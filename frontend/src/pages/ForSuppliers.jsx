@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Factory, FileBadge, TrendingUp, Handshake } from "lucide-react";
 import Seo from "@/components/Seo";
 import { useAuth } from "@/context/AuthContext";
-import { COMPANY } from "@/constants/company";
+import { CertLogo, CertMarquee } from "@/components/CertLogoMarquee";
 
 const BG = "https://images.unsplash.com/photo-1720036236697-018370867320?auto=format&fit=crop&w=1800&q=80";
 // TODO: Replace metalworking image with food/textile/packaged goods production image
@@ -24,18 +24,25 @@ const REQS = [
   "Demonstrated export experience to North America (NA), Europe (EU), Middle East (ME) or Asia-Pacific (APAC) markets",
 ];
 
+// NOTE: FSSC 22000 is built on top of ISO 22000, not an interchangeable "or" alternative — removed the
+// "or ISO 22000" phrasing below. Flag for manual review: if EEC buyers independently accept ISO 22000 alone
+// in some cases, that should be reintroduced as its own line rather than an "or" option.
+// NOTE: EU Health Certificate and Rainforest Alliance don't map cleanly to an existing category (they're
+// most relevant to frozen food / dried fruit sub-segments). Folded into Food Commodities for now — flag for
+// manual review on whether these warrant their own category longer-term.
 const CERT_CARDS = [
-  { cat: "Food Commodities", certs: "HACCP, FSSC 22000 or ISO 22000, BRC/BRCGS · FSSAI (mandatory), MRL testing reports, Phytosanitary certificate · IEC, GST", note: null },
-  { cat: "Processed and Packaged Foods", certs: "BRC/BRCGS, HACCP, FSSC 22000 · FSSAI, IEC, GST", note: "IFS Food required for buyers in Germany and France." },
-  { cat: "Fresh and Agricultural Products", certs: "GlobalG.A.P., GRASP, SMETA · Phytosanitary certificate, MRL testing reports · IEC, GST", note: null },
-  { cat: "Healthcare and Hospital Textile Supplies", certs: "ISO 9001, OEKO-TEX Standard 100, BSCI · IEC, GST", note: "EEC sources hospital textiles, PPE, medical linen and non-regulated consumables. Medical devices, pharmaceuticals and regulated clinical products are outside EEC scope." },
-  { cat: "Home Textile, Apparel and Hospitality Products", certs: "BSCI, SEDEX, Oeko-Tex 100, GOTS, Oeko-Tex STEP · IEC, GST", note: null },
-  { cat: "Eco-Friendly, Sustainable and Organic Products", certs: "ISO 9001, GOTS, EU Organic, NPOP · IEC, GST", note: null },
+  { cat: "Food Commodities", certs: ["HACCP", "FSSC 22000", "BRC/BRCGS", "amfori BSCI", "FSSAI", "MRL Testing Reports", "Phytosanitary Certificate", "Aflatoxin Testing Reports", "EU Health Certificate", "Rainforest Alliance"], note: "FSSAI registration is mandatory." },
+  { cat: "Processed and Packaged Foods", certs: ["BRC/BRCGS", "HACCP", "FSSC 22000", "amfori BSCI", "FSSAI", "Aflatoxin Testing Reports"], note: "IFS Food required for buyers in Germany and France." },
+  { cat: "Fresh and Agricultural Products", certs: ["GlobalG.A.P.", "GRASP", "SMETA", "amfori BSCI", "Phytosanitary Certificate", "MRL Testing Reports"], note: null },
+  { cat: "Healthcare and Hospital Textile Supplies", certs: ["ISO 9001", "OEKO-TEX Standard 100", "BSCI"], note: "EEC sources hospital textiles, PPE, medical linen and non-regulated consumables. Medical devices, pharmaceuticals and regulated clinical products are outside EEC scope." },
+  { cat: "Home Textile, Apparel and Hospitality Products", certs: ["BSCI", "SEDEX", "OEKO-TEX Standard 100", "GOTS", "OEKO-TEX STEP"], note: null },
+  { cat: "Eco-Friendly, Sustainable and Organic Products", certs: ["ISO 9001", "GOTS", "EU Organic", "NPOP"], note: null },
 ];
 
 const CERT_WALL = {
-  Textiles: ["BSCI", "SEDEX", "GOTS", "OEKO-TEX Standard 100", "OEKO-TEX STEP", "GRS", "ISO 9001", "ISO 14001", "CE", "WRAP", "Higg Index"],
-  Food: ["FSSAI", "HACCP", "BRC/BRCGS", "FSSC 22000", "IFS Food", "GlobalG.A.P.", "GRASP", "EU Organic", "NPOP", "Kosher", "Halal", "ASC", "MSC"],
+  // SA8000 kept without a space to match existing sitewide usage (see Home.jsx / ForBuyers.jsx trust bars).
+  Textiles: ["BSCI", "SEDEX", "GOTS", "OEKO-TEX Standard 100", "OEKO-TEX STEP", "GRS", "ISO 9001", "ISO 14001", "CE", "WRAP", "Higg Index", "SA8000"],
+  Food: ["FSSAI", "HACCP", "BRC/BRCGS", "FSSC 22000", "IFS Food", "GlobalG.A.P.", "GRASP", "EU Organic", "NPOP", "Kosher", "Halal", "ASC", "MSC", "amfori BSCI", "EU Health Certificate", "Rainforest Alliance", "Aflatoxin Testing Reports", "Phytosanitary Certificate", "MRL Testing Reports", "SMETA"],
 };
 
 const FAQ = [
@@ -254,12 +261,13 @@ export default function ForSuppliers() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {CERT_CARDS.map(({ cat, certs, note }) => (
               <div key={cat} className="border hairline bg-elevated p-5">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-2">{cat}</div>
-                <div className="text-sm text-[#3A4759] leading-relaxed">{certs}</div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-3">{cat}</div>
+                <CertMarquee names={certs} />
                 {note && <p className="mt-3 text-xs text-[#6B7280] leading-relaxed">{note}</p>}
               </div>
             ))}
           </div>
+          <p className="mt-4 text-xs text-[#6B7280]">All suppliers additionally require IEC and GST registration.</p>
 
           <div className="mt-14">
             <div className="overline mb-3">Standards we screen for</div>
@@ -270,9 +278,11 @@ export default function ForSuppliers() {
               {Object.entries(CERT_WALL).map(([group, certs]) => (
                 <div key={group} className="border hairline bg-elevated p-6">
                   <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-4">{group}</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-3">
                     {certs.map((c) => (
-                      <span key={c} className="text-xs px-3 py-1.5 border hairline text-[#012D76] bg-[#F5F9FC]">{c}</span>
+                      <div key={c} className="flex items-center justify-center px-3 py-2 border hairline bg-[#F5F9FC]">
+                        <CertLogo name={c} className="h-9" />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -310,20 +320,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="py-20 bg-[#012D76] text-white grain">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <div className="overline mx-auto mb-4">Ready to apply?</div>
-          <h2 className="font-display text-4xl lg:text-5xl tracking-tight">Apply to Join the EEC Verified Supplier Network</h2>
-          <p className="mt-4 text-white/90 font-medium">Applications reviewed within 3 to 5 business days.</p>
-          <p className="mt-2 text-white/60">No listing fees, ever. Manufacturers with active production facilities only.</p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link to="/register?role=supplier" className="eec-btn-accent">Apply to the EEC Network</Link>
-            <Link to="#qualification" className="eec-btn-secondary !text-white !border-white/25 hover:!bg-white/10">See qualification requirements</Link>
-          </div>
-          <p className="mt-6 text-white/40 text-xs tracking-wider">{`Singapore HQ (UEN ${COMPANY.uen}) | No supplier listing fees | Active buyer programmes across Europe, US and Middle East`}</p>
-        </div>
-      </section>
     </div>
   );
 }

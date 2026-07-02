@@ -258,6 +258,9 @@ input::placeholder, textarea::placeholder {
 .eec-tmarquee-row:hover .animate-testimonials-ltr {
   animation-play-state: paused;
 }
+.eec-cert-marquee-row:hover .animate-marquee {
+  animation-play-state: paused;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

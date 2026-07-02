@@ -12,7 +12,10 @@ const fallbackCategories = [
     image: "/images/categories/food-commodities.jpg",
     alt: "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing",
     cta: "Source food commodities",
-    body: "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration and BRC/BRCGS certification. HACCP certification is screened as a baseline requirement.",
+    // NOTE: EU Health Certificate and Rainforest Alliance don't map cleanly to an existing category (most
+    // relevant to frozen food / dried fruit sub-segments). Folded into Food Commodities for now — flag for
+    // manual review on whether these warrant their own category longer-term.
+    body: "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification. HACCP certification is screened as a baseline requirement, with Aflatoxin testing reports, EU Health Certificates and Rainforest Alliance certification coordinated where required by the destination market.",
   },
   {
     id: "processed",
@@ -22,7 +25,7 @@ const fallbackCategories = [
     image: "/images/categories/processed-packaged-foods.jpg",
     alt: "Assorted packaged snacks and confectionery bars for processed and packaged food sourcing",
     cta: "Source processed foods",
-    body: "EEC sources snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS and/or FSSC 22000 certification. IFS Food certification is required for suppliers serving German and French buyers.",
+    body: "EEC sources snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification. IFS Food certification is required for suppliers serving German and French buyers, with Aflatoxin testing reports coordinated where required.",
   },
   {
     id: "fresh",
@@ -32,7 +35,7 @@ const fallbackCategories = [
     image: "/images/categories/fresh-agricultural-products.jpg",
     alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens",
     cta: "Source fresh produce",
-    body: "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P. and GRASP certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
+    body: "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P., GRASP and amfori BSCI certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
   },
   {
     id: "healthcare",
@@ -52,7 +55,7 @@ const fallbackCategories = [
     image: "/images/categories/home-textile-apparel-hospitality.jpg",
     alt: "Bed linen, towels, uniforms and hotel amenities for home textile and hospitality sourcing",
     cta: "Source home textiles",
-    body: "EEC sources bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and Oeko-Tex STEP certification is available for organic and sustainable textile requirements.",
+    body: "EEC sources bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and OEKO-TEX STEP certification is available for organic and sustainable textile requirements.",
   },
   {
     id: "eco",
@@ -68,8 +71,8 @@ const fallbackCategories = [
 
 const FAQ = [
   { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks. Food Commodities covers rice, sugar, pulses, edible oils and spices. Processed and Packaged Foods covers snacks, beverages, frozen foods and ready meals. Fresh and Agricultural Products covers fruits, vegetables and organic produce. Healthcare and Hospital Textile Supplies covers patient gowns, scrubs, surgical drapes, hospital bed linen and institutional uniforms. Home Textile, Apparel and Hospitality Products covers bed linen, towels, uniforms and hotel amenities. Eco-Friendly, Sustainable and Organic Products covers biodegradable packaging, organic textiles and green alternatives." },
-  { q: "What certifications does EEC check for food sourcing categories?", a: "Food Commodities suppliers are screened for FSSAI registration and BRC/BRCGS certification, with HACCP certification screened as a baseline requirement. Processed and Packaged Foods suppliers are screened for BRC/BRCGS and/or FSSC 22000 certification, with IFS Food certification required for suppliers serving German and French buyers. Fresh and Agricultural Products suppliers are screened for GlobalG.A.P. and GRASP certification." },
-  { q: "What certifications does EEC check for textile and healthcare categories?", a: "Healthcare and Hospital Textile Supplies manufacturers are screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Home Textile, Apparel and Hospitality Products manufacturers are screened for BSCI and/or SEDEX audit compliance, with GOTS and Oeko-Tex STEP certification available for organic and sustainable textile requirements." },
+  { q: "What certifications does EEC check for food sourcing categories?", a: "Food Commodities suppliers are screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification, with HACCP certification screened as a baseline requirement. Processed and Packaged Foods suppliers are screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification, with IFS Food certification required for suppliers serving German and French buyers. Fresh and Agricultural Products suppliers are screened for GlobalG.A.P., GRASP and amfori BSCI certification." },
+  { q: "What certifications does EEC check for textile and healthcare categories?", a: "Healthcare and Hospital Textile Supplies manufacturers are screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Home Textile, Apparel and Hospitality Products manufacturers are screened for BSCI and/or SEDEX audit compliance, with GOTS and OEKO-TEX STEP certification available for organic and sustainable textile requirements." },
   { q: "Does EEC source organic and eco-friendly products?", a: "Yes. Eco-Friendly, Sustainable and Organic Products is one of the six active sourcing desks, covering biodegradable packaging, organic textiles and green alternatives from manufacturers screened for GOTS certification and EU Organic or NPOP equivalence." },
   { q: "What countries does EEC source from?", a: "EEC sources from India, Asia and select global markets. India remains the primary sourcing market across food commodities, textiles, fresh produce, processed foods, hospital textiles and eco-friendly products. EEC also works with verified manufacturers in Vietnam, Bangladesh, Indonesia, Thailand and other countries based on category requirements." },
   { q: "How do I start sourcing a product in one of these categories?", a: "Submit a sourcing brief through the EEC Buyer Portal, or book a free discovery call to discuss your category, target landed cost, compliance requirements and timelines. EEC maps the engagement after the call and recommends the appropriate tier." },
@@ -111,21 +114,21 @@ export default function Categories() {
                 "@type": "ListItem",
                 position: 1,
                 name: "Food Commodities",
-                description: "Rice, sugar, pulses, edible oils and spices sourced from manufacturers screened for FSSAI registration and BRC/BRCGS certification.",
+                description: "Rice, sugar, pulses, edible oils and spices sourced from manufacturers screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification.",
                 url: "https://eectrade.com/categories#food-commodities",
               },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Processed and Packaged Foods",
-                description: "Snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS and/or FSSC 22000 certification.",
+                description: "Snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification.",
                 url: "https://eectrade.com/categories#processed-packaged-foods",
               },
               {
                 "@type": "ListItem",
                 position: 3,
                 name: "Fresh and Agricultural Products",
-                description: "Fruits, vegetables and organic produce from farms screened for GlobalG.A.P. and GRASP certification, with phytosanitary certificates coordinated where required.",
+                description: "Fruits, vegetables and organic produce from farms screened for GlobalG.A.P., GRASP and amfori BSCI certification, with phytosanitary certificates coordinated where required.",
                 url: "https://eectrade.com/categories#fresh-agricultural",
               },
               {
@@ -227,17 +230,6 @@ export default function Categories() {
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="py-20 bg-[#012D76] text-white grain">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <div className="overline mx-auto mb-4">Get started</div>
-          <h2 className="font-display text-4xl lg:text-5xl tracking-tight">Ready to source from our global supplier network?</h2>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link to="/buyer/intake" className="eec-btn-accent">Submit a sourcing brief</Link>
-            <Link to="/buyer/intake" className="eec-btn-secondary !text-white !border-white/25 hover:!bg-white/10">Book a free discovery call</Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

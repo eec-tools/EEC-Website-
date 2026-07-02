@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, ShieldCheck, FileSpreadsheet, Award, User } from "lucide-react";
 import Seo from "@/components/Seo";
 import { useAuth } from "@/context/AuthContext";
-import { COMPANY } from "@/constants/company";
 
 const BG = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1800&q=80";
 
@@ -226,7 +225,7 @@ export default function ForBuyers() {
           <div className="flex items-start gap-6 flex-wrap">
             <span className="text-[10px] uppercase tracking-[0.18em] text-[#3A4759] font-semibold whitespace-nowrap shrink-0 mt-0.5">Compliance screened for</span>
             <p className="text-sm text-[#3A4759] leading-relaxed">
-              BSCI · SEDEX · SA8000 · SMETA · Oeko-Tex 100 · GOTS · FSSAI · HACCP · ISO 22000 · FSSC 22000 · BRC/BRCGS · IFS Food · GlobalG.A.P. · GRASP · GMP · ISO 9001 · NPOP · EU Organic
+              BSCI · SEDEX · SA8000 · SMETA · OEKO-TEX Standard 100 · GOTS · FSSAI · HACCP · ISO 22000 · FSSC 22000 · BRC/BRCGS · IFS Food · GlobalG.A.P. · GRASP · GMP · ISO 9001 · NPOP · EU Organic
             </p>
           </div>
           <p className="mt-4 text-xs text-[#6B7280]">Certifications are supplier-held. EEC screens and verifies compliance documentation on every supplier before network approval.</p>
@@ -263,19 +262,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 bg-[#012D76] text-white grain">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <div className="overline mx-auto mb-4">Get Started</div>
-          <h2 className="font-display text-4xl lg:text-5xl tracking-tight">Start Your Sourcing Engagement with EEC</h2>
-          <p className="mt-4 text-white/90 font-medium text-lg">Response within two working days. The discovery call is free.</p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link to="/buyer/intake" className="eec-btn-accent">Submit a sourcing brief</Link>
-            <Link to="/buyer/intake" className="eec-btn-secondary !text-white !border-white/25 hover:!bg-white/10">Book a free discovery call</Link>
-          </div>
-          <p className="mt-6 text-white/40 text-xs tracking-wider">{`Singapore HQ (UEN: ${COMPANY.uen}) | Verified supplier network | India and Asia operations`}</p>
-        </div>
-      </section>
     </div>
   );
 }

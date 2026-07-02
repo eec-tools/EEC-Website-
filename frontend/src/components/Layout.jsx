@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, Linkedin, Twitter } from "lucide-react";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, LinkedinIcon, InstagramIcon, FacebookIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
@@ -31,79 +31,101 @@ function Logo({ size = "header" }) {
   );
 }
 
-/* ── Orbit graphic inside the affiliate banner ── */
-function AffiliateOrbit() {
-  const cx = 150, cy = 130;
-  const avatars = [
-    { x: 246, y:  50, bg: "#DCFCE7", ring: "#4ADE80",  label: "Affiliate partner 1" },
-    { x: 202, y: 204, bg: "#FEE2E2", ring: "#F87171",  label: "Affiliate partner 2" },
-    { x: 205, y: 128, bg: "#DBEAFE", ring: "#60A5FA",  label: "Affiliate partner 3" },
-    { x:  60, y: 122, bg: "#EDE9FE", ring: "#A78BFA",  label: "Affiliate partner 4" },
-    { x:  48, y:  58, bg: "#FEF3C7", ring: "#FBBF24",  label: "Affiliate partner 5" },
-    { x:  37, y: 183, bg: "#CCFBF1", ring: "#34D399",  label: "Affiliate partner 6" },
-  ];
-  return (
-    <svg viewBox="0 0 300 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="w-full h-full">
-      <style>{`@keyframes eec-orbit-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-      {/* Slowly rotating dashed rings */}
-      <g style={{ animation: "eec-orbit-spin 80s linear infinite", transformOrigin: `${cx}px ${cy}px` }}>
-        <circle cx={cx} cy={cy} r="55"  stroke="#E5EBF2" strokeWidth="1"   strokeDasharray="4 7"/>
-        <circle cx={cx} cy={cy} r="90"  stroke="#E5EBF2" strokeWidth="1"   strokeDasharray="4 7"/>
-        <circle cx={cx} cy={cy} r="125" stroke="#E5EBF2" strokeWidth="1.5" strokeDasharray="4 7"/>
-      </g>
-      {/* Center hexagon */}
-      <polygon
-        points="168,130 159,114.4 141,114.4 132,130 141,145.6 159,145.6"
-        stroke="#C9A23F" strokeWidth="1.8" fill="#FFFBEB"
-      />
-      <circle cx={cx} cy={cy} r="4.5" fill="#C9A23F" fillOpacity="0.7"/>
-      {/* Avatar circles */}
-      {avatars.map((a, i) => (
-        <g key={i} role="img" aria-label={a.label}>
-          {/* Outer glow ring */}
-          <circle cx={a.x} cy={a.y} r="25" fill={a.ring} fillOpacity="0.15"/>
-          {/* Avatar background */}
-          <circle cx={a.x} cy={a.y} r="20" fill={a.bg} stroke={a.ring} strokeWidth="2"/>
-          {/* Head */}
-          <circle cx={a.x} cy={a.y - 6} r="6.5" fill={a.ring} fillOpacity="0.85"/>
-          {/* Shoulders */}
-          <ellipse cx={a.x} cy={a.y + 14} rx="10" ry="6" fill={a.ring} fillOpacity="0.55"/>
-        </g>
-      ))}
-    </svg>
-  );
-}
 
-/* ── Affiliate banner (sits at top of footer card) ── */
-function AffiliateBanner() {
+/* ── Reusable CTA banner card (sits at top of footer card, above the footer grid). ──
+   Visual shell is identical on every page; content is supplied per-route via CTA_CONFIG below. */
+function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, footnote }) {
   return (
     <div className="bg-white rounded-3xl px-8 md:px-10 py-8 md:py-10 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden">
       {/* Text side */}
-      <div className="flex flex-col gap-4 max-w-sm">
-        <span className="text-sm text-[#6B7280] tracking-wide">Become an Affiliate</span>
+      <div className="flex flex-col gap-4 max-w-md">
+        <span className="text-sm text-[#6B7280] tracking-wide">{eyebrow}</span>
         <h2 className="text-[28px] md:text-[32px] font-bold text-[#012D76] leading-tight">
-          Join our Affiliate Program
+          {heading}
         </h2>
-        <p className="text-sm text-[#6B7280] leading-relaxed">
-          Earn competitive commissions for every buyer you refer who completes a sourcing engagement — reach out to&nbsp;
-          <a href="mailto:partners@eectrade.com" className="text-[#012D76] underline-offset-2 hover:underline">partners@eectrade.com</a>
-          &nbsp;for program details.
-        </p>
-        <Link
-          to="/affiliate"
-          className="inline-flex items-center gap-2 bg-[#012D76] hover:bg-[#011F54] text-white text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
-          aria-label="Join the Élan Exports affiliate program"
-        >
-          Become an affiliate <ArrowUpRight size={15} aria-hidden="true" />
-        </Link>
+        {description && (
+          <p className="text-sm text-[#6B7280] leading-relaxed">{description}</p>
+        )}
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to={primaryCta.href}
+            className="inline-flex items-center gap-2 bg-[#012D76] hover:bg-[#011F54] text-white text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
+          >
+            {primaryCta.label} <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
+          {secondaryCta && (
+            <Link
+              to={secondaryCta.href}
+              className="inline-flex items-center gap-2 bg-transparent border border-[#012D76] text-[#012D76] hover:bg-[#012D76]/5 text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
+            >
+              {secondaryCta.label}
+            </Link>
+          )}
+        </div>
+        {footnote && (
+          <p className="text-xs text-[#9CA3AF] tracking-wide">{footnote}</p>
+        )}
       </div>
       {/* Orbit graphic */}
-      <div className="flex-shrink-0 w-56 h-52 md:w-64 md:h-60 hidden sm:block" aria-hidden="true">
-        <AffiliateOrbit />
+      <div className="flex-shrink-0 w-56 h-56 md:w-64 md:h-64 hidden sm:block" aria-hidden="true">
+        <img
+          src="/images/cta/cta-orbit.png"
+          alt=""
+          className="w-full h-full object-contain select-none"
+          draggable="false"
+        />
       </div>
     </div>
   );
 }
+
+/* ── Per-route CTA content. Keyed by pathname; routes not listed render no CTA card (footer still shows). ── */
+const CTA_CONFIG = {
+  "/for-buyers": {
+    eyebrow: "Get Started",
+    heading: "Start Your Sourcing Engagement with EEC",
+    description: "Response within two working days. The discovery call is free.",
+    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
+    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+    footnote: "Singapore HQ (UEN: 202501728W) | Verified supplier network | India and Asia operations",
+  },
+  "/for-suppliers": {
+    eyebrow: "Ready to apply?",
+    heading: "Apply to Join the EEC Verified Supplier Network",
+    description: "Applications reviewed within 3 to 5 business days. No listing fees, ever. Manufacturers with active production facilities only.",
+    primaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
+    secondaryCta: { label: "See qualification requirements", href: "/for-suppliers#qualification" },
+    footnote: "Singapore HQ (UEN 202501728W) | No supplier listing fees | Active buyer programmes across Europe, US and Middle East",
+  },
+  "/categories": {
+    eyebrow: "Get started",
+    heading: "Ready to source from our global supplier network?",
+    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
+    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+  },
+  "/services": {
+    eyebrow: "Get Started",
+    heading: "Ready to scope your sourcing engagement?",
+    description: "No commitment required. The discovery call is free.",
+    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
+    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+  },
+  "/about": {
+    eyebrow: "Get Started",
+    heading: "Ready to work with EEC?",
+    description: "No commitment required. The discovery call is free.",
+    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
+    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+  },
+  "/": {
+    eyebrow: "Get Started",
+    heading: "Let's Build Your Sourcing Advantage",
+    description: "From qualified suppliers to landed goods — one team, start to finish. The discovery call is free.",
+    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
+    secondaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
+    footnote: "Singapore HQ (UEN: 202501728W) | Verified supplier network | India and Asia operations",
+  },
+};
 
 function FooterColHeader({ title }) {
   return (
@@ -122,10 +144,10 @@ function FooterLink({ to, children }) {
     <li className="list-none">
       <Link
         to={to}
-        className="inline-flex items-center gap-1 text-sm text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors"
+        className="inline-flex items-center gap-1 text-[13px] text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors whitespace-nowrap"
       >
         {children}
-        <ArrowUpRight size={13} className="opacity-60" aria-hidden="true" />
+        <ArrowUpRight size={12} className="opacity-60 flex-shrink-0" aria-hidden="true" />
       </Link>
     </li>
   );
@@ -133,8 +155,8 @@ function FooterLink({ to, children }) {
 
 function FooterBadge({ icon, label1, label2 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 text-center">
-      <div className="w-10 h-10 rounded-full bg-[#EFF4F9] flex items-center justify-center text-[#012D76]">
+    <div className="flex items-center gap-2.5">
+      <div className="w-10 h-10 rounded-full bg-[#EFF4F9] flex items-center justify-center text-[#012D76] flex-shrink-0">
         {icon}
       </div>
       <span className="text-[11px] font-semibold text-[#012D76] leading-tight">
@@ -144,10 +166,57 @@ function FooterBadge({ icon, label1, label2 }) {
   );
 }
 
+/* ── Dotted world-map graphic for the Singapore HQ card. Continent shapes are approximated as
+   filled ellipses sampled onto a dot grid; Singapore is marked with an accent-colored dot. ── */
+function WorldMapDots() {
+  // Each landmass is built from several overlapping ellipses so it reads as a recognizable
+  // continent outline (tapered South America, Africa, etc.) rather than a single blob.
+  const blobs = [
+    { cx: 16, cy: 12, rx: 10,  ry: 7 },   // North America — main mass
+    { cx: 12, cy: 20, rx: 6,   ry: 5 },   // North America — southern extension
+    { cx: 26, cy: 5,  rx: 3,   ry: 2 },   // Greenland
+    { cx: 18, cy: 24, rx: 3,   ry: 3 },   // Central America
+    { cx: 24, cy: 30, rx: 6,   ry: 6 },   // South America — top
+    { cx: 23, cy: 40, rx: 3.5, ry: 6 },   // South America — tapered tail
+    { cx: 49, cy: 8,  rx: 5.5, ry: 4.5 }, // Europe
+    { cx: 49, cy: 18, rx: 7,   ry: 6 },   // Africa — top
+    { cx: 48, cy: 28, rx: 5.5, ry: 7 },   // Africa — tapered tail
+    { cx: 58, cy: 14, rx: 5,   ry: 4 },   // Middle East bridge
+    { cx: 72, cy: 11, rx: 15,  ry: 8 },   // Asia — main mass
+    { cx: 63, cy: 22, rx: 4,   ry: 5 },   // India
+    { cx: 78, cy: 22, rx: 5,   ry: 4 },   // Southeast Asia
+    { cx: 89, cy: 14, rx: 1.6, ry: 3 },   // Japan
+    { cx: 82, cy: 28, rx: 4,   ry: 1.6 }, // Indonesia
+    { cx: 90, cy: 27, rx: 2,   ry: 1.4 }, // Philippines
+    { cx: 85, cy: 38, rx: 6.5, ry: 4.5 }, // Australia
+    { cx: 95, cy: 42, rx: 1.3, ry: 2 },   // New Zealand
+    { cx: 55, cy: 33, rx: 1,   ry: 2.3 }, // Madagascar
+  ];
+  const seen = new Set();
+  const dots = [];
+  blobs.forEach(({ cx, cy, rx, ry }) => {
+    for (let x = cx - rx; x <= cx + rx; x += 1.7) {
+      for (let y = cy - ry; y <= cy + ry; y += 1.7) {
+        const nx = (x - cx) / rx;
+        const ny = (y - cy) / ry;
+        if (nx * nx + ny * ny > 1) continue;
+        const key = `${Math.round(x * 10)}:${Math.round(y * 10)}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        dots.push({ key, x, y });
+      }
+    }
+  });
+  return dots;
+}
+const WORLD_MAP_DOTS = WorldMapDots();
+
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const ctaConfig = CTA_CONFIG[location.pathname];
 
   return (
     <div className="min-h-screen flex flex-col bg-eec">
@@ -253,27 +322,27 @@ export default function Layout({ children }) {
       <footer className="mt-20 bg-white px-4 md:px-8 pb-10" aria-label="Site footer">
         <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-8 pb-8">
 
-          {/* ── Affiliate banner ── */}
-          <AffiliateBanner />
+          {/* ── CTA banner (page-aware; omitted on routes with no config) ── */}
+          {ctaConfig && <CtaCard {...ctaConfig} />}
 
           {/* ── Main grid ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.8fr_1fr_1fr_1fr_1.8fr] gap-10 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.5fr_1.35fr_1.35fr_1.35fr_3.3fr] gap-10 lg:gap-8">
 
             {/* ── Left: brand col ── */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 min-w-0">
               <Link to="/" aria-label="Élan Exports Consultancy home" data-testid="footer-brand-link">
                 <img
                   src="/eec-logo-wbg.png"
                   alt="Élan Exports Consultancy — Singapore Headquartered Sourcing Consultancy"
-                  className="h-28 w-auto select-none"
+                  className="w-56 lg:w-60 h-auto select-none"
                   data-testid="footer-logo"
                   draggable="false"
                 />
               </Link>
-              <p className="text-sm text-[#6B7280] leading-relaxed max-w-[230px]">
+              <p className="text-sm text-[#6B7280] leading-relaxed max-w-[275px]">
                 Singapore-headquartered sourcing consultancy. Embedded procurement support for global buyers sourcing from India and Asia.
               </p>
-              <div className="flex items-start gap-5 flex-wrap">
+              <div className="flex items-center justify-between gap-4">
                 <FooterBadge icon={<Globe size={17} />} label1="Global" label2="Network" />
                 <FooterBadge icon={<Handshake size={17} />} label1="Trusted" label2="Partnerships" />
                 <FooterBadge icon={<ShieldCheck size={17} />} label1="Reliable" label2="Sourcing" />
@@ -281,7 +350,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── BUYERS ── */}
-            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-8">
+            <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="BUYERS" />
               <ul className="space-y-3">
                 <FooterLink to="/for-buyers">For Buyers</FooterLink>
@@ -292,7 +361,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── SUPPLIERS ── */}
-            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-8">
+            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
               <FooterColHeader title="SUPPLIERS" />
               <ul className="space-y-3">
                 <FooterLink to="/for-suppliers">For Suppliers</FooterLink>
@@ -302,14 +371,14 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── COMPANY ── */}
-            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-8">
+            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
               <FooterColHeader title="COMPANY" />
               <ul className="space-y-3">
                 <FooterLink to="/login">Sign In</FooterLink>
                 <FooterLink to="/register">Register</FooterLink>
                 <li className="list-none">
-                  <a href="mailto:partners@eectrade.com" className="inline-flex items-center gap-1 text-sm text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors">
-                    partners@eectrade.com <ArrowUpRight size={13} className="opacity-60" aria-hidden="true" />
+                  <a href="mailto:partners@eectrade.com" className="inline-flex items-center gap-1 text-[13px] text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors whitespace-nowrap">
+                    partners@eectrade.com <ArrowUpRight size={12} className="opacity-60 flex-shrink-0" aria-hidden="true" />
                   </a>
                 </li>
                 <FooterLink to="/privacy">Privacy Policy</FooterLink>
@@ -318,7 +387,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── STAY UPDATED ── */}
-            <div className="sm:col-span-2 lg:col-span-1 lg:border-l lg:border-[#E5EBF2] lg:pl-8">
+            <div className="sm:col-span-2 lg:col-span-1 lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
               <FooterColHeader title="STAY UPDATED" />
               <p className="text-sm text-[#6B7280] leading-relaxed mb-4">
                 Receive product updates, news, exclusive discounts and early access.
@@ -347,59 +416,45 @@ export default function Layout({ children }) {
               </form>
 
               {/* Location card */}
-              <div className="rounded-2xl bg-white px-4 py-3 flex items-center justify-between gap-3">
-                <div className="flex items-start gap-2">
-                  <MapPin size={15} className="text-[#6B7280] mt-0.5 flex-shrink-0" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-semibold text-[#012D76] leading-snug">Singapore HQ</p>
-                    <p className="text-xs text-[#6B7280] leading-snug mt-0.5">India &amp; Asia Operations<br/>Sourcing Network</p>
+              <div className="rounded-2xl bg-white px-6 py-5 overflow-hidden">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-[#EFF4F9] flex items-center justify-center flex-shrink-0">
+                      <MapPin size={17} className="text-[#012D76]" aria-hidden="true" />
+                    </div>
+                    <p className="text-base font-bold text-[#012D76] leading-snug whitespace-nowrap">Singapore HQ</p>
                   </div>
+                  {/* Dotted world-map graphic */}
+                  <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="min-w-0 flex-shrink w-32 sm:w-36 h-auto opacity-80">
+                    {WORLD_MAP_DOTS.map(({ key, x, y }) => (
+                      <circle key={key} cx={x} cy={y} r="0.7" fill="#D1D5DB" />
+                    ))}
+                    {/* Singapore highlight dot */}
+                    <circle cx="79" cy="23" r="1.4" fill="#C9A23F" />
+                    <circle cx="79" cy="23" r="2.8" fill="#C9A23F" fillOpacity="0.25" />
+                  </svg>
                 </div>
-                {/* Dotted world-map graphic */}
-                <svg width="72" height="48" viewBox="0 0 72 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="flex-shrink-0 opacity-80">
-                  {/* dot grid representing world continents */}
-                  {[
-                    [4,8],[8,8],[12,8],[16,8],[20,8],[28,8],[32,8],[36,8],
-                    [2,12],[6,12],[10,12],[14,12],[18,12],[22,12],[26,12],[30,12],[34,12],[38,12],[42,12],[46,12],
-                    [2,16],[6,16],[10,16],[14,16],[18,16],[22,16],[26,16],[30,16],[34,16],[38,16],[42,16],[46,16],[50,16],[54,16],[58,16],[62,16],[66,16],
-                    [2,20],[6,20],[10,20],[14,20],[18,20],[22,20],[26,20],[30,20],[34,20],[38,20],[42,20],[46,20],[50,20],[54,20],[58,20],[62,20],[66,20],
-                    [6,24],[10,24],[14,24],[18,24],[22,24],[26,24],[30,24],[34,24],[38,24],[42,24],[46,24],[50,24],[54,24],[58,24],[62,24],
-                    [10,28],[14,28],[18,28],[22,28],[26,28],[30,28],[34,28],[38,28],[42,28],[46,28],[50,28],[54,28],
-                    [14,32],[18,32],[22,32],[26,32],[30,32],[34,32],[38,32],[42,32],[46,32],
-                    [18,36],[22,36],[26,36],[30,36],[34,36],[38,36],[42,36],
-                    [26,40],[30,40],[34,40],[38,40],
-                    [30,44],[34,44],
-                  ].map(([x, y], i) => (
-                    <circle key={i} cx={x} cy={y} r="1.4" fill="#D1D5DB" />
-                  ))}
-                  {/* Singapore highlight dot */}
-                  <circle cx="58" cy="28" r="3" fill="#2563EB" />
-                  <circle cx="58" cy="28" r="5" fill="#2563EB" fillOpacity="0.2" />
-                </svg>
+                <p className="text-sm text-[#6B7280] leading-relaxed mt-8">India &amp; Asia Operations<br/>Sourcing Network</p>
               </div>
             </div>
           </div>
 
           {/* ── Bottom bar ── */}
           <div className="border-t border-[#E5EBF2] mt-10 pt-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <span className="text-xs text-[#6B7280]">
+            <span className="text-xs text-[#6B7280] whitespace-nowrap">
               © 2026 Élan Exports Consultancy Pte. Ltd. All rights reserved.
             </span>
-            <div className="flex items-center gap-3 flex-wrap justify-center">
-              <span className="text-xs text-[#6B7280]">Follow Us</span>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors">
-                <Linkedin size={15} className="text-white" aria-hidden="true" />
+            <div className="flex items-center gap-2.5 flex-nowrap justify-center">
+              <span className="text-xs text-[#6B7280] whitespace-nowrap">Follow Us</span>
+              <a href="https://www.linkedin.com/company/elan-exports/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors flex-shrink-0">
+                <LinkedinIcon size={15} className="text-white" aria-hidden="true" />
               </a>
-              <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors">
-                <Twitter size={15} className="text-white" aria-hidden="true" />
+              <a href="https://www.instagram.com/elan_exports_consultancy/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors flex-shrink-0">
+                <InstagramIcon size={15} className="text-white" aria-hidden="true" />
               </a>
-              <a href="https://dribbble.com" target="_blank" rel="noopener noreferrer" aria-label="Dribbble" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" stroke="white" strokeWidth="1.8" fill="none"/>
-                  <path d="M4.5 9.5c2 .5 4.5.5 7-.5 2.5-1 4.5-2.5 5.5-4M8 20.5c.5-3 2-5.5 4-7.5s4.5-3 7-3.5M4 13.5c1.5.5 3.5.5 5.5 0 2-.5 4-1.5 5-3" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+              <a href="https://www.facebook.com/profile.php?id=61591311811743&sk=about" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors flex-shrink-0">
+                <FacebookIcon size={15} className="text-white" aria-hidden="true" />
               </a>
-              <span className="text-xs text-[#9CA3AF] tracking-wider ml-1 hidden sm:inline">SINGAPORE HQ · INDIA &amp; ASIA OPERATIONS</span>
             </div>
           </div>
 

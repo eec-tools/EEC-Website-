@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 import { ENGAGEMENT_TIERS } from "@/constants/engagementTiers";
 import { COMPANY } from "@/constants/company";
+import { CertMarquee } from "@/components/CertLogoMarquee";
 
 const HERO_IMG = "https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400&h=1600";
 
@@ -16,7 +17,7 @@ const PROCESS_STEPS = [
   { n: "04", title: "Ship and Optimise", desc: "We coordinate logistics, customs clearance and post-shipment quality control while tracking landed cost components across each shipment cycle." },
 ];
 
-const TRUST = ["BSCI", "SEDEX", "SA8000", "SMETA", "Oeko-Tex 100", "GOTS", "FSSAI", "HACCP", "ISO 22000", "FSSC 22000", "BRC/BRCGS", "IFS Food", "GlobalG.A.P.", "GRASP", "GMP", "ISO 9001", "NPOP", "EU Organic"];
+const TRUST = ["BSCI", "SEDEX", "SA8000", "SMETA", "OEKO-TEX Standard 100", "GOTS", "FSSAI", "HACCP", "ISO 22000", "FSSC 22000", "BRC/BRCGS", "IFS Food", "GlobalG.A.P.", "GRASP", "GMP", "ISO 9001", "NPOP", "EU Organic"];
 
 const TESTIMONIALS = [
   {
@@ -446,13 +447,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <h2 className="font-display text-xl text-[#012D76] tracking-tight mb-2">Supplier Compliance Screening</h2>
           <p className="text-sm text-[#3A4759] mb-6">EEC screens every supplier against the certification requirements of your destination market before network approval. Certifications are supplier-held. Audit reports available on request.</p>
-          <div className="overflow-hidden">
-            <div className="flex gap-8 animate-marquee whitespace-nowrap" style={{ width: "max-content" }}>
-              {[...TRUST, ...TRUST].map((t, i) => (
-                <span key={i} className="font-display text-2xl lg:text-3xl text-[#012D76]/40 italic">{t}</span>
-              ))}
-            </div>
-          </div>
+          <CertMarquee names={TRUST} />
         </div>
       </section>
 

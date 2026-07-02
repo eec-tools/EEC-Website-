@@ -203,18 +203,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="py-20 bg-[#012D76] text-white grain">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <div className="overline mx-auto mb-4">Get Started</div>
-          <h2 className="font-display text-4xl lg:text-5xl tracking-tight">Ready to scope your sourcing engagement?</h2>
-          <p className="mt-4 text-white/75">No commitment required. The discovery call is free.</p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link to="/buyer/intake" className="eec-btn-accent">Submit a sourcing brief</Link>
-            <Link to="/buyer/intake" className="eec-btn-secondary !text-white !border-white/25 hover:!bg-white/10">Book a free discovery call</Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
