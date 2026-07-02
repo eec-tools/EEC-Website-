@@ -114,9 +114,6 @@ export default function Services() {
           <p className="font-display text-4xl sm:text-5xl lg:text-6xl tracking-tighter font-light text-[#012D76] max-w-3xl" aria-hidden="true">
             Sourcing services, <span className="gold-text">unbundled.</span>
           </p>
-          <p className="mt-6 text-[#3A4759] max-w-2xl leading-relaxed">
-            Whether you are sourcing a new product, expanding your supplier base or building a long-term procurement strategy, EEC provides <span className="text-[#8F7228] font-semibold">flexible sourcing solutions</span> tailored to your business. Headquartered in Singapore with a <span className="text-[#8F7228] font-semibold">global supplier network</span> and deep expertise across India and Asia, we help businesses identify <span className="text-[#8F7228] font-semibold">reliable manufacturing partners</span> and manage sourcing with confidence.
-          </p>
         </div>
       </section>
 

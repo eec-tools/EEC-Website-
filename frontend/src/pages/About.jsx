@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 import { COMPANY } from "@/constants/company";
 import TeamSection from "@/components/TeamSection";
+import AboutFounderSection from "@/components/AboutFounderSection";
 
 // TODO: Replace empty office corridor with sourcing/logistics/factory imagery for About page hero
 const BG = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1800&q=80";
@@ -27,12 +28,6 @@ const ABOUT_FAQ = [
     a: "EEC is Singapore Headquartered with procurement and operations teams based in India. Active sourcing is conducted primarily across India, with select verified manufacturers in Vietnam, Bangladesh, Indonesia and Thailand for specific product requirements. Buyer programmes serve procurement teams across Europe, the US, the Middle East and Asia-Pacific.",
   },
   {
-    q: "What industries does EEC specialise in?",
-    a: "EEC operates six active sourcing desks: Food Commodities, Processed and Packaged Foods, Fresh and Agricultural Products, Healthcare and Hospital Textile Supplies, Home Textile, Apparel and Hospitality Products, and Eco-Friendly, Sustainable and Organic Products. All sourcing is from verified manufacturers across India and Asia.",
-    link: "/categories",
-    linkText: "See all categories",
-  },
-  {
     q: "How does EEC qualify suppliers?",
     a: "EEC qualifies manufacturers through IEC registration, GST verification, financial checks, factory assessments and compliance documentation review. Trading and re-export businesses are not eligible.",
     link: "/for-suppliers#qualification",
@@ -43,10 +38,6 @@ const ABOUT_FAQ = [
     a: "EEC does not publish fixed pricing. Scout is a one-time fixed-fee project. Engage (per sourcing project) and Embed (quarterly retainer) are priced based on category complexity, order volume and sourcing geography, confirmed at or after the initial discovery call. No fees are charged to suppliers at any stage.",
     link: "/services",
     linkText: "See engagement models",
-  },
-  {
-    q: "What makes EEC different from a marketplace?",
-    a: "EEC is a sourcing consultancy, not a marketplace. Marketplaces earn revenue from supplier listings or transaction commissions. EEC charges buyers a service fee based on engagement tier. EEC negotiates on open-book terms. Every supplier is presented with an EEC audit report, not a cold profile. Suppliers are recommended based on quality and fit, with no commercial conflict of interest.",
   },
 ];
 
@@ -163,6 +154,26 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      <AboutFounderSection
+        name="Shirali Shetty"
+        eyebrowText="The Founder Behind Elan Exports"
+        headline="About Me"
+        paragraphs={[
+          "Hi, I'm Shirali Shetty. I founded Elan Exports Consultancy to solve a problem I saw first-hand: global buyers were spending years building the trusted supplier relationships that large enterprises take for granted from day one.",
+          "With over 20 years of experience in global sourcing, procurement and international trade across India and Asia, I've built EEC around transparent, open-book commercials, factory-audited suppliers and sourcing plans that hold up under real order volumes.",
+          "Whether it's a first sourcing brief or a multi-year supply chain, my goal is the same — give buyers the same access, visibility and reliability that was previously available only to the biggest players in the room.",
+        ]}
+        photoSrc="/images/team/image.webp"
+        photoAlt="Shirali Shetty, Founder and CEO of Elan Exports Consultancy"
+        signatureText="Shirali Shetty"
+        socialLinks={{
+          linkedin: COMPANY.socialLinks[0],
+          instagram: COMPANY.socialLinks[1],
+          email: `mailto:${COMPANY.contactEmail}`,
+          whatsapp: "https://wa.me/6586784216",
+        }}
+      />
 
       <TeamSection />
 

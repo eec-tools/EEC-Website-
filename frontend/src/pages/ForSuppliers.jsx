@@ -122,30 +122,10 @@ export default function ForSuppliers() {
       {/* Sourcing context — dark navy, white/gold */}
       <section className="bg-[#012D76] py-16 lg:py-20 grain">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20">
-            <div className="space-y-8">
-              <p className="text-base lg:text-lg leading-relaxed text-white/80">
-                For procurement teams managing multi-category sourcing across India and Asia who need{" "}
-                <span className="text-[#C9A23F] font-semibold">audited supply</span>,{" "}
-                <span className="text-[#C9A23F] font-semibold">strategic sourcing</span>{" "}
-                and <span className="text-[#C9A23F] font-semibold">supply chain visibility</span>.
-              </p>
-              <p className="text-sm leading-relaxed text-white/60">
-                Join the EEC <span className="text-[#C9A23F] font-semibold">qualified supplier network</span> and connect with{" "}
-                <span className="text-[#C9A23F] font-semibold">international procurement programmes</span> across food commodities, fresh and agricultural products, processed and packaged foods, healthcare and hospital textile supplies, home textiles, apparel and hospitality products, and eco-friendly, sustainable and organic products.
-              </p>
-            </div>
-            <div className="space-y-8">
-              <p className="text-base lg:text-lg leading-relaxed text-white/80">
-                We maintain <span className="text-[#C9A23F] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
-              </p>
-              <p className="text-sm leading-relaxed text-white/60">
-                Whether you are sourcing a new product, expanding your supplier base or building a long-term procurement strategy, EEC provides{" "}
-                <span className="text-[#C9A23F] font-semibold">flexible sourcing solutions</span> tailored to your business. Headquartered in Singapore with a{" "}
-                <span className="text-[#C9A23F] font-semibold">global supplier network</span> and deep expertise across India and Asia, we help businesses identify{" "}
-                <span className="text-[#C9A23F] font-semibold">reliable manufacturing partners</span> and manage sourcing with confidence.
-              </p>
-            </div>
+          <div className="max-w-2xl space-y-8">
+            <p className="text-base lg:text-lg leading-relaxed text-white/80">
+              We maintain <span className="text-[#C9A23F] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
+            </p>
           </div>
         </div>
       </section>

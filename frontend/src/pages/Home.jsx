@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ChevronRight, Check, Quote, Star, Handshake, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Quote, Star, Handshake, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
-import { ENGAGEMENT_TIERS } from "@/constants/engagementTiers";
 import { COMPANY } from "@/constants/company";
-import { CertMarquee } from "@/components/CertLogoMarquee";
 
 const HERO_IMG = "https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400&h=1600";
+
+const STATS = [
+  { value: 20, suffix: "+", label: "Years of Founder Experience" },
+  { value: 70, suffix: "+", label: "Signed Suppliers" },
+  { value: 13, suffix: "+", label: "Countries" },
+];
 
 const PROCESS_STEPS = [
   { n: "01", title: "Discovery Call", desc: "A free 20-minute call to map your category, target landed cost, order volume, compliance requirements and timelines. No commitment required." },
@@ -16,8 +20,6 @@ const PROCESS_STEPS = [
   { n: "03", title: "Negotiate and Sample", desc: "We negotiate MOQ, payment terms and lead times and coordinate sample QC and arrange third-party pre-shipment inspections against an agreed Acceptable Quality Level (AQL)." },
   { n: "04", title: "Ship and Optimise", desc: "We coordinate logistics, customs clearance and post-shipment quality control while tracking landed cost components across each shipment cycle." },
 ];
-
-const TRUST = ["BSCI", "SEDEX", "SA8000", "SMETA", "OEKO-TEX Standard 100", "GOTS", "FSSAI", "HACCP", "ISO 22000", "FSSC 22000", "BRC/BRCGS", "IFS Food", "GlobalG.A.P.", "GRASP", "GMP", "ISO 9001", "NPOP", "EU Organic"];
 
 const TESTIMONIALS = [
   {
@@ -27,12 +29,12 @@ const TESTIMONIALS = [
   },
   {
     quote: "I wanted to share some exciting news about our collaboration with Elan Exports. Their supportive team has offered to connect us with big retailers in the industry, which presents a fantastic opportunity for us to expand our reach and grow our business.",
-    attribution: "Textile Supplier, India",
+    attribution: "Apparel Manufacturer, India",
     initials: "TS",
   },
   {
     quote: "Elan Exports is a fantastic company to work with. The team excels at understanding buyer requirements from day one, clearly communicating these needs to the factories at every stage. They are diligent in ensuring that both the buyer's and factory's needs are met with a well-thought-out plan and seamless execution. Their reliability and friendly approach make them a pleasure to collaborate with.",
-    attribution: "Textile Supplier, India",
+    attribution: "Home Textile Supplier, India",
     initials: "TS",
   },
 ];
@@ -46,30 +48,17 @@ const HOME_CATEGORIES = [
   { id: "eco", name: "Eco-Friendly, Sustainable and Organic Products", tagline: "Biodegradable packaging, organic textiles, green alternatives.", image: "/images/categories/eco-friendly-sustainable-organic.jpg", cta: "Source eco-friendly products", alt: "Biodegradable packaging, organic textiles and green alternative products" },
 ];
 
-const COMPARE = [
-  ["Supplier discovery", "Marketplace browsing", "Curated, audited bench"],
-  ["QC", "Self-managed", "EEC pre-shipment AQL + third-party inspection"],
-  ["Commercials", "Vendor-published price", "Open-book negotiated. Every cost layer disclosed."],
-  ["Escalations", "Distributed across buyer-side and supplier-side contacts with no defined resolution path.", "Dedicated EEC commercial lead"],
-  ["Cost trajectory", "Price creep each renewal cycle", "Quarterly cost-out programme tracking landed cost across shipment cycles."],
-];
-
 const FAQ = [
   { q: "What is Elan Exports Consultancy?", a: `Elan Exports Consultancy (EEC) is a Singapore Headquartered global sourcing consultancy that connects buyers with verified manufacturers worldwide, backed by specialised expertise and an extensive sourcing network across India and Asia. EEC delivers open-book commercials and predictable shipments. Founded with 20 years of founder experience and incorporated on ${COMPANY.incorporationDateDisplay} (UEN: ${COMPANY.uen}), EEC acts as an embedded sourcing arm for global buyers.` },
   { q: "What countries does EEC source from?", a: "EEC sources from India, Asia and select global markets. India remains the primary sourcing market across food commodities, textiles, fresh produce, processed foods, hospital textiles and eco-friendly products. EEC also works with verified manufacturers in Vietnam, Bangladesh, Indonesia, Thailand and other countries based on category requirements. Every supplier in the network is verified before any RFQ is deployed to a buyer." },
   { q: "How is EEC different from a sourcing marketplace?", a: "EEC is a consultancy, not a marketplace. Marketplaces earn revenue from supplier listings or transaction commissions. EEC charges buyers a service fee based on engagement tier. EEC negotiates on open-book terms. Suppliers are recommended based on quality and fit, with no commercial conflict of interest." },
   { q: "What is landed cost, and how does EEC model it?", a: "Landed cost is the total cost of a product at the destination warehouse, including factory price (FOB), freight, insurance, import duties, customs clearance and last-mile delivery. EEC provides open-book landed cost modelling for every sourcing project before the buyer commits to a supplier. This eliminates hidden margins and gives procurement teams an accurate, comparable basis for supplier decisions across categories and geographies." },
-  { q: "How are suppliers vetted by EEC?", a: `We take a focused approach to sourcing. Every supplier in our network is carefully vetted through due diligence and ongoing evaluation, ensuring global buyers have access to reliable manufacturers, transparent commercial practices and dependable supply chains. The vetting process covers IEC registration, GST filing, financial checks, factory audits and compliance documentation. Every approved supplier has a written EEC audit report on file. EEC currently works with ${COMPANY.supplierCountClaim} across active categories.` },
-  { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks: Food Commodities (rice, sugar, pulses, edible oils, spices), Processed and Packaged Foods (snacks, beverages, frozen foods, ready meals), Fresh and Agricultural Products (fruits, vegetables, organic produce), Healthcare and Hospital Textile Supplies (patient gowns, scrubs, surgical drapes, hospital bed linen, institutional uniforms), Home Textile, Apparel and Hospitality Products (bed linen, towels, uniforms, hotel amenities) and Eco-Friendly, Sustainable and Organic Products (biodegradable packaging, organic textiles).", link: "/categories", linkText: "See all categories" },
   { q: "How does EEC price its services?", a: "EEC pricing varies by engagement tier. Scout is a fixed-fee one-time project for buyers evaluating a new category or geography. Engage (per-project) and Embed (quarterly retainer) are priced during the discovery call based on category complexity, volume and sourcing geography. EEC does not charge suppliers listing or activation fees at any stage. All revenue comes from buyer service fees only. Pricing is shared at the discovery call and is not published publicly." },
-  { q: "Is EEC headquartered in Singapore?", a: `Yes. ${COMPANY.legalName} is incorporated in Singapore under UEN ${COMPANY.uen}, registered on ${COMPANY.incorporationDateDisplay} at ${COMPANY.addressFull}. The company is Singapore Headquartered. Procurement, sourcing and operations teams are based in India.` },
   { q: "What certifications does EEC check for European food buyers?", a: "Certification requirements vary by category. Food commodity and frozen food suppliers require FSSAI, HACCP and BRC/BRCGS as a baseline, with EU Health Certificates for frozen seafood. Organic food suppliers require EU Organic or NPOP equivalence. Ethnic and packaged food suppliers require IFS Food for German and French buyers and Halal certification where applicable. FSSC 22000 is accepted as a BRC equivalent by most EU buyers across all categories.", link: "/for-buyers", linkText: "Full certification requirements by category" },
-  { q: "How do I start working with EEC as a buyer?", a: "The fastest way to start is a free 20-minute discovery call with no commitment required. EEC maps your sourcing category, target landed cost, compliance requirements and timelines. After the call, EEC recommends the appropriate engagement tier and provides a scope and pricing outline within 2 working days. Buyers can also submit a sourcing brief directly through the EEC Buyer Portal, which takes under 5 minutes to complete." },
 ];
 
 export default function Home() {
   const [categories, setCategories] = useState(HOME_CATEGORIES);
-  const [pricing, setPricing] = useState(ENGAGEMENT_TIERS);
   const { user } = useAuth();
   const isAuthed = user && user.user_id;
   const dashboardHref =
@@ -80,9 +69,6 @@ export default function Home() {
   useEffect(() => {
     api.get("/categories").then(({ data }) => {
       if (Array.isArray(data) && data.length) setCategories(data);
-    }).catch(() => {});
-    api.get("/pricing").then(({ data }) => {
-      if (Array.isArray(data) && data.length) setPricing(data);
     }).catch(() => {});
   }, []);
 
@@ -277,6 +263,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* STATS */}
+      <StatsSection />
+
       {/* CATEGORIES */}
       <section className="py-20 lg:py-28" data-testid="categories-section">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
@@ -354,100 +343,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COMPARISON */}
-      <section className="py-20 lg:py-28 border-t hairline bg-surface">
+      {/* COMPARISON TEASER */}
+      <section className="py-10 border-t hairline bg-surface">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
-          <span className="overline">Direct sourcing vs EEC</span>
-          <h2 className="sr-only">EEC vs Direct Sourcing: A Procurement Team's Comparison</h2>
-          <p className="font-display text-4xl lg:text-5xl text-[#012D76] mt-5 max-w-3xl tracking-tight mb-6" aria-hidden="true">
-            Why mature procurement teams switch from direct sourcing.
-          </p>
-          <p className="text-[#3A4759] mb-10 max-w-3xl">
-            When buyers source directly, they manage supplier discovery, quality control, price negotiation and escalations internally. EEC replaces or supplements each of these functions.
-          </p>
-          <div className="border hairline overflow-hidden bg-[#FFFFFF]">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="bg-[#F5F9FC] text-xs uppercase tracking-[0.2em] text-[#3A4759]">
-                  <th className="p-5 text-left">Dimension</th>
-                  <th className="p-5 border-l hairline text-left">Direct sourcing</th>
-                  <th className="p-5 border-l hairline text-left text-[#8F7228]">With EEC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARE.map(([row, a, b]) => (
-                  <tr key={row} className="border-t hairline">
-                    <td className="p-5 text-[#012D76]">{row}</td>
-                    <td className="p-5 border-l hairline text-[#6B7280]">{a}</td>
-                    <td className="p-5 border-l hairline text-[#012D76]">{b}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
-            <p className="text-[#3A4759] text-sm">Ready to move beyond direct sourcing?</p>
-            <Link to="/buyer/intake" className="eec-btn-primary" data-testid="compare-cta">
-              Book a free sourcing call <ArrowUpRight size={14} />
-            </Link>
-          </div>
+          <Link to="/for-buyers" className="text-[#012D76] hover:underline font-medium">See how EEC compares to direct sourcing →</Link>
         </div>
       </section>
 
-      {/* PRICING */}
-      <section className="py-20 lg:py-28" data-testid="pricing-section">
+      {/* PRICING TEASER */}
+      <section className="py-10 border-t hairline">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
-          <span className="overline">Engagement tiers</span>
-          <h2 className="sr-only">Sourcing Consultancy Engagement Models</h2>
-          <p className="font-display text-4xl lg:text-5xl text-[#012D76] mt-5 max-w-3xl tracking-tight mb-4" aria-hidden="true">
-            Three ways to engage. From validation to <em className="italic font-normal">embedded operations.</em>
-          </p>
-          <p className="text-[#3A4759] mb-12 max-w-3xl">
-            EEC offers three engagement models to match different procurement needs. All pricing is scoped and shared at or after the initial discovery call.
-          </p>
-          <div className="grid md:grid-cols-3 gap-px bg-[#E5EBF2]">
-            {pricing.map((p) => (
-              <div key={p.id} className={`relative bg-[#FFFFFF] p-8 lg:p-10 flex flex-col ${p.popular ? "lg:scale-[1.02] shadow-[0_20px_60px_-20px_rgba(26,29,35,0.18)]" : ""}`} data-testid={`pricing-card-${p.id}`}>
-                {p.popular && (
-                  <div className="absolute -top-3 left-8 bg-[#C9A23F] text-[#012D76] text-[10px] tracking-[0.22em] uppercase font-semibold px-3 py-1">Most chosen</div>
-                )}
-                <span className="text-[11px] uppercase tracking-[0.22em] text-[#6B7280]">{p.cadence}</span>
-                <div className="font-display text-3xl text-[#012D76] mt-3">{p.name}</div>
-                <div className="text-[#3A4759] text-sm mt-3 mb-7">{p.tagline}</div>
-                <ul className="space-y-3 mb-8 flex-1">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-[#3A4759]">
-                      <Check size={16} className="text-[#A6831F] mt-0.5 shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                {isAuthed ? (
-                  <Link to={dashboardHref} className={p.popular ? "eec-btn-primary" : "eec-btn-secondary"} data-testid={`pricing-cta-dashboard-${p.id}`}>
-                    Go to dashboard <ArrowUpRight size={14} />
-                  </Link>
-                ) : (
-                  <Link to="/buyer/intake" className={p.popular ? "eec-btn-primary" : "eec-btn-secondary"} data-testid={`pricing-cta-${p.id}`}>
-                    {p.cta} <ArrowUpRight size={14} />
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="mt-12 text-center text-xs uppercase tracking-[0.32em] text-[#6B7280]" data-testid="home-pricing-disclaimer">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A23F] align-middle mr-3"></span>
-            Pricing is tailored to the requirements of each sourcing project. Please contact our team to discuss your sourcing objectives.
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A23F] align-middle ml-3"></span>
-          </p>
-        </div>
-      </section>
-
-      {/* COMPLIANCE TICKER */}
-      <section className="bg-[#F5F9FC] py-14 border-y hairline">
-        <div className="mx-auto max-w-7xl px-5 lg:px-10">
-          <h2 className="font-display text-xl text-[#012D76] tracking-tight mb-2">Supplier Compliance Screening</h2>
-          <p className="text-sm text-[#3A4759] mb-6">EEC screens every supplier against the certification requirements of your destination market before network approval. Certifications are supplier-held. Audit reports available on request.</p>
-          <CertMarquee names={TRUST} />
+          <p className="text-[#3A4759] mb-2">EEC offers three engagement models — Scout, Engage, and Embed — each scoped and priced at the discovery call.</p>
+          <Link to="/services" className="text-[#012D76] hover:underline font-medium">See all engagement models →</Link>
         </div>
       </section>
 
@@ -535,7 +442,7 @@ function TestimonialWallCard({ t }) {
 }
 
 function TestimonialsBlock() {
-  const cards = [...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS];
+  const cards = [...TESTIMONIALS, ...TESTIMONIALS];
 
   const edgeMask = {
     maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
@@ -563,5 +470,71 @@ function TestimonialsBlock() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Ease-out count-up from 0 to `value`, driven by requestAnimationFrame. `start` is a
+// one-way trigger (parent flips it true once and never resets it) so the animation runs
+// exactly once per page load.
+function StatItem({ value, suffix, label, start }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    const duration = 1800;
+    let raf;
+    let startTime;
+    const tick = (t) => {
+      if (startTime === undefined) startTime = t;
+      const progress = Math.min((t - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 2);
+      setCount(Math.round(eased * value));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [start, value]);
+
+  return (
+    <div className="text-center">
+      <div className="font-display text-5xl lg:text-6xl text-[#012D76] tracking-tight tabular-nums">
+        {count}{suffix}
+      </div>
+      <p className="mt-3 text-sm lg:text-base text-[#3A4759] leading-relaxed">{label}</p>
+    </div>
+  );
+}
+
+function StatsSection() {
+  const ref = useRef(null);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    if (started) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setStarted(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [started]);
+
+  return (
+    <section ref={ref} className="py-20 lg:py-28 border-t hairline" aria-label="EEC by the numbers">
+      <div className="mx-auto max-w-7xl px-5 lg:px-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-6">
+          {STATS.map((s) => (
+            <StatItem key={s.label} value={s.value} suffix={s.suffix} label={s.label} start={started} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

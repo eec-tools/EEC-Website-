@@ -67,7 +67,7 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
         )}
       </div>
       {/* Orbit graphic */}
-      <div className="flex-shrink-0 w-56 h-56 md:w-64 md:h-64 hidden sm:block" aria-hidden="true">
+      <div className="flex-shrink-0 w-72 h-72 md:w-96 md:h-96 hidden sm:block" aria-hidden="true">
         <img
           src="/images/cta/cta-orbit.png"
           alt=""
@@ -320,13 +320,13 @@ export default function Layout({ children }) {
       <main className="flex-1">{children}</main>
 
       <footer className="mt-20 bg-white px-4 md:px-8 pb-10" aria-label="Site footer">
-        <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-8 pb-8">
+        <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-6 pb-6">
 
           {/* ── CTA banner (page-aware; omitted on routes with no config) ── */}
           {ctaConfig && <CtaCard {...ctaConfig} />}
 
           {/* ── Main grid ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.5fr_1.35fr_1.35fr_1.35fr_3.3fr] gap-10 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.7fr_1.3fr_1.3fr_1.3fr_3.3fr] gap-10 lg:gap-8">
 
             {/* ── Left: brand col ── */}
             <div className="flex flex-col gap-5 min-w-0">
@@ -339,7 +339,7 @@ export default function Layout({ children }) {
                   draggable="false"
                 />
               </Link>
-              <p className="text-sm text-[#6B7280] leading-relaxed max-w-[275px]">
+              <p className="text-sm text-[#6B7280] leading-relaxed max-w-[300px]">
                 Singapore-headquartered sourcing consultancy. Embedded procurement support for global buyers sourcing from India and Asia.
               </p>
               <div className="flex items-center justify-between gap-4">

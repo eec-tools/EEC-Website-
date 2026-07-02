@@ -33,6 +33,12 @@
 
   --eec-border: #E5EBF2;
   --eec-border-soft: #EFF4F9;
+
+  /* Warm olive/cream tones — used by the founder "About Me" spotlight section */
+  --eec-olive: #8B8548;
+  --eec-olive-soft: #A6A166;
+  --eec-cream: #F0EDE3;
+  --eec-cream-deep: #E8E4D5;
 }
 
 html {
@@ -54,6 +60,14 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   letter-spacing: -0.01em;
   font-weight: 500;
   /* Color inherits from parent — explicit text-* classes win */
+}
+
+.font-display-condensed {
+  font-family: 'Abril Fatface', 'Playfair Display', Georgia, serif;
+}
+
+.font-script {
+  font-family: 'Mrs Saint Delafield', cursive;
 }
 
 ::selection {

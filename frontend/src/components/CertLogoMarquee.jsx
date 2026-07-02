@@ -57,24 +57,38 @@ export function CertLogo({ name, className = "h-10 md:h-12" }) {
     );
   }
   return (
-    <img
-      src={src}
-      alt={name}
-      title={name}
-      className={`${className} w-auto object-contain shrink-0`}
-    />
+    <div className="flex items-center justify-center w-32 md:w-36 h-14 shrink-0">
+      <img
+        src={src}
+        alt={name}
+        title={name}
+        className="max-h-10 md:max-h-12 w-auto object-contain"
+      />
+    </div>
   );
 }
 
-// Continuous, seamless-loop logo marquee. Pauses on hover. Renders the item list twice
-// back to back so the -50% translateX loop point is invisible.
-export function CertMarquee({ names, speed = 26 }) {
-  const doubled = [...names, ...names];
+// Fixed marquee speed shared by every slider on the page (Home ticker + all 6 category
+// sliders on For Suppliers) so they all scroll at the same rate.
+const MARQUEE_SPEED = 26;
+// Minimum item count per loop pass — short category lists (e.g. 3-4 certs) get repeated
+// until the row is dense/continuous rather than looking sparse before it loops.
+const MIN_REPEAT_COUNT = 10;
+
+// Continuous, seamless-loop logo marquee on a white background. Pauses on hover. Renders
+// the (possibly repeated) item list twice back to back so the -50% translateX loop point
+// is invisible.
+export function CertMarquee({ names }) {
+  const repeatTimes = Math.max(1, Math.ceil(MIN_REPEAT_COUNT / names.length));
+  const filled = Array.from({ length: repeatTimes }, () => names).flat();
+  const doubled = [...filled, ...filled];
   return (
-    <div className="overflow-hidden eec-cert-marquee-row">
+    <div className="relative overflow-hidden bg-white eec-cert-marquee-row">
+      <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" aria-hidden="true" />
+      <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" aria-hidden="true" />
       <div
-        className="flex items-center gap-8 animate-marquee"
-        style={{ width: "max-content", animationDuration: `${speed}s` }}
+        className="flex items-center animate-marquee"
+        style={{ width: "max-content", animationDuration: `${MARQUEE_SPEED}s` }}
       >
         {doubled.map((name, i) => (
           <CertLogo key={`${name}-${i}`} name={name} />

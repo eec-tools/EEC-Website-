@@ -67,7 +67,10 @@ CATEGORY_RECORDS = [
         "image": "/images/categories/food-commodities.jpg",
         "cta": "Source food commodities",
         "alt": "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing",
-        "body": "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration and BRC/BRCGS certification. HACCP certification is screened as a baseline requirement.",
+        # NOTE: EU Health Certificate and Rainforest Alliance don't map cleanly to an existing category (most
+        # relevant to frozen food / dried fruit sub-segments). Folded into Food Commodities for now — flag for
+        # manual review on whether these warrant their own category longer-term.
+        "body": "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification. HACCP certification is screened as a baseline requirement, with Aflatoxin testing reports, EU Health Certificates and Rainforest Alliance certification coordinated where required by the destination market.",
     },
     {
         "id": "processed",
@@ -77,7 +80,7 @@ CATEGORY_RECORDS = [
         "image": "/images/categories/processed-packaged-foods.jpg",
         "cta": "Source processed foods",
         "alt": "Assorted packaged snacks and confectionery bars for processed and packaged food sourcing",
-        "body": "EEC sources snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS and/or FSSC 22000 certification. IFS Food certification is required for suppliers serving German and French buyers.",
+        "body": "EEC sources snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification. IFS Food certification is required for suppliers serving German and French buyers, with Aflatoxin testing reports coordinated where required.",
     },
     {
         "id": "fresh",
@@ -87,7 +90,7 @@ CATEGORY_RECORDS = [
         "image": "/images/categories/fresh-agricultural-products.jpg",
         "cta": "Source fresh produce",
         "alt": "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens",
-        "body": "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P. and GRASP certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
+        "body": "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P., GRASP and amfori BSCI certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
     },
     {
         "id": "healthcare",
@@ -107,7 +110,7 @@ CATEGORY_RECORDS = [
         "image": "/images/categories/home-textile-apparel-hospitality.jpg",
         "cta": "Source home textiles",
         "alt": "Bed linen, towels, uniforms and hotel amenities for home textile and hospitality sourcing",
-        "body": "EEC sources bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and Oeko-Tex STEP certification is available for organic and sustainable textile requirements.",
+        "body": "EEC sources bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and OEKO-TEX STEP certification is available for organic and sustainable textile requirements.",
     },
     {
         "id": "eco",
