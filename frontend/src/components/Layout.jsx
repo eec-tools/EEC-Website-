@@ -16,11 +16,11 @@ function Logo({ size = "header" }) {
   // Mobile-first; scales noticeably up on tablet/laptop/desktop.
   const heightClass = size === "footer"
     ? "h-20 md:h-28 lg:h-36"
-    : "h-14 md:h-20 lg:h-24";
+    : "h-16 md:h-24 lg:h-32";
   return (
     <Link to="/" className="inline-flex items-center group" data-testid={size === "footer" ? "footer-brand-link" : "brand-link"}>
       <img
-        src="/eec-logo.png"
+        src="/images/EEC-logo-WBG.png"
         alt="Elan Exports Consultancy, Singapore Headquartered sourcing consultancy"
         className={`${heightClass} w-auto select-none transition-transform duration-300 group-hover:scale-[1.03]`}
         data-testid={size === "footer" ? "footer-logo" : "brand-logo"}

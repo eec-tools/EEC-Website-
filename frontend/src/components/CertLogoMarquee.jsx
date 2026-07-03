@@ -43,27 +43,13 @@ export const CERT_LOGOS = {
   "EU Health Certificate": null,
 };
 
-export function CertLogo({ name, className = "h-10 md:h-12" }) {
-  const src = CERT_LOGOS[name];
-  if (!src) {
-    return (
-      <div
-        className={`inline-flex items-center gap-2 ${className} px-4 border hairline bg-white shrink-0`}
-        title={name}
-      >
-        <FileCheck size={16} className="text-[#012D76]/50 shrink-0" aria-hidden="true" />
-        <span className="text-xs font-medium text-[#012D76] whitespace-nowrap">{name}</span>
-      </div>
-    );
-  }
+export function CertLogo({ name, className = "" }) {
   return (
-    <div className="flex items-center justify-center w-32 md:w-36 h-14 shrink-0">
-      <img
-        src={src}
-        alt={name}
-        title={name}
-        className="max-h-10 md:max-h-12 w-auto object-contain"
-      />
+    <div
+      className={`flex items-center justify-center px-3 py-2 border hairline bg-transparent ${className}`}
+      title={name}
+    >
+      <span className="text-xs md:text-sm font-medium text-[#012D76] whitespace-nowrap text-center">{name}</span>
     </div>
   );
 }
@@ -81,16 +67,10 @@ const MIN_REPEAT_COUNT = 10;
 export function CertMarquee({ names }) {
   const repeatTimes = Math.max(1, Math.ceil(MIN_REPEAT_COUNT / names.length));
   const filled = Array.from({ length: repeatTimes }, () => names).flat();
-  const doubled = [...filled, ...filled];
   return (
-    <div className="relative overflow-hidden bg-white eec-cert-marquee-row">
-      <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" aria-hidden="true" />
-      <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" aria-hidden="true" />
-      <div
-        className="flex items-center animate-marquee"
-        style={{ width: "max-content", animationDuration: `${MARQUEE_SPEED}s` }}
-      >
-        {doubled.map((name, i) => (
+    <div className="relative bg-white eec-cert-marquee-row py-3">
+      <div className="flex flex-wrap items-center gap-3">
+        {filled.map((name, i) => (
           <CertLogo key={`${name}-${i}`} name={name} />
         ))}
       </div>

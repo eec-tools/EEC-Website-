@@ -118,12 +118,12 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Sourcing context — dark navy, white/gold */}
-      <section className="bg-[#012D76] py-16 lg:py-20 grain">
+      {/* Sourcing context */}
+      <section className="bg-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-2xl space-y-8">
-            <p className="text-base lg:text-lg leading-relaxed text-white/80">
-              We maintain <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
+            <p className="text-base lg:text-lg leading-relaxed text-[#3A4759]">
+              We maintain <span className="text-[#012D76] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
             </p>
           </div>
         </div>
@@ -184,11 +184,6 @@ export default function ForSuppliers() {
                 </div>
               ))}
             </div>
-            {!isAuthed && (
-              <Link to="/register?role=supplier" className="eec-btn-primary mt-6 inline-flex items-center gap-2" data-testid="supplier-cta-req-apply-2">
-                Start application <ArrowUpRight size={16} />
-              </Link>
-            )}
           </div>
         </div>
       </section>
@@ -239,7 +234,7 @@ export default function ForSuppliers() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {CERT_CARDS.map(({ cat, certs, note }) => (
-              <div key={cat} className="border hairline bg-elevated p-5">
+              <div key={cat} className="border hairline p-5">
                 <div className="text-[10px] uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold mb-3">{cat}</div>
                 <CertMarquee names={certs} />
                 {note && <p className="mt-3 text-xs text-[#6B7280] leading-relaxed">{note}</p>}
@@ -255,11 +250,11 @@ export default function ForSuppliers() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(CERT_WALL).map(([group, certs]) => (
-                <div key={group} className="border hairline bg-elevated p-6">
+                <div key={group} className="border hairline p-6">
                   <div className="text-[10px] uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold mb-4">{group}</div>
                   <div className="flex flex-wrap items-center gap-3">
                     {certs.map((c) => (
-                      <div key={c} className="flex items-center justify-center px-3 py-2 border hairline bg-[#F5F9FC]">
+                      <div key={c} className="flex items-center justify-center">
                         <CertLogo name={c} className="h-9" />
                       </div>
                     ))}

@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 import { COMPANY } from "@/constants/company";
 import TeamSection from "@/components/TeamSection";
-import AboutFounderSection from "@/components/AboutFounderSection";
 
 // TODO: Replace empty office corridor with sourcing/logistics/factory imagery for About page hero
 const BG = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1800&q=80";
@@ -154,26 +153,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
-      <AboutFounderSection
-        name="Shirali Shetty"
-        eyebrowText="The Founder Behind Elan Exports"
-        headline="About Me"
-        paragraphs={[
-          "Hi, I am Shirali Shetty. I founded Elan Exports Consultancy to solve a problem I saw first-hand: global buyers were spending years building the trusted supplier relationships that large enterprises take for granted from day one.",
-          "In my 20 years working in global sourcing, procurement and international trade across India and Asia, I have built EEC around transparent, open-book commercials, factory-audited suppliers and sourcing plans that hold up under real order volumes.",
-          "Whether it is a first sourcing brief or a multi-year supply chain, my goal is the same: give buyers the same access, visibility and reliability that was previously available only to the biggest players in the room.",
-        ]}
-        photoSrc="/images/team/image.webp"
-        photoAlt="Shirali Shetty, Founder and CEO of Elan Exports Consultancy"
-        signatureText="Shirali Shetty"
-        socialLinks={{
-          linkedin: COMPANY.socialLinks[0],
-          instagram: COMPANY.socialLinks[1],
-          email: `mailto:${COMPANY.contactEmail}`,
-          whatsapp: "https://wa.me/6586784216",
-        }}
-      />
 
       <TeamSection />
 

@@ -51,11 +51,11 @@ const fallbackCategories = [
     id: "home-textile",
     anchor: "home-textile-hospitality",
     name: "Home Textile, Apparel and Hospitality Products",
-    tagline: "Bed linen, towels, uniforms, hotel amenities.",
+    tagline: "Bed linen, towels, uniforms, hotel textiles.",
     image: "/images/categories/home-textile-apparel-hospitality.jpg",
-    alt: "Bed linen, towels, uniforms and hotel amenities for home textile and hospitality sourcing",
+    alt: "Bed linen, towels, uniforms and hotel textiles for home textile and hospitality sourcing",
     cta: "Source home textiles",
-    body: "EEC sources bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and OEKO-TEX STEP certification is available for organic and sustainable textile requirements.",
+    body: "EEC sources bed linen, towels, uniforms and hotel textiles from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and OEKO-TEX STEP certification is available for organic and sustainable textile requirements.",
   },
   {
     id: "eco",
@@ -70,7 +70,7 @@ const fallbackCategories = [
 ];
 
 const FAQ = [
-  { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks. Food Commodities covers rice, sugar, pulses, edible oils and spices. Processed and Packaged Foods covers snacks, beverages, frozen foods and ready meals. Fresh and Agricultural Products covers fruits, vegetables and organic produce. Healthcare and Hospital Textile Supplies covers patient gowns, scrubs, surgical drapes, hospital bed linen and institutional uniforms. Home Textile, Apparel and Hospitality Products covers bed linen, towels, uniforms and hotel amenities. Eco-Friendly, Sustainable and Organic Products covers biodegradable packaging, organic textiles and green alternatives." },
+  { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks. Food Commodities covers rice, sugar, pulses, edible oils and spices. Processed and Packaged Foods covers snacks, beverages, frozen foods and ready meals. Fresh and Agricultural Products covers fruits, vegetables and organic produce. Healthcare and Hospital Textile Supplies covers patient gowns, scrubs, surgical drapes, hospital bed linen and institutional uniforms. Home Textile, Apparel and Hospitality Products covers bed linen, towels, uniforms and hotel textiles. Eco-Friendly, Sustainable and Organic Products covers biodegradable packaging, organic textiles and green alternatives." },
   { q: "What certifications does EEC check for food sourcing categories?", a: "Food Commodities suppliers are screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification, with HACCP certification screened as a baseline requirement. Processed and Packaged Foods suppliers are screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification, with IFS Food certification required for suppliers serving German and French buyers. Fresh and Agricultural Products suppliers are screened for GlobalG.A.P., GRASP and amfori BSCI certification." },
   { q: "What certifications does EEC check for textile and healthcare categories?", a: "Healthcare and Hospital Textile Supplies manufacturers are screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Home Textile, Apparel and Hospitality Products manufacturers are screened for BSCI and/or SEDEX audit compliance, with GOTS and OEKO-TEX STEP certification available for organic and sustainable textile requirements." },
   { q: "Does EEC source organic and eco-friendly products?", a: "Yes. Eco-Friendly, Sustainable and Organic Products is one of the six active sourcing desks, covering biodegradable packaging, organic textiles and green alternatives from manufacturers screened for GOTS certification and EU Organic or NPOP equivalence." },
@@ -142,7 +142,7 @@ export default function Categories() {
                 "@type": "ListItem",
                 position: 5,
                 name: "Home Textile, Apparel and Hospitality Products",
-                description: "Bed linen, towels, uniforms and hotel amenities from manufacturers screened for BSCI and/or SEDEX audit compliance.",
+                description: "Bed linen, towels, uniforms and hotel textiles from manufacturers screened for BSCI and/or SEDEX audit compliance.",
                 url: "https://eectrade.com/categories#home-textile-hospitality",
               },
               {
