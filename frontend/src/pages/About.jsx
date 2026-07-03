@@ -20,7 +20,7 @@ const ABOUT_FAQ = [
   },
   {
     q: "What does EEC do?",
-    a: "Elan Exports Consultancy (EEC) is a Singapore Headquartered sourcing and procurement consultancy that connects international buyers with verified manufacturers across India and Asia. Core services include supplier identification and qualification, factory assessments, landed cost modelling and shipment coordination. Available through Scout, Engage or Embed engagement tiers.",
+    a: "Elan Exports Consultancy exists to close the trust gap between global buyers and verified manufacturers, replacing opaque trading intermediaries with a transparent, accountable sourcing partner. Our mandate covers supplier identification and qualification, factory assessment, open-book landed cost modelling and shipment coordination, delivered through Scout, Engage or Embed engagement tiers, with operations centred on India and extending across Southeast Asia.",
   },
   {
     q: "Where does EEC operate?",
@@ -28,13 +28,13 @@ const ABOUT_FAQ = [
   },
   {
     q: "How does EEC qualify suppliers?",
-    a: "EEC qualifies manufacturers through IEC registration, GST verification, financial checks, factory assessments and compliance documentation review. Trading and re-export businesses are not eligible.",
+    a: "Supplier qualification at EEC is a governance function, not a sales filter. It reflects a deliberate operating decision made at the company's founding: to work exclusively with manufacturers of record and to exclude trading and re-export intermediaries entirely, regardless of the commercial upside they might offer. Every factory in our network is qualified against verified registration, financial standing and independently assessed production capacity, a standard applied uniformly because our credibility as a consultancy depends on it as much as any single buyer relationship does.",
     link: "/for-suppliers#qualification",
     linkText: "See full requirements",
   },
   {
     q: "How does EEC price its services?",
-    a: "EEC does not publish fixed pricing. Scout is a one-time fixed-fee project. Engage (per sourcing project) and Embed (quarterly retainer) are priced based on category complexity, order volume and sourcing geography, confirmed at or after the initial discovery call. No fees are charged to suppliers at any stage.",
+    a: "EEC's commercial model is built on a single ethical premise: a sourcing consultant should be paid by the party it represents. That is why EEC operates on a buyer-funded, open-book architecture, suppliers are never charged for listing, activation, or preferential visibility, at any stage. This removes the structural conflict of interest that lets hidden trading margins and pay-to-play supplier placement creep into conventional sourcing models. When EEC recommends a factory, that recommendation is never for sale.",
     link: "/services",
     linkText: "See engagement models",
   },

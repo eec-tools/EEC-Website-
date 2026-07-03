@@ -91,7 +91,7 @@ const CTA_CONFIG = {
     description: "Response within two working days. The discovery call is free.",
     primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
     secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
-    footnote: "Singapore HQ (UEN: 202501728W) | Verified supplier network | India and Asia operations",
+    footnote: "Singapore HQ | Verified supplier network | India and Asia operations",
   },
   "/for-suppliers": {
     eyebrow: "Ready to apply?",
@@ -99,7 +99,7 @@ const CTA_CONFIG = {
     description: "Applications reviewed within 3 to 5 business days. No listing fees, ever. Manufacturers with active production facilities only.",
     primaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
     secondaryCta: { label: "See qualification requirements", href: "/for-suppliers#qualification" },
-    footnote: "Singapore HQ (UEN 202501728W) | No supplier listing fees | Active buyer programmes across Europe, US and Middle East",
+    footnote: "Singapore HQ | No supplier listing fees | Active buyer programmes across Europe, US and Middle East",
   },
   "/categories": {
     eyebrow: "Get started",
@@ -127,7 +127,7 @@ const CTA_CONFIG = {
     description: "From qualified suppliers to landed goods, one team, start to finish. The discovery call is free.",
     primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
     secondaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
-    footnote: "Singapore HQ (UEN: 202501728W) | Verified supplier network | India and Asia operations",
+    footnote: "Singapore HQ | Verified supplier network | India and Asia operations",
   },
 };
 

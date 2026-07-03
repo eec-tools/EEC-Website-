@@ -46,7 +46,7 @@ const FAQ = [
   { q: "Does EEC support freight and logistics?", a: "EEC can assist with procurement coordination and facilitate communication with logistics and supply chain partners where required. The level of support depends on the scope of the sourcing engagement." },
   { q: "Can EEC source multiple product categories?", a: "Yes. EEC supports sourcing across multiple industries and product categories, helping businesses manage sourcing projects with verified manufacturers across different regions and markets." },
   { q: "Can I expand my engagement as my sourcing needs grow?", a: "Yes. Many clients begin with a focused sourcing requirement and expand into broader procurement support as their business grows. Our services are designed to scale alongside your sourcing requirements." },
-  { q: "Does EEC coordinate supplier verification?", a: "Yes. Where appropriate, EEC supports supplier verification through capability assessments, documentation reviews and coordination with recognised third-party inspection and verification partners." },
+  { q: "Does EEC coordinate supplier verification?", a: "Yes. Where a sourcing engagement calls for it, EEC manages the verification workflow directly, coordinating capability assessments, documentation review and inspection scheduling with recognised third-party partners, and routing the resulting reports back to you as part of the project deliverables." },
 ];
 
 export default function Services() {
@@ -80,7 +80,6 @@ export default function Services() {
               "@type": "Organization",
               name: COMPANY.legalName,
               url: "https://eectrade.com",
-              identifier: COMPANY.uen,
             },
             areaServed: ["Europe", "United States", "Middle East", "Asia"],
             hasOfferCatalog: {

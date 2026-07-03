@@ -49,12 +49,11 @@ const HOME_CATEGORIES = [
 ];
 
 const FAQ = [
-  { q: "What is Elan Exports Consultancy?", a: `Elan Exports Consultancy (EEC) is a Singapore Headquartered global sourcing consultancy that connects buyers with verified manufacturers worldwide, backed by specialised expertise and an extensive sourcing network across India and Asia. EEC delivers open-book commercials and predictable shipments. Founded with 20 years of founder experience and incorporated on ${COMPANY.incorporationDateDisplay} (UEN: ${COMPANY.uen}), EEC acts as an embedded sourcing arm for global buyers.` },
+  { q: "What is Elan Exports Consultancy?", a: `Elan Exports Consultancy (EEC) is a Singapore-headquartered global sourcing consultancy connecting buyers with verified manufacturers worldwide, with deep specialisation across India and Southeast Asia. Built on 20 years of founder experience in international trade, EEC operates on an open-book commercial model with predictable shipments, functioning as an embedded sourcing arm for buyers rather than a transactional marketplace.` },
   { q: "What countries does EEC source from?", a: "EEC sources from India, Asia and select global markets. India remains the primary sourcing market across food commodities, textiles, fresh produce, processed foods, hospital textiles and eco-friendly products. EEC also works with verified manufacturers in Vietnam, Bangladesh, Indonesia, Thailand and other countries based on category requirements. Every supplier in the network is verified before any RFQ is deployed to a buyer." },
   { q: "How is EEC different from a sourcing marketplace?", a: "EEC is a consultancy, not a marketplace. Marketplaces earn revenue from supplier listings or transaction commissions. EEC charges buyers a service fee based on engagement tier. EEC negotiates on open-book terms. Suppliers are recommended based on quality and fit, with no commercial conflict of interest." },
   { q: "What is landed cost, and how does EEC model it?", a: "Landed cost is the total cost of a product at the destination warehouse, including factory price (FOB), freight, insurance, import duties, customs clearance and last-mile delivery. EEC provides open-book landed cost modelling for every sourcing project before the buyer commits to a supplier. This eliminates hidden margins and gives procurement teams an accurate, comparable basis for supplier decisions across categories and geographies." },
-  { q: "How does EEC price its services?", a: "EEC pricing varies by engagement tier. Scout is a fixed-fee one-time project for buyers evaluating a new category or geography. Engage (per-project) and Embed (quarterly retainer) are priced during the discovery call based on category complexity, volume and sourcing geography. EEC does not charge suppliers listing or activation fees at any stage. All revenue comes from buyer service fees only. Pricing is shared at the discovery call and is not published publicly." },
-  { q: "What certifications does EEC check for European food buyers?", a: "Certification requirements vary by category. Food commodity and frozen food suppliers require FSSAI, HACCP and BRC/BRCGS as a baseline, with EU Health Certificates for frozen seafood. Organic food suppliers require EU Organic or NPOP equivalence. Ethnic and packaged food suppliers require IFS Food for German and French buyers and Halal certification where applicable. FSSC 22000 is accepted as a BRC equivalent by most EU buyers across all categories.", link: "/for-buyers", linkText: "Full certification requirements by category" },
+  { q: "How does EEC price its services?", a: "Pricing varies by engagement tier. Scout is a fixed-fee one-time project for buyers evaluating a new category or geography. Engage (per-project) and Embed (quarterly retainer) are scoped during a discovery call based on category complexity, volume and sourcing geography. Suppliers are never charged listing or activation fees — all revenue comes from buyer service fees only." },
 ];
 
 export default function Home() {
@@ -90,7 +89,6 @@ export default function Home() {
             url: "https://eectrade.com",
             email: COMPANY.contactEmail,
             foundingDate: COMPANY.incorporationDateISO,
-            identifier: COMPANY.uen,
             description: "Singapore Headquartered sourcing and procurement consultancy connecting global buyers with verified manufacturers across India and Asia.",
             address: { "@type": "PostalAddress", streetAddress: COMPANY.addressStreet, addressLocality: COMPANY.addressCity, postalCode: COMPANY.addressPostalCode, addressCountry: COMPANY.addressCountry },
             areaServed: ["Europe", "United States", "Middle East", "Asia-Pacific"],
@@ -238,7 +236,7 @@ export default function Home() {
                 )}
               </div>
               <p className="mt-8 text-xs text-[#6B7280] max-w-md leading-relaxed">
-                {`Singapore HQ (UEN: ${COMPANY.uen}) | Incorporated ${COMPANY.incorporationMonthYear} | ${COMPANY.supplierCountClaim} | India and Asia operations`}
+                {`Singapore HQ | Incorporated ${COMPANY.incorporationMonthYear} | ${COMPANY.supplierCountClaim} | India and Asia operations`}
               </p>
             </div>
             <div className="lg:col-span-5">
