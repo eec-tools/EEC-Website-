@@ -21,7 +21,7 @@ function Logo({ size = "header" }) {
     <Link to="/" className="inline-flex items-center group" data-testid={size === "footer" ? "footer-brand-link" : "brand-link"}>
       <img
         src="/eec-logo.png"
-        alt="Elan Exports Consultancy -- Singapore Headquartered sourcing consultancy"
+        alt="Elan Exports Consultancy, Singapore Headquartered sourcing consultancy"
         className={`${heightClass} w-auto select-none transition-transform duration-300 group-hover:scale-[1.03]`}
         data-testid={size === "footer" ? "footer-logo" : "brand-logo"}
         draggable="false"
@@ -36,7 +36,7 @@ function Logo({ size = "header" }) {
    Visual shell is identical on every page; content is supplied per-route via CTA_CONFIG below. */
 function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, footnote }) {
   return (
-    <div className="bg-white rounded-3xl px-8 md:px-10 py-8 md:py-10 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden">
+    <div className="bg-white rounded-3xl px-8 md:px-10 py-5 md:py-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
       {/* Text side */}
       <div className="flex flex-col gap-4 max-w-md">
         <span className="text-sm text-[#6B7280] tracking-wide">{eyebrow}</span>
@@ -67,10 +67,14 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
         )}
       </div>
       {/* Orbit graphic */}
-      <div className="flex-shrink-0 w-72 h-72 md:w-96 md:h-96 hidden sm:block" aria-hidden="true">
+      <div className="flex-shrink-0 w-52 h-52 md:w-64 md:h-64 hidden sm:block" aria-hidden="true">
         <img
           src="/images/cta/cta-orbit.png"
           alt=""
+          width="256"
+          height="256"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-contain select-none"
           draggable="false"
         />
@@ -119,8 +123,8 @@ const CTA_CONFIG = {
   },
   "/": {
     eyebrow: "Get Started",
-    heading: "Let's Build Your Sourcing Advantage",
-    description: "From qualified suppliers to landed goods — one team, start to finish. The discovery call is free.",
+    heading: "Build Your Sourcing Advantage",
+    description: "From qualified suppliers to landed goods, one team, start to finish. The discovery call is free.",
     primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
     secondaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
     footnote: "Singapore HQ (UEN: 202501728W) | Verified supplier network | India and Asia operations",
@@ -165,51 +169,6 @@ function FooterBadge({ icon, label1, label2 }) {
     </div>
   );
 }
-
-/* ── Dotted world-map graphic for the Singapore HQ card. Continent shapes are approximated as
-   filled ellipses sampled onto a dot grid; Singapore is marked with an accent-colored dot. ── */
-function WorldMapDots() {
-  // Each landmass is built from several overlapping ellipses so it reads as a recognizable
-  // continent outline (tapered South America, Africa, etc.) rather than a single blob.
-  const blobs = [
-    { cx: 16, cy: 12, rx: 10,  ry: 7 },   // North America — main mass
-    { cx: 12, cy: 20, rx: 6,   ry: 5 },   // North America — southern extension
-    { cx: 26, cy: 5,  rx: 3,   ry: 2 },   // Greenland
-    { cx: 18, cy: 24, rx: 3,   ry: 3 },   // Central America
-    { cx: 24, cy: 30, rx: 6,   ry: 6 },   // South America — top
-    { cx: 23, cy: 40, rx: 3.5, ry: 6 },   // South America — tapered tail
-    { cx: 49, cy: 8,  rx: 5.5, ry: 4.5 }, // Europe
-    { cx: 49, cy: 18, rx: 7,   ry: 6 },   // Africa — top
-    { cx: 48, cy: 28, rx: 5.5, ry: 7 },   // Africa — tapered tail
-    { cx: 58, cy: 14, rx: 5,   ry: 4 },   // Middle East bridge
-    { cx: 72, cy: 11, rx: 15,  ry: 8 },   // Asia — main mass
-    { cx: 63, cy: 22, rx: 4,   ry: 5 },   // India
-    { cx: 78, cy: 22, rx: 5,   ry: 4 },   // Southeast Asia
-    { cx: 89, cy: 14, rx: 1.6, ry: 3 },   // Japan
-    { cx: 82, cy: 28, rx: 4,   ry: 1.6 }, // Indonesia
-    { cx: 90, cy: 27, rx: 2,   ry: 1.4 }, // Philippines
-    { cx: 85, cy: 38, rx: 6.5, ry: 4.5 }, // Australia
-    { cx: 95, cy: 42, rx: 1.3, ry: 2 },   // New Zealand
-    { cx: 55, cy: 33, rx: 1,   ry: 2.3 }, // Madagascar
-  ];
-  const seen = new Set();
-  const dots = [];
-  blobs.forEach(({ cx, cy, rx, ry }) => {
-    for (let x = cx - rx; x <= cx + rx; x += 1.7) {
-      for (let y = cy - ry; y <= cy + ry; y += 1.7) {
-        const nx = (x - cx) / rx;
-        const ny = (y - cy) / ry;
-        if (nx * nx + ny * ny > 1) continue;
-        const key = `${Math.round(x * 10)}:${Math.round(y * 10)}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        dots.push({ key, x, y });
-      }
-    }
-  });
-  return dots;
-}
-const WORLD_MAP_DOTS = WorldMapDots();
 
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -274,7 +233,13 @@ export default function Layout({ children }) {
             )}
           </div>
 
-          <button className="md:hidden text-[#012D76]" onClick={() => setOpen(!open)} data-testid="mobile-menu-toggle">
+          <button
+            className="md:hidden text-[#012D76]"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            data-testid="mobile-menu-toggle"
+          >
             {open ? <X /> : <Menu />}
           </button>
         </div>
@@ -320,21 +285,25 @@ export default function Layout({ children }) {
       <main className="flex-1">{children}</main>
 
       <footer className="mt-20 bg-white px-4 md:px-8 pb-10" aria-label="Site footer">
-        <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-6 pb-6">
+        <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-4 pb-4">
 
           {/* ── CTA banner (page-aware; omitted on routes with no config) ── */}
           {ctaConfig && <CtaCard {...ctaConfig} />}
 
           {/* ── Main grid ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.7fr_1.3fr_1.3fr_1.3fr_3.3fr] gap-10 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.4fr_1.2fr_1.2fr_1.2fr_3.4fr] gap-10 lg:gap-8">
 
             {/* ── Left: brand col ── */}
             <div className="flex flex-col gap-5 min-w-0">
-              <Link to="/" aria-label="Élan Exports Consultancy home" data-testid="footer-brand-link">
+              <Link to="/" aria-label="Elan Exports Consultancy home" data-testid="footer-brand-link">
                 <img
                   src="/eec-logo-wbg.png"
-                  alt="Élan Exports Consultancy — Singapore Headquartered Sourcing Consultancy"
+                  alt="Elan Exports Consultancy, Singapore Headquartered Sourcing Consultancy"
                   className="w-56 lg:w-60 h-auto select-none"
+                  width="240"
+                  height="240"
+                  loading="lazy"
+                  decoding="async"
                   data-testid="footer-logo"
                   draggable="false"
                 />
@@ -416,25 +385,19 @@ export default function Layout({ children }) {
               </form>
 
               {/* Location card */}
-              <div className="rounded-2xl bg-white px-6 py-5 overflow-hidden">
-                <div className="flex items-start justify-between gap-4">
+              <div
+                className="rounded-2xl w-full max-w-full sm:max-w-[420px] lg:max-w-none px-6 py-3 overflow-hidden bg-cover bg-no-repeat"
+                style={{ backgroundImage: "url(/images/footer/location-card-bg.png)", backgroundPosition: "right center" }}
+              >
+                <div className="flex flex-col items-start text-left">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-[#EFF4F9] flex items-center justify-center flex-shrink-0">
                       <MapPin size={17} className="text-[#012D76]" aria-hidden="true" />
                     </div>
                     <p className="text-base font-bold text-[#012D76] leading-snug whitespace-nowrap">Singapore HQ</p>
                   </div>
-                  {/* Dotted world-map graphic */}
-                  <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="min-w-0 flex-shrink w-32 sm:w-36 h-auto opacity-80">
-                    {WORLD_MAP_DOTS.map(({ key, x, y }) => (
-                      <circle key={key} cx={x} cy={y} r="0.7" fill="#D1D5DB" />
-                    ))}
-                    {/* Singapore highlight dot */}
-                    <circle cx="79" cy="23" r="1.4" fill="#C9A23F" />
-                    <circle cx="79" cy="23" r="2.8" fill="#C9A23F" fillOpacity="0.25" />
-                  </svg>
+                  <p className="text-sm text-[#6B7280] leading-relaxed mt-3 text-left">India &amp; Asia Operations<br/>Sourcing Network</p>
                 </div>
-                <p className="text-sm text-[#6B7280] leading-relaxed mt-8">India &amp; Asia Operations<br/>Sourcing Network</p>
               </div>
             </div>
           </div>
@@ -442,7 +405,7 @@ export default function Layout({ children }) {
           {/* ── Bottom bar ── */}
           <div className="border-t border-[#E5EBF2] mt-10 pt-5 flex flex-col md:flex-row justify-between items-center gap-4">
             <span className="text-xs text-[#6B7280] whitespace-nowrap">
-              © 2026 Élan Exports Consultancy Pte. Ltd. All rights reserved.
+              © 2026 Elan Exports Consultancy Pte. Ltd. All rights reserved.
             </span>
             <div className="flex items-center gap-2.5 flex-nowrap justify-center">
               <span className="text-xs text-[#6B7280] whitespace-nowrap">Follow Us</span>

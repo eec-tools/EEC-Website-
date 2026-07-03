@@ -30,12 +30,12 @@ const TESTIMONIALS = [
   {
     quote: "I wanted to share some exciting news about our collaboration with Elan Exports. Their supportive team has offered to connect us with big retailers in the industry, which presents a fantastic opportunity for us to expand our reach and grow our business.",
     attribution: "Apparel Manufacturer, India",
-    initials: "TS",
+    initials: "AM",
   },
   {
     quote: "Elan Exports is a fantastic company to work with. The team excels at understanding buyer requirements from day one, clearly communicating these needs to the factories at every stage. They are diligent in ensuring that both the buyer's and factory's needs are met with a well-thought-out plan and seamless execution. Their reliability and friendly approach make them a pleasure to collaborate with.",
     attribution: "Home Textile Supplier, India",
-    initials: "TS",
+    initials: "HT",
   },
 ];
 
@@ -139,14 +139,14 @@ export default function Home() {
               <div className="mt-8 text-base lg:text-lg text-[#3A4759] leading-relaxed max-w-xl space-y-5">
                 <p>
                   EEC is a Singapore headquartered global sourcing consultancy connecting buyers with verified manufacturing partners{" "}
-                  <span className="text-[#C9A23F] font-medium">across the world</span>.
+                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">across the world</span>.
                 </p>
                 <p>
                   While our sourcing{" "}
-                  <span className="text-[#C9A23F] font-medium">expertise is rooted in India and Asia</span>, our trusted supplier network spans{" "}
-                  <span className="text-[#C9A23F] font-medium">global markets</span>, enabling us to deliver{" "}
-                  <span className="text-[#C9A23F] font-medium">transparent commercial terms, predictable shipments,</span> and{" "}
-                  <span className="text-[#C9A23F] font-medium">reliable sourcing solutions</span>.
+                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">expertise is rooted in India and Asia</span>, our trusted supplier network spans{" "}
+                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">global markets</span>, enabling us to deliver{" "}
+                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">transparent commercial terms, predictable shipments,</span> and{" "}
+                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">reliable sourcing solutions</span>.
                 </p>
               </div>
               {/* ── Feature badges ── */}
@@ -248,11 +248,13 @@ export default function Home() {
                   alt="Shipping containers representing the EEC India and Asia sourcing network"
                   className="w-full h-[420px] lg:h-[540px] object-cover grayscale-[10%]"
                   src={HERO_IMG}
+                  width="1400"
+                  height="1600"
                   decoding="async"
                   fetchPriority="high"
                 />
                 <div className="absolute bottom-6 left-6 right-6 bg-[#FFFFFF]/95 backdrop-blur-md p-5 border-l-2 border-[#C9A23F]">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[#A6831F]">A buyer-first sourcing desk</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">A buyer-first sourcing desk</p>
                   <p className="mt-2 font-display text-xl text-[#012D76] leading-tight">
                     Vetted suppliers. Open-book cost. Supply chains you can plan around.
                   </p>
@@ -314,14 +316,14 @@ export default function Home() {
             </span>
             <h2 className="sr-only">How the EEC Sourcing Process Works</h2>
             <p className="font-display text-4xl lg:text-5xl mt-5 tracking-tight" aria-hidden="true">
-              A clear, <em className="italic font-normal text-[#DBB85A]">four-step</em> engagement.
+              A clear, <em className="italic font-normal text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">four-step</em> engagement.
             </p>
           </div>
           <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10">
             {PROCESS_STEPS.map((s) => (
               <div key={s.n} className="bg-[#012D76] p-8 lg:p-10" data-testid={`process-step-${s.n}`}>
                 <div className="flex items-center justify-between">
-                  <span className="font-display text-3xl text-[#C9A23F] italic">{s.n}</span>
+                  <span className="font-display text-3xl text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] italic">{s.n}</span>
                   <span className="text-[10px] uppercase tracking-[0.22em] text-white/50">Step</span>
                 </div>
                 <h3 className="font-display text-2xl mt-8">{s.title}</h3>
@@ -353,7 +355,7 @@ export default function Home() {
       {/* PRICING TEASER */}
       <section className="py-10 border-t hairline">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
-          <p className="text-[#3A4759] mb-2">EEC offers three engagement models — Scout, Engage, and Embed — each scoped and priced at the discovery call.</p>
+          <p className="text-[#3A4759] mb-2">EEC offers three engagement models: Scout, Engage, and Embed, each scoped and priced at the discovery call.</p>
           <Link to="/services" className="text-[#012D76] hover:underline font-medium">See all engagement models →</Link>
         </div>
       </section>
@@ -368,7 +370,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           {isAuthed ? (
             <div className="border hairline bg-[#FFFFFF] p-10 lg:p-14 text-center" data-testid="closing-cta-authed">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#A6831F]">Welcome back, {user.name?.split(" ")[0]}</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">Welcome back, {user.name?.split(" ")[0]}</p>
               <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight max-w-2xl mx-auto">Pick up where you left off.</h3>
               <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-xl mx-auto">Track your active briefs, supplier applications, documents and shipment milestones.</p>
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
@@ -380,13 +382,13 @@ export default function Home() {
           ) : (
             <div className="grid md:grid-cols-2 gap-px bg-[#E5EBF2]">
               <Link to="/buyer/intake" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-buyer">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#A6831F]">For Buyers</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">For Buyers</p>
                 <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Book a free 20-minute sourcing call.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">No commitment required. EEC maps your category, target landed cost, compliance requirements and a realistic 90-day sourcing plan.</p>
                 <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Book now <ArrowUpRight size={14} /></span>
               </Link>
               <Link to="/supplier/apply" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-supplier">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#A6831F]">For Suppliers</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">For Suppliers</p>
                 <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Apply to the EEC Supplier Network.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">Structured sourcing briefs, defined payment schedules and recurring export programmes. Not one-off spot RFQs.</p>
                 <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Apply now <ArrowUpRight size={14} /></span>
@@ -427,13 +429,13 @@ export default function Home() {
 function TestimonialWallCard({ t }) {
   return (
     <div className="shrink-0 w-[360px] sm:w-[400px] bg-[#F6F6FA] rounded-2xl p-5 lg:p-6 flex flex-col gap-3">
-      <Quote size={32} className="text-[#C9A23F]" aria-hidden="true" />
+      <Quote size={32} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" aria-hidden="true" />
       <p className="text-sm text-[#3A4759] leading-relaxed flex-1">
         {t.quote}
       </p>
       <div className="flex items-center gap-3 pt-1">
         <div className="w-9 h-9 rounded-full bg-[#012D76] flex items-center justify-center shrink-0">
-          <span className="text-[#C9A23F] font-display text-xs font-semibold">{t.initials}</span>
+          <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-display text-xs font-semibold">{t.initials}</span>
         </div>
         <p className="text-sm font-semibold text-[#012D76]">{t.attribution}</p>
       </div>
@@ -455,11 +457,11 @@ function TestimonialsBlock() {
         <div className="bg-white rounded-[2rem] lg:rounded-[2.5rem] px-5 lg:px-8 py-8 lg:py-10 shadow-[0_32px_80px_-20px_rgba(1,45,118,0.2)]">
           <div className="text-center mb-6 lg:mb-8">
             <span className="inline-flex items-center gap-2 bg-[#012D76] rounded-full px-4 py-2 mb-6">
-              <Star size={13} className="text-[#C9A23F]" fill="currentColor" aria-hidden="true" />
+              <Star size={13} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" fill="currentColor" aria-hidden="true" />
               <span className="text-white text-xs font-medium tracking-wide">Trusted by suppliers and buyers worldwide</span>
             </span>
             <h2 className="font-display text-3xl lg:text-4xl text-[#012D76] tracking-tight">
-              Words of praise from our <em className="italic font-normal text-[#A6831F]">global network.</em>
+              Words of praise from our <em className="italic font-normal text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">global network.</em>
             </h2>
           </div>
           <div className="eec-tmarquee-row overflow-hidden" style={edgeMask}>

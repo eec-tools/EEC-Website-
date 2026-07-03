@@ -53,7 +53,7 @@ const FAQ = [
   ["Does joining the EEC Supplier Network guarantee orders?", "No. Joining the EEC Supplier Network does not guarantee purchase orders or contracts. Qualified suppliers may be considered for relevant sourcing opportunities when their products, capabilities and commercial offering align with buyer requirements."],
   ["Which countries and industries does EEC serve?", "EEC active sourcing categories are: Food Commodities, Processed and Packaged Foods, Fresh and Agricultural Products, Healthcare and Hospital Textile Supplies, Home Textile, Apparel and Hospitality Products, and Eco-Friendly, Sustainable and Organic Products. Buyers span procurement teams across the EU, US, Canada, Middle East and Asia-Pacific."],
   ["Does EEC work only with suppliers from India and Asia?", "The EEC primary supplier network is across India, with select verified manufacturers in Vietnam, Bangladesh, Indonesia and Thailand. Suppliers from other markets may be considered for specific buyer requirements on a case-by-case basis."],
-  ["What makes EEC different from a B2B marketplace?", "EEC is a sourcing consultancy, not a marketplace. Buyer-fee model, open-book costs, no supplier listing fees. We work closely with buyers and suppliers throughout the sourcing process. Learn more", "/about"],
+  ["What makes EEC different from a B2B marketplace?", "EEC is a sourcing consultancy, not a marketplace. Buyer-fee model, open-book costs, no supplier listing fees. We work closely with buyers and suppliers throughout the sourcing process.", "/about"],
 ];
 
 export default function ForSuppliers() {
@@ -67,7 +67,6 @@ export default function ForSuppliers() {
         title="Join EEC Supplier Network | Export to Global Buyers | EEC"
         description="Apply to join the EEC verified supplier network. Connect with procurement teams across Europe, the US and the Middle East. IEC and GST registration required. No listing fees."
         canonical="https://eectrade.com/for-suppliers"
-        robots="noindex"
         ogTitle="Join EEC Supplier Network | Export to Global Buyers | EEC"
         ogDescription="Apply to join the EEC verified supplier network. Connect with procurement teams across Europe, the US and the Middle East. IEC and GST registration required. No listing fees."
         jsonLd={[
@@ -102,7 +101,7 @@ export default function ForSuppliers() {
             Build a recurring export book with <span className="gold-text font-medium">verified global buyers.</span>
           </p>
           <p className="mt-6 text-[#3A4759] max-w-2xl text-lg">
-            Join the EEC <span className="text-[#C9A23F] font-semibold">qualified supplier network</span> and connect with <span className="text-[#C9A23F] font-semibold">international procurement programmes</span> across food commodities, fresh and agricultural products, processed and packaged foods, healthcare and hospital textile supplies, home textiles, apparel and hospitality products, and eco-friendly, sustainable and organic products.
+            Join the EEC <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">qualified supplier network</span> and connect with <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">international procurement programmes</span> across food commodities, fresh and agricultural products, processed and packaged foods, healthcare and hospital textile supplies, home textiles, apparel and hospitality products, and eco-friendly, sustainable and organic products.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             {isAuthed ? (
@@ -124,7 +123,7 @@ export default function ForSuppliers() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-2xl space-y-8">
             <p className="text-base lg:text-lg leading-relaxed text-white/80">
-              We maintain <span className="text-[#C9A23F] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
+              We maintain <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
             </p>
           </div>
         </div>
@@ -140,7 +139,7 @@ export default function ForSuppliers() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             {BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="border hairline p-8 bg-surface">
-                <Icon size={22} className="text-[#A6831F]" />
+                <Icon size={22} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" />
                 <div className="font-display text-xl text-[#012D76] mt-6 mb-2">{title}</div>
                 <p className="text-sm text-[#3A4759] leading-relaxed">{desc}</p>
               </div>
@@ -180,7 +179,7 @@ export default function ForSuppliers() {
             <div className="border hairline">
               {REQS.map((r, i) => (
                 <div key={r} className={`p-6 flex items-start gap-4 ${i !== 0 ? "border-t hairline" : ""}`}>
-                  <span className="font-display text-[#A6831F] text-sm">0{i + 1}</span>
+                  <span className="font-display text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] text-sm">0{i + 1}</span>
                   <span className="text-[#012D76]/90">{r}</span>
                 </div>
               ))}
@@ -217,7 +216,7 @@ export default function ForSuppliers() {
                 "Network activation: your factory profile and EEC audit report are made available to relevant buyer procurement teams. You are notified when your profile is matched to an active sourcing brief.",
               ].map((s, i) => (
                 <li key={i} className="flex gap-4 items-start">
-                  <span className="font-display text-3xl text-[#A6831F]">{(i + 1).toString().padStart(2, "0")}</span>
+                  <span className="font-display text-3xl text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">{(i + 1).toString().padStart(2, "0")}</span>
                   <div className="pt-2">
                     <div className="text-[#012D76] text-sm leading-relaxed">{s}</div>
                   </div>
@@ -241,7 +240,7 @@ export default function ForSuppliers() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {CERT_CARDS.map(({ cat, certs, note }) => (
               <div key={cat} className="border hairline bg-elevated p-5">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-3">{cat}</div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold mb-3">{cat}</div>
                 <CertMarquee names={certs} />
                 {note && <p className="mt-3 text-xs text-[#6B7280] leading-relaxed">{note}</p>}
               </div>
@@ -257,7 +256,7 @@ export default function ForSuppliers() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(CERT_WALL).map(([group, certs]) => (
                 <div key={group} className="border hairline bg-elevated p-6">
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-4">{group}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold mb-4">{group}</div>
                   <div className="flex flex-wrap items-center gap-3">
                     {certs.map((c) => (
                       <div key={c} className="flex items-center justify-center px-3 py-2 border hairline bg-[#F5F9FC]">

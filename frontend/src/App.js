@@ -1,5 +1,5 @@
 import "@/App.css";
-import { Suspense, useEffect, useLayoutEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -8,21 +8,21 @@ import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthCallback from "@/components/AuthCallback";
 
-import Home from "@/pages/Home";
-import ForBuyers from "@/pages/ForBuyers";
-import ForSuppliers from "@/pages/ForSuppliers";
-import About from "@/pages/About";
-import Services from "@/pages/Services";
-import Categories from "@/pages/Categories";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import BuyerPortal from "@/pages/BuyerPortal";
-import BuyerIntake from "@/pages/BuyerIntake";
-import SupplierPortal from "@/pages/SupplierPortal";
-import SupplierApply from "@/pages/SupplierApply";
-import AdminDashboard from "@/pages/AdminDashboard";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
+const Home = lazy(() => import("@/pages/Home"));
+const ForBuyers = lazy(() => import("@/pages/ForBuyers"));
+const ForSuppliers = lazy(() => import("@/pages/ForSuppliers"));
+const About = lazy(() => import("@/pages/About"));
+const Services = lazy(() => import("@/pages/Services"));
+const Categories = lazy(() => import("@/pages/Categories"));
+const Login = lazy(() => import("@/pages/Login"));
+const Register = lazy(() => import("@/pages/Register"));
+const BuyerPortal = lazy(() => import("@/pages/BuyerPortal"));
+const BuyerIntake = lazy(() => import("@/pages/BuyerIntake"));
+const SupplierPortal = lazy(() => import("@/pages/SupplierPortal"));
+const SupplierApply = lazy(() => import("@/pages/SupplierApply"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
 
 function ScrollToTop() {
   const { pathname, search } = useLocation();

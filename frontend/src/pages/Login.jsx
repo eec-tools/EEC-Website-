@@ -88,7 +88,7 @@ export default function Login() {
           Continue with Google
         </button>
         <div className="mt-6 text-sm text-[#3A4759] text-center">
-          New to EEC? <Link to="/register" className="text-[#8F7228] hover:text-[#DBB85A]" data-testid="login-to-register">Create an account</Link>
+          New to EEC? <Link to="/register" className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] hover:text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" data-testid="login-to-register">Create an account</Link>
         </div>
       </div>
     </div>

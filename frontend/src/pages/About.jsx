@@ -141,13 +141,13 @@ export default function About() {
       <section className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border hairline p-8 bg-surface">
-            <div className="text-xs text-[#8F7228] tracking-[0.22em] uppercase mb-4">OUR MISSION</div>
+            <div className="text-xs text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] tracking-[0.22em] uppercase mb-4">OUR MISSION</div>
             <p className="text-[#3A4759] leading-relaxed">
               To simplify global sourcing by connecting businesses with qualified manufacturing partners, delivering transparent procurement solutions and building long-term relationships that create value for buyers and suppliers alike.
             </p>
           </div>
           <div className="border hairline p-8 bg-surface">
-            <div className="text-xs text-[#8F7228] tracking-[0.22em] uppercase mb-4">OUR VISION</div>
+            <div className="text-xs text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] tracking-[0.22em] uppercase mb-4">OUR VISION</div>
             <p className="text-[#3A4759] leading-relaxed">
               To be the trusted global sourcing partner for businesses seeking reliable manufacturers, resilient supply chains and sustainable international growth.
             </p>
@@ -160,9 +160,9 @@ export default function About() {
         eyebrowText="The Founder Behind Elan Exports"
         headline="About Me"
         paragraphs={[
-          "Hi, I'm Shirali Shetty. I founded Elan Exports Consultancy to solve a problem I saw first-hand: global buyers were spending years building the trusted supplier relationships that large enterprises take for granted from day one.",
-          "With over 20 years of experience in global sourcing, procurement and international trade across India and Asia, I've built EEC around transparent, open-book commercials, factory-audited suppliers and sourcing plans that hold up under real order volumes.",
-          "Whether it's a first sourcing brief or a multi-year supply chain, my goal is the same — give buyers the same access, visibility and reliability that was previously available only to the biggest players in the room.",
+          "Hi, I am Shirali Shetty. I founded Elan Exports Consultancy to solve a problem I saw first-hand: global buyers were spending years building the trusted supplier relationships that large enterprises take for granted from day one.",
+          "In my 20 years working in global sourcing, procurement and international trade across India and Asia, I have built EEC around transparent, open-book commercials, factory-audited suppliers and sourcing plans that hold up under real order volumes.",
+          "Whether it is a first sourcing brief or a multi-year supply chain, my goal is the same: give buyers the same access, visibility and reliability that was previously available only to the biggest players in the room.",
         ]}
         photoSrc="/images/team/image.webp"
         photoAlt="Shirali Shetty, Founder and CEO of Elan Exports Consultancy"

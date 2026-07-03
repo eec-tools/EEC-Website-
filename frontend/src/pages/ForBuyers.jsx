@@ -80,7 +80,7 @@ export default function ForBuyers() {
             Outsource sourcing. <span className="gold-text font-medium italic">Not accountability.</span>
           </p>
           <p className="mt-6 text-[#3A4759] max-w-2xl text-lg">
-            For procurement teams managing multi-category sourcing across India and Asia who need <span className="text-[#8F7228] font-semibold">audited supply</span>, <span className="text-[#8F7228] font-semibold">strategic sourcing</span> and <span className="text-[#8F7228] font-semibold">supply chain visibility</span>.
+            For procurement teams managing multi-category sourcing across India and Asia who need <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">audited supply</span>, <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">strategic sourcing</span> and <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">supply chain visibility</span>.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             {isAuthed ? (
@@ -101,7 +101,7 @@ export default function ForBuyers() {
       <section className="py-16 border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="text-[#3A4759] text-lg leading-relaxed max-w-4xl">
-            EEC is a <span className="text-[#8F7228] font-semibold">Singapore Headquartered</span> global sourcing consultancy connecting procurement teams with <span className="text-[#8F7228] font-semibold">verified manufacturers worldwide</span>. Our expertise in supplier qualification, strategic sourcing and procurement, with specialised focus across India and Asia, helps businesses build transparent, <span className="text-[#8F7228] font-semibold">long-term supply chain partnerships</span>.
+            EEC is a <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">Singapore Headquartered</span> global sourcing consultancy connecting procurement teams with <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">verified manufacturers worldwide</span>. Our expertise in supplier qualification, strategic sourcing and procurement, with specialised focus across India and Asia, helps businesses build transparent, <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">long-term supply chain partnerships</span>.
           </p>
         </div>
       </section>
@@ -117,7 +117,7 @@ export default function ForBuyers() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             {BENEFITS.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="border hairline p-8 bg-surface">
-                <Icon size={22} className="text-[#A6831F]" />
+                <Icon size={22} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" />
                 <div className="font-display text-xl text-[#012D76] mt-6 mb-2">{title}</div>
                 <p className="text-sm text-[#3A4759] leading-relaxed">{desc}</p>
               </div>
@@ -140,7 +140,7 @@ export default function ForBuyers() {
                 <tr className="bg-[#012D76] text-white">
                   <th className="text-left px-6 py-4 font-medium text-xs tracking-wider uppercase">Dimension</th>
                   <th className="text-left px-6 py-4 font-medium text-xs tracking-wider uppercase">Direct Sourcing</th>
-                  <th className="text-left px-6 py-4 font-medium text-xs tracking-wider uppercase text-[#C9A23F]">With EEC</th>
+                  <th className="text-left px-6 py-4 font-medium text-xs tracking-wider uppercase text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">With EEC</th>
                 </tr>
               </thead>
               <tbody>
@@ -148,7 +148,7 @@ export default function ForBuyers() {
                   <tr key={dim} className={i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}>
                     <td className="px-6 py-4 font-medium text-[#012D76] border-t hairline">{dim}</td>
                     <td className="px-6 py-4 text-[#3A4759] border-t hairline">{direct}</td>
-                    <td className="px-6 py-4 text-[#8F7228] font-medium border-t hairline">{eec}</td>
+                    <td className="px-6 py-4 text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium border-t hairline">{eec}</td>
                   </tr>
                 ))}
               </tbody>
@@ -193,7 +193,7 @@ export default function ForBuyers() {
           </div>
           <div className="lg:col-span-6">
             <div className="border hairline bg-surface p-8">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-[#8F7228] font-semibold mb-6">SAMPLE BRIEF. ILLUSTRATIVE DATA ONLY.</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold mb-6">SAMPLE BRIEF. ILLUSTRATIVE DATA ONLY.</div>
               <div className="space-y-4">
                 {[
                   ["Category", "Home textiles"],

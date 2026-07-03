@@ -175,7 +175,7 @@ export default function Categories() {
             Active sourcing desks across <span className="gold-text">six categories.</span>
           </p>
           <p className="mt-6 text-[#3A4759] max-w-2xl">
-            We maintain <span className="text-[#8F7228] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
+            We maintain <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
           </p>
         </div>
       </section>
@@ -202,7 +202,7 @@ export default function Categories() {
                     <p className="text-[#3A4759] text-sm leading-relaxed">{c.tagline}</p>
                     <p className="text-[#3A4759] text-sm leading-relaxed mt-4">{c.body}</p>
                   </div>
-                  <Link to="/buyer/intake" className="inline-flex items-center gap-2 text-[#8F7228] hover:text-[#DBB85A] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
+                  <Link to="/buyer/intake" className="inline-flex items-center gap-2 text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] hover:text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
                     {c.cta || `Source ${c.name.toLowerCase()}`} →
                   </Link>
                 </div>

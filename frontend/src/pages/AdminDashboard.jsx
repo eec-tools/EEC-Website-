@@ -46,7 +46,7 @@ function DeleteUserButton({ userId, label, onDeleted }) {
 
 const STATUS_COLORS = {
   new: "text-[#0096D6]",
-  pending_review: "text-[#8F7228]",
+  pending_review: "text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]",
   approved: "text-[#0F8B5C]",
   rejected: "text-[#B23B3B]",
 };
@@ -54,7 +54,7 @@ const STATUS_COLORS = {
 function StatCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="border hairline bg-surface p-6" data-testid={`admin-stat-${label.toLowerCase()}`}>
-      <Icon size={18} className="text-[#A6831F]" />
+      <Icon size={18} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" />
       <div className="font-display text-3xl text-[#012D76] mt-4">{value}</div>
       <div className="text-xs text-[#6B7280] mt-2 tracking-widest uppercase">{label}</div>
       {sub && <div className="text-xs text-[#6B7280] mt-1">{sub}</div>}

@@ -42,7 +42,7 @@ export default function SupplierPortal() {
           { icon: ShieldCheck, label: "Status", value: apps[0]?.status || "Not started" },
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="border hairline bg-surface p-6">
-            <Icon size={18} className="text-[#A6831F]" />
+            <Icon size={18} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" />
             <div className="font-display text-2xl text-[#012D76] mt-4">{value}</div>
             <div className="text-xs text-[#6B7280] mt-2 tracking-widest uppercase">{label}</div>
           </div>
@@ -77,7 +77,7 @@ export default function SupplierPortal() {
                     <div className="md:col-span-2 text-sm text-[#3A4759]">{a.annual_capacity}</div>
                     <div className="md:col-span-2 text-sm text-[#3A4759]">{docs.length} docs</div>
                     <div className="md:col-span-1 text-right">
-                      <span className="text-[#8F7228] text-xs uppercase tracking-widest">{a.status}</span>
+                      <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] text-xs uppercase tracking-widest">{a.status}</span>
                     </div>
                   </div>
 

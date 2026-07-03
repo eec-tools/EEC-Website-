@@ -48,7 +48,7 @@ export default function BuyerIntake() {
     setSubmitting(true);
     try {
       await api.post("/buyer/intake", form);
-      toast.success("Brief submitted. We'll be in touch within 24 hours.");
+      toast.success("Brief submitted. We will be in touch within 24 hours.");
       if (user) navigate("/buyer", { replace: true });
       else navigate("/");
     } catch (e) {
@@ -65,14 +65,14 @@ export default function BuyerIntake() {
         Tell us about your sourcing need.
       </h1>
       <p className="text-[#3A4759] mb-10 max-w-2xl">
-        4 steps. ~3 minutes. We'll come back to you with category benchmarks and a sourcing approach
+        4 steps. ~3 minutes. We will come back to you with category benchmarks and a sourcing approach
         within 24 hours.
       </p>
 
       <div className="flex items-center gap-2 mb-12">
         {STEPS.map((s, i) => (
           <div key={s} className="flex-1 flex items-center gap-2" data-testid={`intake-step-${i}`}>
-            <div className={`h-8 w-8 flex items-center justify-center border ${i <= step ? "border-[#C9A23F] text-[#8F7228]" : "border-[#E5EBF2] text-[#6B7280]"} text-xs`}>
+            <div className={`h-8 w-8 flex items-center justify-center border ${i <= step ? "border-[#C9A23F] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" : "border-[#E5EBF2] text-[#6B7280]"} text-xs`}>
               {i < step ? <Check size={14} /> : i + 1}
             </div>
             <span className={`text-xs uppercase tracking-widest ${i <= step ? "text-[#012D76]" : "text-[#6B7280]"} hidden sm:block`}>{s}</span>

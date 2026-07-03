@@ -111,7 +111,7 @@ export default function Register() {
         </button>
 
         <div className="mt-6 text-sm text-[#3A4759] text-center">
-          Already registered? <Link to="/login" className="text-[#8F7228] hover:text-[#DBB85A]">Sign in</Link>
+          Already registered? <Link to="/login" className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] hover:text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">Sign in</Link>
         </div>
       </div>
       <style>{`.input-eec{margin-top:0.5rem;width:100%;background:#05050A;border:1px solid rgba(255,255,255,0.08);padding:0.75rem 1rem;color:#fff;outline:none;}.input-eec:focus{border-color:rgba(212,175,55,0.5);}`}</style>

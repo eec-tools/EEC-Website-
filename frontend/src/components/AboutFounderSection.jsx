@@ -81,7 +81,7 @@ export default function AboutFounderSection({
                   className="text-center text-xs uppercase tracking-[0.2em] font-medium mb-3"
                   style={{ color: "var(--eec-olive)" }}
                 >
-                  Let's Connect
+                  Connect
                 </p>
 
                 <div className="flex items-center justify-center gap-4">

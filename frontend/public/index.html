@@ -47,6 +47,10 @@
         <!-- Fonts: non-blocking load. display=swap (in the URL) prevents invisible text while loading. -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="preconnect" href="https://images.pexels.com" />
+        <!-- Homepage hero image is the LCP element; preload it here so the CRA client-side Seo/meta
+             injection (which fires after mount) doesn't leave the browser discovering it late. -->
+        <link rel="preload" as="image" href="https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;w=1400&amp;h=1600" />
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&family=Abril+Fatface&family=Mrs+Saint+Delafield&display=swap" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&family=Abril+Fatface&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
         <noscript>
@@ -181,14 +185,23 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
-                session_recording: {
-                    recordCrossOriginIframes: true,
-                    capturePerformance: false,
-                },
-            });
+            function initPostHog() {
+                posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+                    api_host: "https://us.i.posthog.com",
+                    person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
+                    session_recording: {
+                        recordCrossOriginIframes: true,
+                        capturePerformance: false,
+                    },
+                });
+            }
+            if (document.readyState === "complete") {
+                (window.requestIdleCallback || setTimeout)(initPostHog);
+            } else {
+                window.addEventListener("load", function () {
+                    (window.requestIdleCallback || setTimeout)(initPostHog);
+                });
+            }
         </script>
     </body>
 </html>

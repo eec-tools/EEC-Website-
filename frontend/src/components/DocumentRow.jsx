@@ -55,7 +55,7 @@ export default function DocumentRow({ doc, compact = false }) {
       data-testid={`doc-row-${doc.file_id || doc.path}`}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <FileText size={compact ? 14 : 16} className="text-[#C9A23F] shrink-0" />
+        <FileText size={compact ? 14 : 16} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] shrink-0" />
         <div className="min-w-0">
           <div className={`${compact ? "text-xs" : "text-sm"} text-[#012D76] truncate`}>
             {doc.original_filename || doc.path?.split("/").pop()}
