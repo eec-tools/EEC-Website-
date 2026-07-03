@@ -29,7 +29,6 @@ MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
-EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
 APP_NAME = os.environ.get("APP_NAME", "elan-exports-v2")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@eectrade.com")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
