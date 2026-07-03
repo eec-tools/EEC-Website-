@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import AuthCallback from "@/components/AuthCallback";
 
 const Home = lazy(() => import("@/pages/Home"));
 const ForBuyers = lazy(() => import("@/pages/ForBuyers"));
@@ -41,9 +40,6 @@ function AppRouter() {
     hasRenderedOnce.current = true;
   }, []);
 
-  if (location.hash?.includes("session_id=")) {
-    return <AuthCallback />;
-  }
   const pageMotion = shouldReduceMotion || isInitialRender
     ? {
         initial: false,

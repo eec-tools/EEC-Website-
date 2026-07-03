@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
-import { api, formatApiErrorDetail } from "@/lib/api";
+import { API, api, formatApiErrorDetail } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 
@@ -35,10 +35,7 @@ export default function Register() {
   };
 
   const googleSignup = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    sessionStorage.setItem("eec_oauth_role", form.role);
-    const redirectUrl = window.location.origin + (form.role === "supplier" ? "/supplier" : "/buyer");
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    window.location.href = `${API}/auth/google/login?role=${form.role}`;
   };
 
   return (

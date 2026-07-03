@@ -19,11 +19,6 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    // If returning from OAuth callback, skip the /me check.
-    if (typeof window !== "undefined" && window.location.hash?.includes("session_id=")) {
-      setLoading(false);
-      return;
-    }
     refresh();
   }, [refresh]);
 

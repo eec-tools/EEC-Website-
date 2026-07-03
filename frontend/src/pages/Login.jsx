@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowUpRight, Eye, EyeOff } from "lucide-react";
-import { api, formatApiErrorDetail } from "@/lib/api";
+import { API, api, formatApiErrorDetail } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 
@@ -33,10 +33,7 @@ export default function Login() {
   };
 
   const googleLogin = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + "/buyer";
-    sessionStorage.setItem("eec_oauth_role", "buyer");
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    window.location.href = `${API}/auth/google/login?role=buyer`;
   };
 
   return (
