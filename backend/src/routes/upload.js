@@ -7,11 +7,11 @@ const { requireAuth } = require("../middleware/requireAuth");
 const HttpError = require("../utils/httpError");
 const config = require("../config/env");
 const ids = require("../utils/ids");
+const { MAX_UPLOAD_BYTES } = require("../config/uploadLimits");
 
 const ALLOWED_EXTENSIONS = new Set(["pdf", "png", "jpg", "jpeg", "webp", "doc", "docx"]);
-const MAX_SIZE = 10 * 1024 * 1024;
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_SIZE } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_UPLOAD_BYTES } });
 
 const router = express.Router();
 

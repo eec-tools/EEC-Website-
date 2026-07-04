@@ -2,6 +2,7 @@ const multer = require("multer");
 const { ZodError } = require("zod");
 const HttpError = require("../utils/httpError");
 const logger = require("../utils/logger");
+const { MAX_UPLOAD_MB } = require("../config/uploadLimits");
 
 function notFoundHandler(req, res) {
   res.status(404).json({ detail: "Not Found" });
@@ -14,7 +15,7 @@ function errorHandler(err, req, res, next) {
   }
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ detail: "File too large (max 10MB)" });
+      return res.status(400).json({ detail: `File too large (max ${MAX_UPLOAD_MB}MB)` });
     }
     return res.status(400).json({ detail: err.message });
   }
