@@ -330,7 +330,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── SUPPLIERS ── */}
-            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
+            <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="SUPPLIERS" />
               <ul className="space-y-3">
                 <FooterLink to="/for-suppliers">For Suppliers</FooterLink>
@@ -340,7 +340,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── COMPANY ── */}
-            <div className="lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
+            <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="COMPANY" />
               <ul className="space-y-3">
                 <FooterLink to="/login">Sign In</FooterLink>
@@ -356,7 +356,7 @@ export default function Layout({ children }) {
             </div>
 
             {/* ── STAY UPDATED ── */}
-            <div className="sm:col-span-2 lg:col-span-1 lg:border-l lg:border-[#E5EBF2] lg:pl-6 min-w-0">
+            <div className="sm:col-span-2 lg:col-span-1 lg:pl-6 min-w-0">
               <FooterColHeader title="STAY UPDATED" />
               <p className="text-sm text-[#6B7280] leading-relaxed mb-4">
                 Receive product updates, news, exclusive discounts and early access.

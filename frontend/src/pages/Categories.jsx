@@ -8,7 +8,7 @@ const fallbackCategories = [
     id: "food",
     anchor: "food-commodities",
     name: "Food Commodities",
-    tagline: "Rice, sugar, pulses, edible oils, spices.",
+    tagline: "Rice, Sugar, Pulses, Lentils, Beans, Seeds, Salt, Edible Oils, Spices",
     image: "/images/categories/food-commodities.jpg",
     alt: "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing",
     cta: "Source food commodities",
@@ -21,7 +21,7 @@ const fallbackCategories = [
     id: "processed",
     anchor: "processed-packaged-foods",
     name: "Processed and Packaged Foods",
-    tagline: "Snacks, beverages, frozen foods, ready meals.",
+    tagline: "Instant Noodles, Biscuits, Snacks, Peanut Butter, Sauces, Beverages, Frozen Foods, Ready Meals, Private Label Foods",
     image: "/images/categories/processed-packaged-foods.jpg",
     alt: "Assorted packaged snacks and confectionery bars for processed and packaged food sourcing",
     cta: "Source processed foods",
@@ -31,7 +31,7 @@ const fallbackCategories = [
     id: "fresh",
     anchor: "fresh-agricultural",
     name: "Fresh and Agricultural Products",
-    tagline: "Fruits, vegetables, organic produce.",
+    tagline: "Fruits, Vegetables, Frozen Fruits, Frozen Vegetables, Herbs, Agricultural Produce, Organic Produce",
     image: "/images/categories/fresh-agricultural-products.jpg",
     alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens",
     cta: "Source fresh produce",
@@ -41,7 +41,7 @@ const fallbackCategories = [
     id: "healthcare",
     anchor: "healthcare-hospital",
     name: "Healthcare and Hospital Textile Supplies",
-    tagline: "Patient gowns, scrubs, surgical drapes, hospital bed linen, institutional uniforms.",
+    tagline: "Hospital Textiles, Patient Gowns, Scrubs, Surgical Drapes, Hospital Bed Linen, Institutional Uniforms, Curtains, Healthcare Procurement Products",
     image: "/images/categories/healthcare-hospital-textiles.jpg",
     alt: "Hospital gowns, scrubs, PPE, bed linen, towels and institutional uniforms in blue and teal",
     cta: "Source healthcare textiles",
@@ -51,7 +51,7 @@ const fallbackCategories = [
     id: "home-textile",
     anchor: "home-textile-hospitality",
     name: "Home Textile, Apparel and Hospitality Products",
-    tagline: "Bed linen, towels, uniforms, hotel textiles.",
+    tagline: "Bed Linen, Hotel Linen, Towels, Bathrobes, Curtains, Uniforms, Home Textiles, Home Furnishings, Hotel Textiles, Hospitality Products",
     image: "/images/categories/home-textile-apparel-hospitality.jpg",
     alt: "Bed linen, towels, uniforms and hotel textiles for home textile and hospitality sourcing",
     cta: "Source home textiles",
@@ -61,7 +61,7 @@ const fallbackCategories = [
     id: "eco",
     anchor: "eco-friendly-sustainable",
     name: "Eco-Friendly, Sustainable and Organic Products",
-    tagline: "Biodegradable packaging, organic textiles, green alternatives.",
+    tagline: "Organic Foods, Organic Textiles, Sustainable Textiles, Bamboo Products, Coconut-based Products, Areca Leaf Products, Compostable Products, Sustainable Packaging Solutions, Fair Trade Products, Green Alternatives",
     image: "/images/categories/eco-friendly-sustainable-organic.jpg",
     alt: "Biodegradable packaging, organic textiles and green alternative products",
     cta: "Source eco-friendly products",
@@ -184,7 +184,7 @@ export default function Categories() {
           {categories.map((c, i) => (
             <div id={c.anchor || c.id} key={c.id} className="relative overflow-hidden border hairline bg-surface group" data-testid={`category-item-${c.id}`}>
               <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="aspect-[4/3] md:aspect-auto overflow-hidden">
+                <div className="aspect-[4/5] md:aspect-auto md:self-stretch overflow-hidden">
                   <img
                     src={c.image}
                     alt={c.alt || c.name}
