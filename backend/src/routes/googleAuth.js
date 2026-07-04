@@ -49,19 +49,27 @@ router.get(
 router.get(
   "/auth/google/callback",
   asyncHandler(async (req, res) => {
-    const failRedirect = () => res.redirect(`${config.frontendUrl}/login?error=oauth`);
+    const failRedirect = (reason) => {
+      logger.error(`Google OAuth callback aborted: ${reason}`);
+      return res.redirect(`${config.frontendUrl}/login?error=oauth`);
+    };
 
     const { code, state, error } = req.query;
-    if (error || !code || !state) return failRedirect();
+    if (error) return failRedirect(`Google returned error=${error}`);
+    if (!code || !state) return failRedirect(`missing code/state (code=${!!code}, state=${!!state})`);
 
     let statePayload;
     try {
       statePayload = oauthService.verifyState(state);
-    } catch {
-      return failRedirect();
+    } catch (e) {
+      return failRedirect(`state JWT invalid: ${e.message}`);
     }
 
-    if (statePayload.nonce !== req.cookies.oauth_nonce) return failRedirect();
+    if (statePayload.nonce !== req.cookies.oauth_nonce) {
+      return failRedirect(
+        `nonce mismatch (state.nonce=${statePayload.nonce}, cookie.oauth_nonce=${req.cookies.oauth_nonce}, all cookies=${JSON.stringify(req.cookies)})`
+      );
+    }
     const role = normalizeRole(statePayload.role);
 
     let info;
@@ -70,12 +78,11 @@ router.get(
       info = await oauthService.fetchUserinfo(tokens.access_token);
     } catch (e) {
       const details = e.response?.data ? JSON.stringify(e.response.data) : e.message;
-      logger.error(`Google OAuth token/userinfo error: ${details}`);
-      return failRedirect();
+      return failRedirect(`token/userinfo exchange failed: ${details}`);
     }
 
     const email = (info.email || "").toLowerCase();
-    if (!email) return failRedirect();
+    if (!email) return failRedirect(`no email in userinfo response: ${JSON.stringify(info)}`);
     const name = info.name || email;
     const picture = info.picture;
 
