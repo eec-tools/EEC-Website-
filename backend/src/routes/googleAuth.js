@@ -69,7 +69,8 @@ router.get(
       const tokens = await oauthService.exchangeCodeForToken(code);
       info = await oauthService.fetchUserinfo(tokens.access_token);
     } catch (e) {
-      logger.error(`Google OAuth token/userinfo error: ${e.message}`);
+      const details = e.response?.data ? JSON.stringify(e.response.data) : e.message;
+      logger.error(`Google OAuth token/userinfo error: ${details}`);
       return failRedirect();
     }
 
