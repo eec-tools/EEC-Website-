@@ -14,8 +14,10 @@ async function sendPasswordResetEmail(email, token) {
     const transporter = nodemailer.createTransport({
       host: config.smtpHost,
       port: config.smtpPort,
-      secure: false,
-      requireTLS: true,
+      // Port 465 is implicit TLS (secure:true from the start); port 587 (and others)
+      // use STARTTLS — negotiated after connecting in plaintext, hence secure:false.
+      secure: config.smtpPort === 465,
+      requireTLS: config.smtpPort !== 465,
       auth:
         config.smtpUsername && config.smtpPassword
           ? { user: config.smtpUsername, pass: config.smtpPassword }
