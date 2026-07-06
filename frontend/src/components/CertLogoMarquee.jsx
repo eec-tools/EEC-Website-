@@ -5,7 +5,7 @@ import { FileCheck } from "lucide-react";
 // Names without a source file have no official standalone logo (generic report/document
 // types, not brand-holding certifying bodies) and render as a bordered icon badge instead
 // of plain text.
-export const CERT_LOGOS = {
+const CERT_LOGOS = {
   "BSCI": "/images/certifications/bsci.png",
   "amfori BSCI": "/images/certifications/amfori-bsci.png",
   "SEDEX": "/images/certifications/sedex.png",
@@ -45,13 +45,13 @@ export const CERT_LOGOS = {
 
 // Logo-on-top, label-below cert tile. Falls back to a generic document icon for
 // certification names with no official standalone logo (see the null entries above).
-export function CertLogo({ name }) {
+function CertLogo({ name }) {
   const src = CERT_LOGOS[name];
   return (
     <div className="flex flex-col items-center justify-center gap-5 text-center" title={name}>
       <div className="flex items-center justify-center h-20 w-24">
         {src ? (
-          <img src={src} alt={name} loading="lazy" className="max-h-20 max-w-24 w-auto h-auto object-contain" />
+          <img src={src} alt={name} loading="lazy" width="96" height="80" className="max-h-20 max-w-24 w-auto h-auto object-contain" />
         ) : (
           <FileCheck className="h-10 w-10 text-[#8A6F2B]" aria-hidden="true" />
         )}
@@ -101,6 +101,8 @@ export function CertLogosMarquee({ names }) {
               src={CERT_LOGOS[name]}
               alt={name}
               loading="lazy"
+              width="112"
+              height="80"
               className="object-contain w-full h-full grayscale hover:grayscale-0 opacity-75 hover:opacity-100 transition-all duration-300"
             />
           </div>

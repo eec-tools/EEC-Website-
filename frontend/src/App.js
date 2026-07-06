@@ -31,6 +31,7 @@ const SupplierApply = lazy(() => import("@/pages/SupplierApply"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function ScrollToTop() {
   const { pathname, search, hash } = useLocation();
@@ -101,6 +102,7 @@ function AppRouter() {
                 <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </m.div>
