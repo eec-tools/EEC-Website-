@@ -1,10 +1,6 @@
 import React from "react";
 import { FileCheck } from "lucide-react";
 
-// Master certification name -> logo asset map, shared by Home and For Suppliers pages.
-// Names without a source file have no official standalone logo (generic report/document
-// types, not brand-holding certifying bodies) and render as a bordered icon badge instead
-// of plain text.
 const CERT_LOGOS = {
   "BSCI": "/images/certifications/bsci.png",
   "amfori BSCI": "/images/certifications/amfori-bsci.png",
@@ -36,15 +32,12 @@ const CERT_LOGOS = {
   "Halal": "/images/certifications/halal.png",
   "ASC": "/images/certifications/asc.png",
   "MSC": "/images/certifications/msc.png",
-  // No official standalone logo — generic test report / document types.
   "MRL Testing Reports": null,
   "Phytosanitary Certificate": null,
   "Aflatoxin Testing Reports": null,
   "EU Health Certificate": null,
 };
 
-// Logo-on-top, label-below cert tile. Falls back to a generic document icon for
-// certification names with no official standalone logo (see the null entries above).
 function CertLogo({ name }) {
   const src = CERT_LOGOS[name];
   return (
@@ -61,9 +54,6 @@ function CertLogo({ name }) {
   );
 }
 
-// Awards-style logo row: every cert in the group sits in a single row, separated by
-// thin vertical dividers, logo on top and name centered below. Scrolls horizontally
-// instead of wrapping so the "one row per category" layout holds on narrow screens.
 export function CertGrid({ names }) {
   return (
     <div className="overflow-x-auto">
@@ -84,9 +74,6 @@ export function CertGrid({ names }) {
   );
 }
 
-// Infinite-scrolling logo strip: dedupes the given names, drops any with no official
-// logo (generic report/document types), triples the list for a seamless loop, and
-// fades the strip out at both edges. Pauses on hover.
 export function CertLogosMarquee({ names }) {
   const logos = [...new Set(names)].filter((name) => CERT_LOGOS[name]);
   const tripled = [...logos, ...logos, ...logos];

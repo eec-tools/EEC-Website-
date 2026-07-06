@@ -20,10 +20,6 @@ const googleAuthRouter = require("./routes/googleAuth");
 function buildApp() {
   const app = express();
 
-  // Note: the `cors` package treats a literal "*" string for methods/allowedHeaders
-  // as an actual header/method name, not a wildcard (unlike FastAPI's allow_headers=["*"]).
-  // Omitting them makes `cors` reflect back whatever the browser's preflight requested,
-  // which is the correct equivalent of "allow any".
   const corsOrigins = config.corsOrigins === "*" ? "*" : config.corsOrigins.split(",");
   app.use(
     cors({

@@ -4,8 +4,6 @@ function throwIfError(error) {
   if (error) throw error;
 }
 
-// Dedupe on the table's unique email constraint: re-subscribing just refreshes
-// source_page/submitted_at instead of creating a second row or erroring.
 async function upsertByEmail(record) {
   const { data, error } = await getSupabase()
     .from("newsletter_subscribers")

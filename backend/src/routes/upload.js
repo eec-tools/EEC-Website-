@@ -22,8 +22,6 @@ router.post(
   asyncHandler(async (req, res) => {
     if (!req.file) throw new HttpError(400, "No file provided");
 
-    // doc_type is deliberately read from the query string, not the multipart body —
-    // that's how the (unchanged) frontend sends it.
     const docType = typeof req.query.doc_type === "string" ? req.query.doc_type : "general";
 
     const originalFilename = req.file.originalname || "file";

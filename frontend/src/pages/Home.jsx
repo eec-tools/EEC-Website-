@@ -114,7 +114,6 @@ export default function Home() {
         ]}
       />
 
-      {/* HERO */}
       <section className="relative overflow-hidden grain pt-6 lg:pt-10" data-testid="hero-section">
         <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-[rgba(201,162,75,0.06)] to-transparent pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-10 pb-20 lg:pb-28 relative">
@@ -143,10 +142,8 @@ export default function Home() {
                   <span className="text-[#8A6F2B] font-medium">reliable sourcing solutions</span>.
                 </p>
               </div>
-              {/* ── Feature badges ── */}
               <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center">
 
-                {/* 1 — Transparent Commercial Terms */}
                 <div className="flex items-center gap-4 sm:pr-8">
                   <div className="relative w-[60px] h-[60px] flex-shrink-0">
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 60 60" fill="none" aria-hidden="true">
@@ -161,27 +158,18 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* divider: vertical on desktop, horizontal on mobile */}
                 <div className="hidden sm:block w-px h-14 bg-[#0D1B2A]/20 flex-shrink-0" aria-hidden="true"/>
                 <div className="sm:hidden h-px w-52 bg-[#0D1B2A]/20 my-4" aria-hidden="true"/>
 
-                {/* 2 — Predictable Shipments — custom cargo ship SVG */}
                 <div className="flex items-center gap-4 sm:px-8">
                   <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[60px] h-[60px] flex-shrink-0" aria-hidden="true">
                     <circle cx="30" cy="30" r="28.5" stroke="#0D1B2A" strokeWidth="1.6"/>
-                    {/* Hull */}
                     <path d="M11 38 L13 43 L47 43 L49 38" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    {/* Deck line */}
                     <line x1="11" y1="38" x2="49" y2="38" stroke="#0D1B2A" strokeWidth="1.4" strokeLinecap="round"/>
-                    {/* Container left */}
                     <rect x="12" y="29" width="10" height="9" rx="0.8" stroke="#0D1B2A" strokeWidth="1.4"/>
-                    {/* Container middle */}
                     <rect x="24" y="29" width="10" height="9" rx="0.8" stroke="#0D1B2A" strokeWidth="1.4"/>
-                    {/* Bridge / superstructure right */}
                     <rect x="36" y="27" width="11" height="11" rx="0.8" stroke="#0D1B2A" strokeWidth="1.4"/>
-                    {/* Smokestack */}
                     <rect x="38.5" y="22.5" width="3" height="4.5" rx="0.5" stroke="#0D1B2A" strokeWidth="1.3"/>
-                    {/* Water wave */}
                     <path d="M9 46 Q13 44.5 17 46 Q21 47.5 25 46 Q29 44.5 33 46 Q37 47.5 41 46 Q45 44.5 50 46" stroke="#0D1B2A" strokeWidth="1.3" strokeLinecap="round"/>
                   </svg>
                   <span className="text-sm font-bold text-[#0D1B2A] leading-snug">
@@ -189,11 +177,9 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* divider */}
                 <div className="hidden sm:block w-px h-14 bg-[#0D1B2A]/20 flex-shrink-0" aria-hidden="true"/>
                 <div className="sm:hidden h-px w-52 bg-[#0D1B2A]/20 my-4" aria-hidden="true"/>
 
-                {/* 3 — Reliable Sourcing Solutions */}
                 <div className="flex items-center gap-4 sm:pl-8">
                   <div className="relative w-[60px] h-[60px] flex-shrink-0">
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 60 60" fill="none" aria-hidden="true">
@@ -259,10 +245,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* STATS */}
       <StatsSection />
 
-      {/* CATEGORIES */}
       <section className="py-20 lg:py-28" data-testid="categories-section">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
@@ -305,7 +289,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PROCESS */}
       <section className="bg-[#012D76] text-[#FFFFFF] py-20 lg:py-28 grain" data-testid="process-section">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <div className="max-w-2xl">
@@ -344,14 +327,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COMPARISON TEASER */}
       <section className="py-10 border-t hairline bg-surface">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <Link to="/for-buyers" className="text-[#012D76] hover:underline font-medium">See how EEC compares to direct sourcing →</Link>
         </div>
       </section>
 
-      {/* PRICING TEASER */}
       <section className="py-10 border-t hairline">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <p className="text-[#3A4759] mb-2">EEC offers three engagement models: Scout, Engage, and Embed, each scoped and priced at the discovery call.</p>
@@ -359,12 +340,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
       <section data-testid="testimonials-section" aria-label="Supplier testimonials">
         <TestimonialsBlock />
       </section>
 
-      {/* DUAL FINAL CTA */}
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           {isAuthed ? (
@@ -397,7 +376,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-20 lg:py-28 border-t hairline bg-surface">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           <h2 className="font-display text-4xl lg:text-5xl text-[#012D76] tracking-tight mb-12">
@@ -474,13 +452,6 @@ function TestimonialsBlock() {
   );
 }
 
-// Ease-out count-up from 0 to `value`, driven by requestAnimationFrame. `start` is a
-// one-way trigger (parent flips it true once and never resets it) so the animation runs
-// exactly once per page load. Initial state is `value` itself (not 0) so the real number
-// is what's present in the markup before any effect runs — a crawler or no-JS client
-// reading the raw/prerendered HTML sees the correct figure, not a stuck "0+". The rAF tick
-// below still computes progress from 0 on trigger, so scrolling into view replays the
-// familiar count-up animation for real users.
 function StatItem({ value, suffix, label, start }) {
   const [count, setCount] = useState(value);
 

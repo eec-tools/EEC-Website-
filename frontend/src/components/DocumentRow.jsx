@@ -3,15 +3,6 @@ import { FileText, Eye, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { api, formatApiErrorDetail } from "@/lib/api";
 
-/**
- * Renders one uploaded document with a "View" button that fetches a 1-hour
- * presigned S3 URL via /api/files/{id}/download?redirect=false and opens it
- * in a new tab. Used by both the Supplier Portal and the Admin Dashboard.
- *
- * Props:
- *   - doc: { file_id, original_filename, path, doc_type }
- *   - compact: smaller variant for dense admin lists
- */
 export default function DocumentRow({ doc, compact = false }) {
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +12,6 @@ export default function DocumentRow({ doc, compact = false }) {
       return;
     }
     setLoading(true);
-    // Open the tab synchronously (in the click handler) so popup blockers allow it.
-    // Do NOT pass "noopener" — that returns null and breaks the later redirect.
     const tab = window.open("", "_blank");
     if (tab) {
       tab.document.write(

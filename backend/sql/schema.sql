@@ -1,7 +1,3 @@
--- Elan Exports Consultancy API — Supabase Postgres schema.
--- Run this once against your Supabase project (SQL editor or `supabase db execute`).
--- The app does NOT run this automatically at boot.
-
 create table if not exists users (
   user_id       text primary key,
   email         text not null unique,
@@ -121,9 +117,6 @@ create table if not exists password_reset_tokens (
 );
 create index if not exists password_reset_tokens_user_id_idx on password_reset_tokens(user_id);
 
--- Defense-in-depth: the backend always connects with the service-role key (which
--- bypasses RLS), but enabling RLS with zero policies means an accidental anon-key
--- usage fails closed instead of open.
 alter table users enable row level security;
 alter table files enable row level security;
 alter table buyer_intakes enable row level security;

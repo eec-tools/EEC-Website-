@@ -18,8 +18,6 @@ router.post(
       source_page: payload.source_page || null,
       submitted_at: new Date().toISOString(),
     };
-    // Dedupe on email happens inside the repo (upsert) — re-subscribing just refreshes
-    // source_page/submitted_at instead of erroring or creating a duplicate row.
     await repos.newsletterSubscribers.upsertByEmail(record);
     res.json({ ok: true });
   })

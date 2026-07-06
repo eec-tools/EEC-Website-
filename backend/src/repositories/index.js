@@ -18,7 +18,7 @@ const supabaseImpls = {
   passwordResetTokens: require("./supabase/passwordResetTokensRepo"),
 };
 
-let mode = null; // 'memory' | 'postgres' — set once by bootstrap() before app.listen()
+let mode = null; 
 
 function setMode(m) {
   mode = m;

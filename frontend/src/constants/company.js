@@ -1,11 +1,3 @@
-// Single source of truth for facts about Elan Exports Consultancy that are
-// restated across multiple pages (UEN, incorporation date, address, contact,
-// supplier count). Import these instead of hardcoding the value again.
-//
-// public/index.html cannot import this file (CRA serves it as static HTML,
-// outside the webpack/JS bundle), so its JSON-LD block must be kept in sync
-// with these values by hand. If you change a value here, also update
-// public/index.html.
 export const COMPANY = {
   legalName: "Elan Exports Consultancy Pte. Ltd.",
   brandName: "Elan Exports Consultancy",

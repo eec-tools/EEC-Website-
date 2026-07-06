@@ -6,7 +6,6 @@ import Seo from "@/components/Seo";
 import { COMPANY } from "@/constants/company";
 import TeamSection from "@/components/TeamSection";
 
-// TODO: Replace empty office corridor with sourcing/logistics/factory imagery for About page hero
 const BG = "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1800&q=80";
 
 const ABOUT_FAQ = [
@@ -72,7 +71,6 @@ export default function About() {
         ]}
       />
 
-      {/* Hero */}
       <section className="relative">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG})` }} aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#FFFFFF] via-[#FFFFFF]/80 to-[#FFFFFF]/20" aria-hidden="true" />
@@ -85,7 +83,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Origin */}
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5">
@@ -109,7 +106,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Mission & Vision */}
       <section className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border hairline p-8 bg-surface">
@@ -129,7 +125,6 @@ export default function About() {
 
       <TeamSection />
 
-      {/* Principles */}
       <section className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Principles</div>
@@ -178,7 +173,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>

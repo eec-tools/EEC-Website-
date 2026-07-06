@@ -15,7 +15,6 @@ const NAV = [
 ];
 
 function Logo({ size = "header" }) {
-  // Mobile-first; scales noticeably up on tablet/laptop/desktop.
   const heightClass = size === "footer"
     ? "h-20 md:h-28 lg:h-36"
     : "h-16 md:h-24 lg:h-32";
@@ -39,12 +38,9 @@ function Logo({ size = "header" }) {
 }
 
 
-/* ── Reusable CTA banner card (sits at top of footer card, above the footer grid). ──
-   Visual shell is identical on every page; content is supplied per-route via CTA_CONFIG below. */
 function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, footnote }) {
   return (
     <div className="bg-white rounded-3xl px-8 md:px-10 py-5 md:py-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
-      {/* Text side */}
       <div className="flex flex-col gap-4 max-w-md">
         <span className="text-sm text-[#6B7280] tracking-wide">{eyebrow}</span>
         <h2 className="text-[28px] md:text-[32px] font-bold text-[#012D76] leading-tight">
@@ -73,7 +69,6 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
           <p className="text-xs text-[#6B7280] tracking-wide">{footnote}</p>
         )}
       </div>
-      {/* Orbit graphic */}
       <div className="flex-shrink-0 w-52 h-52 md:w-64 md:h-64 hidden sm:block" aria-hidden="true">
         <picture>
         <source srcSet="/images/cta/cta-orbit.webp" type="image/webp" />
@@ -93,7 +88,6 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
   );
 }
 
-/* ── Per-route CTA content. Keyed by pathname; routes not listed render no CTA card (footer still shows). ── */
 const CTA_CONFIG = {
   "/for-buyers": {
     eyebrow: "Get Started",
@@ -318,13 +312,10 @@ export default function Layout({ children }) {
       <footer className="mt-20 bg-white px-6 lg:px-8 pb-10" aria-label="Site footer">
         <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-4 pb-4">
 
-          {/* ── CTA banner (page-aware; omitted on routes with no config) ── */}
           {ctaConfig && <CtaCard {...ctaConfig} />}
 
-          {/* ── Main grid ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.4fr_1.2fr_1.2fr_1.2fr_3.4fr] gap-10 lg:gap-8">
 
-            {/* ── Left: brand col ── */}
             <div className="flex flex-col gap-5 min-w-0">
               <Link to="/" aria-label="Elan Exports Consultancy home" data-testid="footer-brand-link">
                 <picture>
@@ -352,7 +343,6 @@ export default function Layout({ children }) {
               </div>
             </div>
 
-            {/* ── BUYERS ── */}
             <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="BUYERS" />
               <ul className="space-y-3">
@@ -363,7 +353,6 @@ export default function Layout({ children }) {
               </ul>
             </div>
 
-            {/* ── SUPPLIERS ── */}
             <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="SUPPLIERS" />
               <ul className="space-y-3">
@@ -373,7 +362,6 @@ export default function Layout({ children }) {
               </ul>
             </div>
 
-            {/* ── COMPANY ── */}
             <div className="lg:pl-6 min-w-0">
               <FooterColHeader title="COMPANY" />
               <ul className="space-y-3">
@@ -389,14 +377,12 @@ export default function Layout({ children }) {
               </ul>
             </div>
 
-            {/* ── STAY UPDATED ── */}
             <div className="sm:col-span-2 lg:col-span-1 lg:pl-6 min-w-0">
               <FooterColHeader title="STAY UPDATED" />
               <p className="text-sm text-[#616873] leading-relaxed mb-4">
                 Receive product updates, news, exclusive discounts and early access.
               </p>
 
-              {/* Email input */}
               <form
                 onSubmit={onNewsletterSubmit}
                 className="relative mb-4"
@@ -428,7 +414,6 @@ export default function Layout({ children }) {
                 </button>
               </form>
 
-              {/* Location card */}
               <div
                 className="rounded-2xl w-full max-w-full sm:max-w-[420px] lg:max-w-none px-6 py-3 overflow-hidden bg-cover bg-no-repeat"
                 style={{ backgroundImage: "url(/images/footer/location-card-bg.png)", backgroundPosition: "right center" }}
@@ -446,7 +431,6 @@ export default function Layout({ children }) {
             </div>
           </div>
 
-          {/* ── Bottom bar ── */}
           <div className="border-t border-[#E5EBF2] mt-10 pt-5 flex flex-col md:flex-row justify-between items-center gap-4">
             <span className="text-xs text-[#616873] whitespace-nowrap">
               © 2026 Elan Exports Consultancy Pte. Ltd. All rights reserved.

@@ -14,9 +14,6 @@ export const fallbackCategories = [
     image: "/images/categories/food-commodities.jpg",
     alt: "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing",
     cta: "Source food commodities",
-    // NOTE: EU Health Certificate and Rainforest Alliance don't map cleanly to an existing category (most
-    // relevant to frozen food / dried fruit sub-segments). Folded into Food Commodities for now — flag for
-    // manual review on whether these warrant their own category longer-term.
     body: "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification. HACCP certification is screened as a baseline requirement, with Aflatoxin testing reports, EU Health Certificates and Rainforest Alliance certification coordinated where required by the destination market.",
   },
   {
@@ -171,7 +168,6 @@ export default function Categories() {
         ]}
       />
 
-      {/* Hero */}
       <section className="border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-24">
           <div className="overline mb-4">Categories</div>
@@ -185,7 +181,6 @@ export default function Categories() {
         </div>
       </section>
 
-      {/* Category Cards */}
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           {categories.map((c, i) => (
@@ -221,7 +216,6 @@ export default function Categories() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-20 lg:py-24 border-t hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>

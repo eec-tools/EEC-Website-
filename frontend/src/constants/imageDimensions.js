@@ -1,7 +1,3 @@
-// Intrinsic pixel dimensions for locally-hosted images, keyed by their public path.
-// Used to set explicit width/height on <img> tags so the browser can reserve layout
-// space before the image loads (prevents cumulative layout shift), without hardcoding
-// dimensions into data that may be overwritten by an API response at runtime.
 export const IMAGE_DIMENSIONS = {
   "/images/categories/food-commodities.jpg": { width: 2320, height: 1383 },
   "/images/categories/processed-packaged-foods.jpg": { width: 2352, height: 1221 },

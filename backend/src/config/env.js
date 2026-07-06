@@ -45,10 +45,6 @@ const config = {
     return process.env.SMTP_FROM || this.smtpUsername || "no-reply@eectrade.com";
   },
 
-  // Every request in this app sends cookies (withCredentials), and browsers reject
-  // a wildcard Access-Control-Allow-Origin whenever credentials are included — so
-  // "*" is never actually usable here. Fall back to FRONTEND_URL instead of "*"
-  // when CORS_ORIGINS isn't explicitly set.
   get corsOrigins() {
     return process.env.CORS_ORIGINS || this.frontendUrl;
   },

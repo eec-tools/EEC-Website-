@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import "./TeamSection.css";
 import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 
-// Add members here — each card reads from this array
 const TEAM = [
   {
     id: "shirali-shetty",
@@ -62,7 +61,6 @@ export default function TeamSection() {
         backgroundPosition: "0 480px",
       }}
     >
-      {/* Background watermark — "our" small top-left, "team" larger + indented */}
       <div
         className="absolute top-0 left-0 font-display leading-[0.88] text-[#012D76] pointer-events-none select-none"
         style={{ opacity: 0.055 }}
@@ -79,7 +77,6 @@ export default function TeamSection() {
         </div>
       </div>
 
-      {/* Horizontal scroll row */}
       <div
         className="relative z-10 team-scroll"
         style={{ paddingLeft: "20px", paddingRight: "20px", paddingTop: "clamp(160px, 22vw, 280px)" }}
@@ -96,12 +93,6 @@ export default function TeamSection() {
                 className="team-card-slot"
                 style={{ marginTop: member.mt }}
               >
-                {/*
-                  Interactive card:
-                  - onMouseEnter/Leave: desktop hover
-                  - onFocus/Blur: keyboard navigation
-                  - onClick: tap-to-expand on touch devices
-                */}
                 <div
                   className={`team-card${isActive ? " team-card--active" : ""}`}
                   tabIndex={0}
@@ -120,7 +111,6 @@ export default function TeamSection() {
                     }
                   }}
                 >
-                  {/* Photo — fixed square, never distorts */}
                   <div className="team-card__photo">
                     <img
                       src={member.image}
@@ -131,7 +121,6 @@ export default function TeamSection() {
                     />
                   </div>
 
-                  {/* Dark panel — slides in below photo on hover/focus */}
                   <div className="team-panel" aria-hidden={!isActive}>
                     <div className="team-panel__inner">
                       <div className="team-panel__name font-display">

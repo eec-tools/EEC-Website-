@@ -7,13 +7,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-// These 6 routes are prerendered (react-snap) and must be present in the main bundle,
-// not React.lazy()-loaded: createRoot() discards the prerendered static HTML on mount
-// and re-renders from scratch, so if these were lazy, the Suspense fallback (null) would
-// blank the page for as long as the route's chunk takes to download+execute — on a slow
-// connection that's a multi-second gap where a real user sees nothing. Bundling them
-// eagerly means the real component tree is ready the instant React mounts, so there's
-// nothing to suspend on and no blank window. See .audit-screenshots/content-blanking-scoping-note.md.
 import Home from "@/pages/Home";
 import ForBuyers from "@/pages/ForBuyers";
 import ForSuppliers from "@/pages/ForSuppliers";

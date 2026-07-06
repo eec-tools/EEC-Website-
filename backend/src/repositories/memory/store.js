@@ -1,7 +1,3 @@
-// Minimal in-memory fallback store for local dev without a configured Supabase project.
-// Only equality/predicate-based lookups are needed — the real app never exercises
-// anything more elaborate than that against Mongo/Postgres either.
-
 const tables = {
   users: [],
   files: [],

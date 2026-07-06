@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   ELAN EXPORTS — OFFICIAL BRAND PALETTE
-   Primary: Navy #012D76 · Secondary: Sky #0096D6 · Accent: Gold #C9A23F · BG: White
-   Fonts: Playfair Display (display) + Outfit (body)
-   ============================================ */
 
 :root {
   --eec-bg: #FFFFFF;
@@ -27,14 +22,13 @@
   --eec-gold-deep: #A6831F;
   --eec-gold-text: #8F7228;
 
-  --eec-text: #012D76;          /* primary text = navy */
+  --eec-text: #012D76;
   --eec-text-soft: #3A4759;
   --eec-muted-fg: #6B7280;
 
   --eec-border: #E5EBF2;
   --eec-border-soft: #EFF4F9;
 
-  /* Warm olive/cream tones — used by the founder "About Me" spotlight section */
   --eec-olive: #8B8548;
   --eec-olive-soft: #A6A166;
   --eec-cream: #F0EDE3;
@@ -59,7 +53,6 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   font-family: 'Playfair Display', Georgia, serif;
   letter-spacing: -0.01em;
   font-weight: 500;
-  /* Color inherits from parent — explicit text-* classes win */
 }
 
 .font-display-condensed {
@@ -75,10 +68,9 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   color: var(--eec-navy);
 }
 
-/* Subtle paper grain overlay */
 .grain {
   position: relative;
-  isolation: isolate;  /* creates a new stacking context so children render above ::before without needing position overrides */
+  isolation: isolate;
 }
 .grain::before {
   content: '';
@@ -91,7 +83,6 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   z-index: -1;
 }
 
-/* ============ Utility classes ============ */
 
 .bg-eec { background: var(--eec-bg); }
 .bg-surface { background: var(--eec-bg); }
@@ -148,7 +139,6 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   z-index: -1;
 }
 
-/* Buttons */
 .eec-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -210,34 +200,32 @@ h1, h2, h3, h4, h5, h6, .font-display, .font-heading {
   box-shadow: 0 8px 24px rgba(201, 162, 63, 0.3);
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #FFFFFF; }
 ::-webkit-scrollbar-thumb { background: #CED7E1; border-radius: 6px; }
 ::-webkit-scrollbar-thumb:hover { background: #B4C0CF; }
 
-/* Tailwind tokens for shadcn — LIGHT NAVY MODE */
 @layer base {
   :root {
-    --background: 0 0% 100%;          /* #FFFFFF */
-    --foreground: 215 98% 23%;        /* navy text default */
+    --background: 0 0% 100%;
+    --foreground: 215 98% 23%;
     --card: 0 0% 100%;
     --card-foreground: 215 98% 23%;
     --popover: 0 0% 100%;
     --popover-foreground: 215 98% 23%;
-    --primary: 215 98% 23%;           /* #012D76 */
+    --primary: 215 98% 23%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 205 60% 96%;         /* #F5F9FC */
+    --secondary: 205 60% 96%;
     --secondary-foreground: 215 98% 23%;
     --muted: 205 55% 95%;
-    --muted-foreground: 220 9% 46%;   /* #6B7280 */
-    --accent: 43 53% 52%;             /* #C9A23F */
+    --muted-foreground: 220 9% 46%;
+    --accent: 43 53% 52%;
     --accent-foreground: 215 98% 23%;
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 25% 92%;            /* #E5EBF2 */
+    --border: 215 25% 92%;
     --input: 215 25% 95%;
-    --ring: 199 100% 42%;             /* #0096D6 focus ring */
+    --ring: 199 100% 42%;
     --radius: 0;
   }
   * {

@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // null = checking, false = anon, object = user
+  const [user, setUser] = useState(null); 
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {

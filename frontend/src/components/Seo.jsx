@@ -44,10 +44,6 @@ export default function Seo({
     setMeta("twitter:description", "twitter:description", ogDescription || description, "name");
     if (canonical) setLink("canonical", canonical);
 
-    // Route-scoped preload hint (e.g. this page's LCP image) — lives here rather than in
-    // index.html so it doesn't ship (and trigger an unused-preload warning) on every other
-    // route. Prerendering captures this into the static output for the page it's set on,
-    // so it still lands in the raw HTML the browser parses, same as a static tag would.
     let preloadEl = null;
     if (preloadImage) {
       preloadEl = document.head.querySelector(`link[data-seo-preload="${preloadImage}"]`);

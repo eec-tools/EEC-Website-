@@ -24,12 +24,6 @@ export const REQS = [
   "Demonstrated export experience to North America (NA), Europe (EU), Middle East (ME) or Asia-Pacific (APAC) markets",
 ];
 
-// NOTE: FSSC 22000 is built on top of ISO 22000, not an interchangeable "or" alternative — removed the
-// "or ISO 22000" phrasing below. Flag for manual review: if EEC buyers independently accept ISO 22000 alone
-// in some cases, that should be reintroduced as its own line rather than an "or" option.
-// NOTE: EU Health Certificate and Rainforest Alliance don't map cleanly to an existing category (they're
-// most relevant to frozen food / dried fruit sub-segments). Folded into Food Commodities for now — flag for
-// manual review on whether these warrant their own category longer-term.
 export const CERT_CARDS = [
   { cat: "Food Commodities", certs: ["HACCP", "FSSC 22000", "BRC/BRCGS", "amfori BSCI", "FSSAI", "MRL Testing Reports", "Phytosanitary Certificate", "Aflatoxin Testing Reports", "EU Health Certificate", "Rainforest Alliance"], note: "FSSAI registration is mandatory." },
   { cat: "Processed and Packaged Foods", certs: ["BRC/BRCGS", "HACCP", "FSSC 22000", "amfori BSCI", "FSSAI", "Aflatoxin Testing Reports"], note: "IFS Food required for buyers in Germany and France." },
@@ -40,7 +34,6 @@ export const CERT_CARDS = [
 ];
 
 const CERT_WALL = {
-  // SA8000 kept without a space to match existing sitewide usage (see Home.jsx / ForBuyers.jsx trust bars).
   Textiles: ["BSCI", "SEDEX", "GOTS", "OEKO-TEX Standard 100", "OEKO-TEX STEP", "GRS", "ISO 9001", "ISO 14001", "CE", "WRAP", "Higg Index", "SA8000"],
   Food: ["FSSAI", "HACCP", "BRC/BRCGS", "FSSC 22000", "IFS Food", "GlobalG.A.P.", "GRASP", "EU Organic", "NPOP", "Kosher", "Halal", "ASC", "MSC", "amfori BSCI", "EU Health Certificate", "Rainforest Alliance", "Aflatoxin Testing Reports", "Phytosanitary Certificate", "MRL Testing Reports", "SMETA"],
 };
@@ -90,7 +83,6 @@ export default function ForSuppliers() {
         ]}
       />
 
-      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG})` }} aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#FFFFFF] via-[#FFFFFF]/80 to-[#FFFFFF]/20" aria-hidden="true" />
@@ -118,7 +110,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Sourcing context */}
       <section className="bg-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-2xl space-y-8">
@@ -129,7 +120,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Why Join */}
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Why join</div>
@@ -151,7 +141,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Qualification */}
       <section id="qualification" className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5">
@@ -188,7 +177,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Application Flow */}
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 relative">
@@ -222,7 +210,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* Certifications */}
       <section id="certifications" className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Certification requirements</div>
@@ -260,7 +247,6 @@ export default function ForSuppliers() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-20 lg:py-24 border-t hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>

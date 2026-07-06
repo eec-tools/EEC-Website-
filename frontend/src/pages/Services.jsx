@@ -105,7 +105,6 @@ export default function Services() {
         ]}
       />
 
-      {/* Hero */}
       <section className="border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-24">
           <div className="overline mb-4">Services</div>
@@ -116,7 +115,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Service Cards */}
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           {SERVICES.map(({ icon: Icon, t, d }) => (
@@ -131,7 +129,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Engagement Tiers */}
       <section id="engagement-tiers" className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Engagement options</div>
@@ -181,7 +178,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-20 lg:py-24 border-t hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>

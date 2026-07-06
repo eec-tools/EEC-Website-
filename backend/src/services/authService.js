@@ -50,7 +50,6 @@ function clearAuthCookies(res) {
   res.clearCookie("refresh_token", { path: "/" });
 }
 
-// Core resolver — never throws. Returns the public user object (no password_hash) or null.
 async function resolveUserFromRequest(req) {
   let token = req.cookies && req.cookies.access_token;
   if (!token) {

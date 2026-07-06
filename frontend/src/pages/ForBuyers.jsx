@@ -72,7 +72,6 @@ export default function ForBuyers() {
         ]}
       />
 
-      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG})` }} aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#FFFFFF] via-[#FFFFFF]/80 to-[#FFFFFF]/20" aria-hidden="true" />
@@ -100,7 +99,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Intro */}
       <section className="py-16 border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="text-[#3A4759] text-lg leading-relaxed max-w-4xl">
@@ -109,7 +107,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Why EEC */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Why EEC</div>
@@ -129,7 +126,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Comparison */}
       <section className="py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Direct Sourcing vs EEC</div>
@@ -137,9 +133,6 @@ export default function ForBuyers() {
           <p className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-10" aria-hidden="true">
             Why mature procurement teams switch from direct sourcing.
           </p>
-          {/* Desktop/tablet: full table. Below md, a table this wide either clips its
-              third column or relies on an undiscoverable horizontal scroll, so mobile
-              gets a stacked card-per-row layout instead (same data, same order). */}
           <div className="hidden md:block overflow-x-auto border hairline">
             <table className="w-full text-sm">
               <thead>
@@ -184,7 +177,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Buyer Portal */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6">
@@ -234,7 +226,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* Compliance */}
       <section id="certifications" className="py-16 border-t border-b hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <h2 className="font-display text-2xl text-[#012D76] tracking-tight font-light mb-3">
@@ -255,7 +246,6 @@ export default function ForBuyers() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>

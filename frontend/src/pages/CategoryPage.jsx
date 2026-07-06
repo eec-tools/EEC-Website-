@@ -7,14 +7,9 @@ import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 import { fallbackCategories, FAQ } from "@/pages/Categories";
 import { CERT_CARDS, REQS } from "@/pages/ForSuppliers";
 
-// EEC's confirmed sourcing base is India across every active category; Vietnam, Bangladesh,
-// Indonesia and Thailand are used selectively "based on category requirements" (see Home.jsx /
-// ForBuyers.jsx FAQ copy), but no category-to-country mapping exists in the codebase to cite
-// more specifically than that without inventing it.
 const GEOGRAPHY_NOTE =
   "India is EEC's primary sourcing base for this category. EEC also maintains a smaller, audited manufacturer base across Vietnam, Bangladesh, Indonesia and Thailand, used selectively where a category requires specific technical capability.";
 
-// Single template driving every /categories/:slug page — no per-category page files.
 export default function CategoryPage() {
   const { slug } = useParams();
   const category = fallbackCategories.find((c) => (c.slug || c.anchor || c.id) === slug);
@@ -62,7 +57,6 @@ export default function CategoryPage() {
         ]}
       />
 
-      {/* Breadcrumb */}
       <div className="border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center gap-2 text-sm text-[#6B7280]">
           <Link to="/" className="hover:text-[#012D76]">Home</Link>
@@ -73,7 +67,6 @@ export default function CategoryPage() {
         </div>
       </div>
 
-      {/* Hero */}
       <section className="border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
@@ -101,7 +94,6 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* Sourcing geography */}
       <section className="py-16 lg:py-20 border-b hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Sourcing geography</div>
@@ -112,7 +104,6 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* Certifications */}
       {certEntry && (
         <section className="py-16 lg:py-20 border-b hairline">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -128,7 +119,6 @@ export default function CategoryPage() {
         </section>
       )}
 
-      {/* Supplier vetting process */}
       <section className="py-16 lg:py-20 border-b hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Supplier vetting</div>
@@ -146,7 +136,6 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-16 lg:py-20 border-b hairline">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">FAQ</div>
@@ -164,7 +153,6 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* Related categories */}
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="overline mb-3">Related categories</div>

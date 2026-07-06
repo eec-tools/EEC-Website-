@@ -1,14 +1,8 @@
 import React from "react";
 
-/**
- * Shared wrapper for internal portal pages (Admin, Supplier, Buyer).
- * Adds a subtle ship-wheel watermark + soft gradient backdrop for brand presence
- * while keeping the page content fully on top, accessible, and unaffected.
- */
 export default function PortalShell({ children, testid }) {
   return (
     <div className="relative overflow-hidden isolate" data-testid={testid}>
-      {/* Soft sky-blue corner wash, top-right */}
       <div
         className="pointer-events-none absolute top-0 right-0 w-[60vw] h-[480px] -z-10"
         style={{
@@ -17,7 +11,6 @@ export default function PortalShell({ children, testid }) {
         }}
         aria-hidden="true"
       />
-      {/* Soft gold corner wash, bottom-left */}
       <div
         className="pointer-events-none absolute bottom-0 left-0 w-[55vw] h-[420px] -z-10"
         style={{
@@ -26,7 +19,6 @@ export default function PortalShell({ children, testid }) {
         }}
         aria-hidden="true"
       />
-      {/* Large ship-wheel watermark, lower-right of the page */}
       <img
         src="/ship-wheel.svg"
         alt=""
@@ -39,7 +31,6 @@ export default function PortalShell({ children, testid }) {
         className="pointer-events-none select-none absolute -bottom-24 -right-24 w-[420px] md:w-[560px] lg:w-[720px] opacity-[0.045] -z-10"
         style={{ color: "#012D76" }}
       />
-      {/* Small accent wheel, upper-left */}
       <img
         src="/ship-wheel.svg"
         alt=""

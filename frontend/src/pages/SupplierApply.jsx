@@ -59,7 +59,7 @@ export default function SupplierApply() {
     factory_locations: "",
     employee_count: "",
     website: "",
-    documents: [], // {path, original_filename, doc_type, file_id}
+    documents: [], 
     notes: "",
   });
 
