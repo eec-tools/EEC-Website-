@@ -4,6 +4,7 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { api, formatApiErrorDetail } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import Seo from "@/components/Seo";
 
 const STEPS = ["Company", "Product brief", "Volumes & timeline", "Submit"];
 
@@ -60,6 +61,12 @@ export default function BuyerIntake() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 lg:px-8 py-16" data-testid="buyer-intake-page">
+      <Seo
+        title="Submit a Sourcing Brief | Buyer Intake | EEC"
+        description="Tell EEC about your sourcing need in four short steps. Receive category benchmarks and a recommended sourcing approach within 24 hours."
+        canonical="https://eectrade.com/buyer/intake"
+        robots="index, follow"
+      />
       <div className="overline mb-3">Buyer Intake</div>
       <h1 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-3">
         Tell us about your sourcing need.

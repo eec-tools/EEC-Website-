@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, LinkedinIcon, InstagramIcon, FacebookIcon } from "lucide-react";
+import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, LinkedinIcon, InstagramIcon, FacebookIcon, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { api, formatApiErrorDetail } from "@/lib/api";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -19,13 +21,18 @@ function Logo({ size = "header" }) {
     : "h-16 md:h-24 lg:h-32";
   return (
     <Link to="/" className="inline-flex items-center group" data-testid={size === "footer" ? "footer-brand-link" : "brand-link"}>
-      <img
-        src="/images/EEC-logo-WBG.png"
-        alt="Elan Exports Consultancy, Singapore Headquartered sourcing consultancy"
-        className={`${heightClass} w-auto select-none transition-transform duration-300 group-hover:scale-[1.03]`}
-        data-testid={size === "footer" ? "footer-logo" : "brand-logo"}
-        draggable="false"
-      />
+      <picture>
+        <source srcSet="/images/EEC-logo-WBG.webp" type="image/webp" />
+        <img
+          src="/images/EEC-logo-WBG.png"
+          alt="Elan Exports Consultancy, Singapore Headquartered sourcing consultancy"
+          width="1254"
+          height="1254"
+          className={`${heightClass} w-auto select-none transition-transform duration-300 group-hover:scale-[1.03]`}
+          data-testid={size === "footer" ? "footer-logo" : "brand-logo"}
+          draggable="false"
+        />
+      </picture>
       <span className="sr-only">Elan Exports Consultancy</span>
     </Link>
   );
@@ -46,28 +53,30 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
         {description && (
           <p className="text-sm text-[#6B7280] leading-relaxed">{description}</p>
         )}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Link
             to={primaryCta.href}
-            className="inline-flex items-center gap-2 bg-[#012D76] hover:bg-[#011F54] text-white text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap bg-[#012D76] hover:bg-[#011F54] text-white text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
           >
             {primaryCta.label} <ArrowUpRight size={15} aria-hidden="true" />
           </Link>
           {secondaryCta && (
             <Link
               to={secondaryCta.href}
-              className="inline-flex items-center gap-2 bg-transparent border border-[#012D76] text-[#012D76] hover:bg-[#012D76]/5 text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap bg-transparent border border-[#012D76] text-[#012D76] hover:bg-[#012D76]/5 text-sm font-medium px-6 py-3 rounded-full w-fit transition-colors"
             >
               {secondaryCta.label}
             </Link>
           )}
         </div>
         {footnote && (
-          <p className="text-xs text-[#9CA3AF] tracking-wide">{footnote}</p>
+          <p className="text-xs text-[#6B7280] tracking-wide">{footnote}</p>
         )}
       </div>
       {/* Orbit graphic */}
       <div className="flex-shrink-0 w-52 h-52 md:w-64 md:h-64 hidden sm:block" aria-hidden="true">
+        <picture>
+        <source srcSet="/images/cta/cta-orbit.webp" type="image/webp" />
         <img
           src="/images/cta/cta-orbit.png"
           alt=""
@@ -78,6 +87,7 @@ function CtaCard({ eyebrow, heading, description, primaryCta, secondaryCta, foot
           className="w-full h-full object-contain select-none"
           draggable="false"
         />
+        </picture>
       </div>
     </div>
   );
@@ -172,15 +182,36 @@ function FooterBadge({ icon, label1, label2 }) {
 
 export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const ctaConfig = CTA_CONFIG[location.pathname];
 
+  const onNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    const email = newsletterEmail.trim();
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    setNewsletterSubmitting(true);
+    try {
+      await api.post("/newsletter/subscribe", { email, source_page: location.pathname });
+      toast.success("Subscribed. Thanks for staying updated.");
+      setNewsletterEmail("");
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Subscription failed");
+    } finally {
+      setNewsletterSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-eec">
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFFFFF]/90 border-b hairline">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 h-20 md:h-28 lg:h-32 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 md:h-28 lg:h-32 flex items-center justify-between">
           <Logo />
 
           <nav className="hidden md:flex items-center gap-8">
@@ -234,7 +265,7 @@ export default function Layout({ children }) {
           </div>
 
           <button
-            className="md:hidden text-[#012D76]"
+            className="md:hidden text-[#012D76] p-2.5 -m-2.5"
             onClick={() => setOpen(!open)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
@@ -284,7 +315,7 @@ export default function Layout({ children }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="mt-20 bg-white px-4 md:px-8 pb-10" aria-label="Site footer">
+      <footer className="mt-20 bg-white px-6 lg:px-8 pb-10" aria-label="Site footer">
         <div className="max-w-7xl mx-auto bg-[#F5F5F7] rounded-3xl shadow-sm px-8 md:px-12 lg:px-14 pt-4 pb-4">
 
           {/* ── CTA banner (page-aware; omitted on routes with no config) ── */}
@@ -296,6 +327,8 @@ export default function Layout({ children }) {
             {/* ── Left: brand col ── */}
             <div className="flex flex-col gap-5 min-w-0">
               <Link to="/" aria-label="Elan Exports Consultancy home" data-testid="footer-brand-link">
+                <picture>
+                <source srcSet="/eec-logo-wbg.webp" type="image/webp" />
                 <img
                   src="/eec-logo-wbg.png"
                   alt="Elan Exports Consultancy, Singapore Headquartered Sourcing Consultancy"
@@ -307,8 +340,9 @@ export default function Layout({ children }) {
                   data-testid="footer-logo"
                   draggable="false"
                 />
+                </picture>
               </Link>
-              <p className="text-sm text-[#6B7280] leading-relaxed max-w-[300px]">
+              <p className="text-sm text-[#616873] leading-relaxed max-w-[300px]">
                 Singapore-headquartered sourcing consultancy. Embedded procurement support for global buyers sourcing from India and Asia.
               </p>
               <div className="flex items-center justify-between gap-4">
@@ -358,13 +392,13 @@ export default function Layout({ children }) {
             {/* ── STAY UPDATED ── */}
             <div className="sm:col-span-2 lg:col-span-1 lg:pl-6 min-w-0">
               <FooterColHeader title="STAY UPDATED" />
-              <p className="text-sm text-[#6B7280] leading-relaxed mb-4">
+              <p className="text-sm text-[#616873] leading-relaxed mb-4">
                 Receive product updates, news, exclusive discounts and early access.
               </p>
 
               {/* Email input */}
               <form
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={onNewsletterSubmit}
                 className="relative mb-4"
                 aria-label="Newsletter signup"
               >
@@ -372,15 +406,25 @@ export default function Layout({ children }) {
                 <input
                   id="footer-email"
                   type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Enter your email..."
-                  className="w-full rounded-full bg-white border border-[#E5EBF2] px-5 py-3 pr-[52px] text-sm text-[#012D76] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#012D76]/20 focus:border-[#012D76] transition"
+                  disabled={newsletterSubmitting}
+                  className="w-full rounded-full bg-white border border-[#E5EBF2] px-5 py-3 pr-[52px] text-sm text-[#012D76] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#012D76]/20 focus:border-[#012D76] transition disabled:opacity-60"
+                  data-testid="newsletter-email-input"
                 />
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors"
+                  disabled={newsletterSubmitting}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors disabled:opacity-60"
+                  data-testid="newsletter-submit"
                 >
-                  <ArrowRight size={15} className="text-white" aria-hidden="true" />
+                  {newsletterSubmitting ? (
+                    <Loader2 size={15} className="text-white animate-spin" aria-hidden="true" />
+                  ) : (
+                    <ArrowRight size={15} className="text-white" aria-hidden="true" />
+                  )}
                 </button>
               </form>
 
@@ -396,7 +440,7 @@ export default function Layout({ children }) {
                     </div>
                     <p className="text-base font-bold text-[#012D76] leading-snug whitespace-nowrap">Singapore HQ</p>
                   </div>
-                  <p className="text-sm text-[#6B7280] leading-relaxed mt-3 text-left">India &amp; Asia Operations<br/>Sourcing Network</p>
+                  <p className="text-sm text-[#616873] leading-relaxed mt-3 text-left">India &amp; Asia Operations<br/>Sourcing Network</p>
                 </div>
               </div>
             </div>
@@ -404,11 +448,11 @@ export default function Layout({ children }) {
 
           {/* ── Bottom bar ── */}
           <div className="border-t border-[#E5EBF2] mt-10 pt-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <span className="text-xs text-[#6B7280] whitespace-nowrap">
+            <span className="text-xs text-[#616873] whitespace-nowrap">
               © 2026 Elan Exports Consultancy Pte. Ltd. All rights reserved.
             </span>
             <div className="flex items-center gap-2.5 flex-nowrap justify-center">
-              <span className="text-xs text-[#6B7280] whitespace-nowrap">Follow Us</span>
+              <span className="text-xs text-[#616873] whitespace-nowrap">Follow Us</span>
               <a href="https://www.linkedin.com/company/elan-exports/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-9 h-9 rounded-full bg-[#012D76] hover:bg-[#011F54] flex items-center justify-center transition-colors flex-shrink-0">
                 <LinkedinIcon size={15} className="text-white" aria-hidden="true" />
               </a>

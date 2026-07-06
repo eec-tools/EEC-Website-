@@ -103,6 +103,14 @@ create table if not exists leads (
   created_at timestamptz not null default now()
 );
 
+create table if not exists newsletter_subscribers (
+  subscriber_id text primary key,
+  email         text not null unique,
+  source_page   text,
+  submitted_at  timestamptz not null default now()
+);
+create index if not exists newsletter_subscribers_submitted_at_idx on newsletter_subscribers(submitted_at desc);
+
 create table if not exists password_reset_tokens (
   token      text primary key,
   user_id    text not null references users(user_id) on delete cascade,
@@ -121,4 +129,5 @@ alter table files enable row level security;
 alter table buyer_intakes enable row level security;
 alter table supplier_applications enable row level security;
 alter table leads enable row level security;
+alter table newsletter_subscribers enable row level security;
 alter table password_reset_tokens enable row level security;

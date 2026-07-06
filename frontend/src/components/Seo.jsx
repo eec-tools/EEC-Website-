@@ -31,6 +31,7 @@ export default function Seo({
   ogTitle,
   ogDescription,
   jsonLd,
+  preloadImage,
 }) {
   useEffect(() => {
     if (title) document.title = title;
@@ -38,7 +39,27 @@ export default function Seo({
     setMeta("robots", "robots", robots, "name");
     setMeta("og:title", "og:title", ogTitle || title, "property");
     setMeta("og:description", "og:description", ogDescription || description, "property");
+    if (canonical) setMeta("og:url", "og:url", canonical, "property");
+    setMeta("twitter:title", "twitter:title", ogTitle || title, "name");
+    setMeta("twitter:description", "twitter:description", ogDescription || description, "name");
     if (canonical) setLink("canonical", canonical);
+
+    // Route-scoped preload hint (e.g. this page's LCP image) — lives here rather than in
+    // index.html so it doesn't ship (and trigger an unused-preload warning) on every other
+    // route. Prerendering captures this into the static output for the page it's set on,
+    // so it still lands in the raw HTML the browser parses, same as a static tag would.
+    let preloadEl = null;
+    if (preloadImage) {
+      preloadEl = document.head.querySelector(`link[data-seo-preload="${preloadImage}"]`);
+      if (!preloadEl) {
+        preloadEl = document.createElement("link");
+        preloadEl.setAttribute("rel", "preload");
+        preloadEl.setAttribute("as", "image");
+        preloadEl.setAttribute("href", preloadImage);
+        preloadEl.setAttribute("data-seo-preload", preloadImage);
+        document.head.appendChild(preloadEl);
+      }
+    }
 
     const scriptIds = [];
     const payloads = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
@@ -60,8 +81,9 @@ export default function Seo({
         const script = document.getElementById(id);
         if (script) script.remove();
       });
+      if (preloadEl) preloadEl.remove();
     };
-  }, [title, description, canonical, robots, ogTitle, ogDescription, jsonLd]);
+  }, [title, description, canonical, robots, ogTitle, ogDescription, jsonLd, preloadImage]);
 
   return null;
 }

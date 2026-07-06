@@ -7,12 +7,21 @@ import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-const Home = lazy(() => import("@/pages/Home"));
-const ForBuyers = lazy(() => import("@/pages/ForBuyers"));
-const ForSuppliers = lazy(() => import("@/pages/ForSuppliers"));
-const About = lazy(() => import("@/pages/About"));
-const Services = lazy(() => import("@/pages/Services"));
-const Categories = lazy(() => import("@/pages/Categories"));
+// These 6 routes are prerendered (react-snap) and must be present in the main bundle,
+// not React.lazy()-loaded: createRoot() discards the prerendered static HTML on mount
+// and re-renders from scratch, so if these were lazy, the Suspense fallback (null) would
+// blank the page for as long as the route's chunk takes to download+execute — on a slow
+// connection that's a multi-second gap where a real user sees nothing. Bundling them
+// eagerly means the real component tree is ready the instant React mounts, so there's
+// nothing to suspend on and no blank window. See .audit-screenshots/content-blanking-scoping-note.md.
+import Home from "@/pages/Home";
+import ForBuyers from "@/pages/ForBuyers";
+import ForSuppliers from "@/pages/ForSuppliers";
+import About from "@/pages/About";
+import Services from "@/pages/Services";
+import Categories from "@/pages/Categories";
+
+const CategoryPage = lazy(() => import("@/pages/CategoryPage"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const BuyerPortal = lazy(() => import("@/pages/BuyerPortal"));
@@ -24,10 +33,17 @@ const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 
 function ScrollToTop() {
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
   useLayoutEffect(() => {
+    if (hash) {
+      const target = document.getElementById(hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [pathname, search]);
+  }, [pathname, search, hash]);
   return null;
 }
 
@@ -75,6 +91,7 @@ function AppRouter() {
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/categories" element={<Categories />} />
+                <Route path="/categories/:slug" element={<CategoryPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/buyer" element={<ProtectedRoute role="buyer"><BuyerPortal /></ProtectedRoute>} />

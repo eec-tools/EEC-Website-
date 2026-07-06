@@ -95,6 +95,11 @@ const contactLeadSchema = z.object({
   source: z.string().default("contact"),
 });
 
+const newsletterSubscribeSchema = z.object({
+  email,
+  source_page: z.string().nullable().optional(),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -103,4 +108,5 @@ module.exports = {
   buyerIntakeSchema,
   supplierApplicationSchema,
   contactLeadSchema,
+  newsletterSubscribeSchema,
 };

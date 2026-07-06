@@ -121,7 +121,7 @@ export default function Services() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           {SERVICES.map(({ icon: Icon, t, d }) => (
             <div key={t} className="border hairline p-8 bg-surface flex gap-6">
-              <Icon size={28} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] mt-1 shrink-0" />
+              <Icon size={28} className="text-[#8A6F2B] mt-1 shrink-0" />
               <div>
                 <div className="font-display text-2xl text-[#012D76] mb-2">{t}</div>
                 <div className="text-[#3A4759] leading-relaxed">{d}</div>
@@ -151,12 +151,12 @@ export default function Services() {
                 )}
                 <div className="overline mb-2">{p.label}</div>
                 <div className="font-display text-3xl text-[#012D76] mb-1">{p.name}</div>
-                <div className="text-sm text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium mb-2">{p.subtitle}</div>
+                <div className="text-sm text-[#8A6F2B] font-medium mb-2">{p.subtitle}</div>
                 <div className="text-[#3A4759] text-sm mb-6">{p.tagline}</div>
                 <ul className="space-y-3 mb-8 flex-1">
                   {p.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-[#3A4759]">
-                      <Check size={16} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] mt-0.5 shrink-0" />
+                      <Check size={16} className="text-[#8A6F2B] mt-0.5 shrink-0" />
                       <span>{f}</span>
                     </li>
                   ))}

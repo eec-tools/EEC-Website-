@@ -32,12 +32,6 @@ const ABOUT_FAQ = [
     link: "/for-suppliers#qualification",
     linkText: "See full requirements",
   },
-  {
-    q: "How does EEC price its services?",
-    a: "EEC's commercial model is built on a single ethical premise: a sourcing consultant should be paid by the party it represents. That is why EEC operates on a buyer-funded, open-book architecture, suppliers are never charged for listing, activation, or preferential visibility, at any stage. This removes the structural conflict of interest that lets hidden trading margins and pay-to-play supplier placement creep into conventional sourcing models. When EEC recommends a factory, that recommendation is never for sale.",
-    link: "/services",
-    linkText: "See engagement models",
-  },
 ];
 
 
@@ -65,27 +59,6 @@ export default function About() {
               { "@type": "ListItem", position: 1, name: "Home", item: "https://eectrade.com" },
               { "@type": "ListItem", position: 2, name: "About", item: "https://eectrade.com/about" },
             ],
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: COMPANY.legalName,
-            alternateName: COMPANY.shortName,
-            url: "https://eectrade.com",
-            email: COMPANY.contactEmail,
-            foundingDate: COMPANY.incorporationDateISO,
-            identifier: COMPANY.uen,
-            description: "Singapore Headquartered sourcing and procurement consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025.",
-            address: {
-              "@type": "PostalAddress",
-              streetAddress: COMPANY.addressStreet,
-              addressLocality: COMPANY.addressCity,
-              postalCode: COMPANY.addressPostalCode,
-              addressCountry: COMPANY.addressCountry,
-            },
-            areaServed: ["Europe", "United States", "Middle East", "Asia-Pacific"],
-            knowsAbout: ["Sourcing", "Procurement", "Supplier qualification", "Factory audits", "Landed cost modelling", "India manufacturing", "Asia supply chain"],
-            sameAs: COMPANY.socialLinks,
           },
           {
             "@context": "https://schema.org",
@@ -140,13 +113,13 @@ export default function About() {
       <section className="py-20 lg:py-24 border-t hairline bg-surface">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border hairline p-8 bg-surface">
-            <div className="text-xs text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] tracking-[0.22em] uppercase mb-4">OUR MISSION</div>
+            <div className="text-xs text-[#8A6F2B] tracking-[0.22em] uppercase mb-4">OUR MISSION</div>
             <p className="text-[#3A4759] leading-relaxed">
               To simplify global sourcing by connecting businesses with qualified manufacturing partners, delivering transparent procurement solutions and building long-term relationships that create value for buyers and suppliers alike.
             </p>
           </div>
           <div className="border hairline p-8 bg-surface">
-            <div className="text-xs text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] tracking-[0.22em] uppercase mb-4">OUR VISION</div>
+            <div className="text-xs text-[#8A6F2B] tracking-[0.22em] uppercase mb-4">OUR VISION</div>
             <p className="text-[#3A4759] leading-relaxed">
               To be the trusted global sourcing partner for businesses seeking reliable manufacturers, resilient supply chains and sustainable international growth.
             </p>

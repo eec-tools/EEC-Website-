@@ -7,7 +7,7 @@
         <meta name="color-scheme" content="light" />
 
         <!-- Primary -->
-        <title>India Sourcing and Procurement Consultancy | Verified Suppliers | EEC</title>
+        <title>Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC</title>
         <meta name="description" content="Elan Exports Consultancy (EEC) is a Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Open-book costs. Factory-audited suppliers. Incorporated January 2025." />
         <meta name="keywords" content="India sourcing, Asia sourcing, export consultancy, supplier qualification, IEC GST verification, landed cost optimization, Singapore export firm, B2B sourcing" />
         <meta name="author" content="Elan Exports Consultancy" />
@@ -18,12 +18,11 @@
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-
+        
         <!-- Open Graph -->
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Elan Exports Consultancy" />
-        <meta property="og:title" content="India Sourcing and Procurement Consultancy | Verified Suppliers | EEC" />
+        <meta property="og:title" content="Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC" />
         <meta property="og:description" content="Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025." />
         <meta property="og:url" content="https://eectrade.com/" />
         <meta property="og:image" content="https://eectrade.com/og-image.png" />
@@ -36,7 +35,7 @@
 
         <!-- Twitter / X -->
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="India Sourcing and Procurement Consultancy | Verified Suppliers | EEC" />
+        <meta name="twitter:title" content="Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC" />
         <meta name="twitter:description" content="Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025." />
         <meta name="twitter:image" content="https://eectrade.com/og-image.png" />
         <meta name="twitter:image:alt" content="Elan Exports Consultancy, Singapore Headquartered sourcing for India and Asia" />
@@ -48,9 +47,9 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link rel="preconnect" href="https://images.pexels.com" />
-        <!-- Homepage hero image is the LCP element; preload it here so the CRA client-side Seo/meta
-             injection (which fires after mount) doesn't leave the browser discovering it late. -->
-        <link rel="preload" as="image" href="https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=2&amp;w=1400&amp;h=1600" />
+        <!-- Homepage hero image preload moved to Home.jsx's Seo call (preloadImage prop) so it
+             only ships on "/" instead of every route via this shared shell. Prerendering bakes
+             it back into the static homepage output, so production still gets an early hint. -->
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&family=Abril+Fatface&family=Mrs+Saint+Delafield&display=swap" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&family=Abril+Fatface&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
         <noscript>

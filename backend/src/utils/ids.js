@@ -10,6 +10,7 @@ module.exports = {
   genIntakeId: () => `intake_${shortHex(12)}`,
   genApplicationId: () => `app_${shortHex(12)}`,
   genLeadId: () => `lead_${shortHex(12)}`,
+  genNewsletterSubscriberId: () => `newsletter_${shortHex(12)}`,
   genToken: () => randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, ""),
   genNonce: () => randomUUID().replace(/-/g, ""),
 };

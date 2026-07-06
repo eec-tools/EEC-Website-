@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import Seo from "@/components/Seo";
 import { COMPANY } from "@/constants/company";
+import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 
 const HERO_IMG = "https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=1400&h=1600";
 
@@ -28,21 +29,36 @@ const TESTIMONIALS = [
     initials: "KF",
   },
   {
-    quote: "I wanted to share some exciting news about our collaboration with Elan Exports. Their supportive team has offered to connect us with big retailers in the industry, which presents a fantastic opportunity for us to expand our reach and grow our business.",
+    quote: "I wanted to share some exciting news about our collaboration with EEC. Their supportive team has offered to connect us with big retailers in the industry, which presents a fantastic opportunity for us to expand our reach and grow our business.",
     attribution: "Apparel Manufacturer, India",
     initials: "AM",
   },
   {
-    quote: "Elan Exports is a fantastic company to work with. The team excels at understanding buyer requirements from day one, clearly communicating these needs to the factories at every stage. They are diligent in ensuring that both the buyer's and factory's needs are met with a well-thought-out plan and seamless execution. Their reliability and friendly approach make them a pleasure to collaborate with.",
+    quote: "EEC is a fantastic company to work with. The team excels at understanding buyer requirements from day one, clearly communicating these needs to the factories at every stage. They are diligent in ensuring that both the buyer's and factory's needs are met with a well-thought-out plan and seamless execution. Their reliability and friendly approach make them a pleasure to collaborate with.",
     attribution: "Home Textile Supplier, India",
     initials: "HT",
+  },
+  {
+    quote: "We established a relationship with EEC two years ago, and they have left a deep impression on us. The company has played an indispensable role in facilitating our trade with the end customer. They have demonstrated outstanding professionalism across all stages of cooperation: smooth two-way communication, efficient handling of order formalities, and timely solutions to all unexpected issues. Equipped with solid industry expertise and an attentive working style, they have put forward practical proposals that balance both parties' needs and have greatly simplified our entire transaction process. We highly recognize their rigorous and devoted service. We sincerely wish them continuous growth, a thriving business, and greater achievements in their future endeavors. Additionally, we are looking forward to further potential cooperation with them in the future.",
+    attribution: "Outdoor Textiles Supplier, China",
+    initials: "OT",
+  },
+  {
+    quote: "Our experience working with EEC has been highly professional and result-oriented. Their market knowledge, sourcing expertise, and strong buyer network have helped create valuable business opportunities for our company. We particularly appreciate EEC's support in facilitating business discussions with a leading discount retailer in Germany. Throughout the engagement, their team demonstrated excellent communication, commitment, and a proactive approach to building successful partnerships. We would confidently recommend EEC to companies seeking reliable global sourcing and business development support.",
+    attribution: "Peanut Butter Supplier, India",
+    initials: "PB",
+  },
+  {
+    quote: "We have had a positive experience working with EEC. Their team is professional, reliable, and responsive, making communication and project coordination smooth and efficient. We value our partnership and look forward to working together in the future.",
+    attribution: "Textile Supplier, Hong Kong",
+    initials: "TS",
   },
 ];
 
 const HOME_CATEGORIES = [
   { id: "food", name: "Food Commodities", tagline: "Rice, Sugar, Pulses, Lentils, Beans, Seeds, Salt, Edible Oils, Spices", image: "/images/categories/food-commodities.jpg", cta: "Source food commodities", alt: "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing" },
   { id: "processed", name: "Processed and Packaged Foods", tagline: "Instant Noodles, Biscuits, Snacks, Peanut Butter, Sauces, Beverages, Frozen Foods, Ready Meals, Private Label Foods", image: "/images/categories/processed-packaged-foods.jpg", cta: "Source processed foods", alt: "Assorted packaged snacks and confectionery bars for processed and packaged food sourcing" },
-  { id: "fresh", name: "Fresh and Agricultural Products", tagline: "Fruits, Vegetables, Frozen Fruits, Frozen Vegetables, Herbs, Agricultural Produce, Organic Produce", image: "/images/categories/fresh-agricultural-products.jpg", cta: "Source fresh produce", alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens" },
+  { id: "fresh", name: "Fresh and Agricultural Products", tagline: "Fruits, Vegetables, Frozen Fruits, Frozen Vegetables, Herbs, Agricultural Produce, Organic Produce", image: "/images/categories/fresh-agricultural-produce.jpg", cta: "Source fresh produce", alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens" },
   { id: "healthcare", name: "Healthcare and Hospital Textile Supplies", tagline: "Hospital Textiles, Patient Gowns, Scrubs, Surgical Drapes, Hospital Bed Linen, Institutional Uniforms, Curtains, Healthcare Procurement Products", image: "/images/hero-image.jpeg", cta: "Source healthcare textiles", alt: "Hospital textiles, PPE and medical linen sourced from certified Indian manufacturers" },
   { id: "home-textile", name: "Home Textile, Apparel and Hospitality Products", tagline: "Bed Linen, Hotel Linen, Towels, Bathrobes, Curtains, Uniforms, Home Textiles, Home Furnishings, Hotel Textiles, Hospitality Products", image: "/images/categories/home-textile-apparel-hospitality.jpg", cta: "Source home textiles", alt: "Bed linen, towels, uniforms and hotel textiles for home textile and hospitality sourcing" },
   { id: "eco", name: "Eco-Friendly, Sustainable and Organic Products", tagline: "Organic Foods, Organic Textiles, Sustainable Textiles, Bamboo Products, Coconut-based Products, Areca Leaf Products, Compostable Products, Sustainable Packaging Solutions, Fair Trade Products, Green Alternatives", image: "/images/categories/eco-friendly-sustainable-organic.jpg", cta: "Source eco-friendly products", alt: "Biodegradable packaging, organic textiles and green alternative products" },
@@ -53,7 +69,7 @@ const FAQ = [
   { q: "What countries does EEC source from?", a: "EEC sources from India, Asia and select global markets. India remains the primary sourcing market across food commodities, textiles, fresh produce, processed foods, hospital textiles and eco-friendly products. EEC also works with verified manufacturers in Vietnam, Bangladesh, Indonesia, Thailand and other countries based on category requirements. Every supplier in the network is verified before any RFQ is deployed to a buyer." },
   { q: "How is EEC different from a sourcing marketplace?", a: "EEC is a consultancy, not a marketplace. Marketplaces earn revenue from supplier listings or transaction commissions. EEC charges buyers a service fee based on engagement tier. EEC negotiates on open-book terms. Suppliers are recommended based on quality and fit, with no commercial conflict of interest." },
   { q: "What is landed cost, and how does EEC model it?", a: "Landed cost is the total cost of a product at the destination warehouse, including factory price (FOB), freight, insurance, import duties, customs clearance and last-mile delivery. EEC provides open-book landed cost modelling for every sourcing project before the buyer commits to a supplier. This eliminates hidden margins and gives procurement teams an accurate, comparable basis for supplier decisions across categories and geographies." },
-  { q: "How does EEC price its services?", a: "Pricing varies by engagement tier. Scout is a fixed-fee one-time project for buyers evaluating a new category or geography. Engage (per-project) and Embed (quarterly retainer) are scoped during a discovery call based on category complexity, volume and sourcing geography. Suppliers are never charged listing or activation fees — all revenue comes from buyer service fees only." },
+  { q: "How does EEC price its services?", a: "EEC follows a transparent procurement consulting model. Suppliers are never charged listing fees, activation fees, or fees for preferential visibility, ensuring every supplier recommendation is based solely on capability, quality, and buyer requirements. Buyer pricing depends on the engagement model. Scout is a fixed-fee sourcing assessment, while Engage (project-based) and Embed (quarterly retainer) are scoped during a discovery call based on the product category, sourcing complexity, procurement volume, and sourcing geography." },
 ];
 
 export default function Home() {
@@ -74,33 +90,13 @@ export default function Home() {
   return (
     <div data-testid="home-page">
       <Seo
-        title="India Sourcing and Procurement Consultancy | Verified Suppliers | EEC"
+        title="Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC"
         description="Elan Exports Consultancy (EEC) is a Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Open-book costs. Factory-audited suppliers. Incorporated January 2025."
         canonical="https://eectrade.com/"
-        ogTitle="India Sourcing and Procurement Consultancy | Verified Suppliers | EEC"
+        ogTitle="Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC"
         ogDescription="Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025."
+        preloadImage={HERO_IMG}
         jsonLd={[
-          {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "@id": "https://eectrade.com/#organization",
-            name: COMPANY.legalName,
-            alternateName: COMPANY.shortName,
-            url: "https://eectrade.com",
-            email: COMPANY.contactEmail,
-            foundingDate: COMPANY.incorporationDateISO,
-            description: "Singapore Headquartered sourcing and procurement consultancy connecting global buyers with verified manufacturers across India and Asia.",
-            address: { "@type": "PostalAddress", streetAddress: COMPANY.addressStreet, addressLocality: COMPANY.addressCity, postalCode: COMPANY.addressPostalCode, addressCountry: COMPANY.addressCountry },
-            areaServed: ["Europe", "United States", "Middle East", "Asia-Pacific"],
-            sameAs: COMPANY.socialLinks,
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            url: "https://eectrade.com",
-            name: "Elan Exports Consultancy",
-            publisher: { "@id": "https://eectrade.com/#organization" },
-          },
           {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
@@ -137,14 +133,14 @@ export default function Home() {
               <div className="mt-8 text-base lg:text-lg text-[#3A4759] leading-relaxed max-w-xl space-y-5">
                 <p>
                   EEC is a Singapore headquartered global sourcing consultancy connecting buyers with verified manufacturing partners{" "}
-                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">across the world</span>.
+                  <span className="text-[#8A6F2B] font-medium">across the world</span>.
                 </p>
                 <p>
                   While our sourcing{" "}
-                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">expertise is rooted in India and Asia</span>, our trusted supplier network spans{" "}
-                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">global markets</span>, enabling us to deliver{" "}
-                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">transparent commercial terms, predictable shipments,</span> and{" "}
-                  <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-medium">reliable sourcing solutions</span>.
+                  <span className="text-[#8A6F2B] font-medium">expertise is rooted in India and Asia</span>, our trusted supplier network spans{" "}
+                  <span className="text-[#8A6F2B] font-medium">global markets</span>, enabling us to deliver{" "}
+                  <span className="text-[#8A6F2B] font-medium">transparent commercial terms, predictable shipments,</span> and{" "}
+                  <span className="text-[#8A6F2B] font-medium">reliable sourcing solutions</span>.
                 </p>
               </div>
               {/* ── Feature badges ── */}
@@ -252,7 +248,7 @@ export default function Home() {
                   fetchPriority="high"
                 />
                 <div className="absolute bottom-6 left-6 right-6 bg-[#FFFFFF]/95 backdrop-blur-md p-5 border-l-2 border-[#C9A23F]">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">A buyer-first sourcing desk</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[#8A6F2B]">A buyer-first sourcing desk</p>
                   <p className="mt-2 font-display text-xl text-[#012D76] leading-tight">
                     Vetted suppliers. Open-book cost. Supply chains you can plan around.
                   </p>
@@ -285,7 +281,12 @@ export default function Home() {
             {categories.map((c, i) => (
               <Link key={c.id} to="/categories" className="group bg-[#FFFFFF] hover:bg-[#F5F9FC] transition-colors duration-500 p-7 lg:p-9" data-testid={`category-card-${c.id}`}>
                 <div className="aspect-[4/3] overflow-hidden mb-6 bg-[#EFF4F9]">
-                  <img src={c.image} alt={c.alt || c.name} loading="lazy" decoding="async" className="w-full h-full object-cover grayscale-[10%] group-hover:scale-[1.03] transition-transform duration-700" />
+                  <picture>
+                    {IMAGE_DIMENSIONS[c.image]?.webp && (
+                      <source srcSet={IMAGE_DIMENSIONS[c.image].webp} type="image/webp" />
+                    )}
+                    <img src={c.image} alt={c.alt || c.name} loading="lazy" decoding="async" width={IMAGE_DIMENSIONS[c.image]?.width} height={IMAGE_DIMENSIONS[c.image]?.height} className="w-full h-full object-cover grayscale-[10%] group-hover:scale-[1.03] transition-transform duration-700" />
+                  </picture>
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <h3 className="font-display text-2xl text-[#012D76]">{c.name}</h3>
@@ -368,7 +369,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 lg:px-10">
           {isAuthed ? (
             <div className="border hairline bg-[#FFFFFF] p-10 lg:p-14 text-center" data-testid="closing-cta-authed">
-              <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">Welcome back, {user.name?.split(" ")[0]}</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#8A6F2B]">Welcome back, {user.name?.split(" ")[0]}</p>
               <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight max-w-2xl mx-auto">Pick up where you left off.</h3>
               <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-xl mx-auto">Track your active briefs, supplier applications, documents and shipment milestones.</p>
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
@@ -380,13 +381,13 @@ export default function Home() {
           ) : (
             <div className="grid md:grid-cols-2 gap-px bg-[#E5EBF2]">
               <Link to="/buyer/intake" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-buyer">
-                <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">For Buyers</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-[#8A6F2B]">For Buyers</p>
                 <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Book a free 20-minute sourcing call.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">No commitment required. EEC maps your category, target landed cost, compliance requirements and a realistic 90-day sourcing plan.</p>
                 <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Book now <ArrowUpRight size={14} /></span>
               </Link>
               <Link to="/supplier/apply" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-supplier">
-                <p className="text-xs uppercase tracking-[0.22em] text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">For Suppliers</p>
+                <p className="text-xs uppercase tracking-[0.22em] text-[#8A6F2B]">For Suppliers</p>
                 <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Apply to the EEC Supplier Network.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">Structured sourcing briefs, defined payment schedules and recurring export programmes. Not one-off spot RFQs.</p>
                 <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Apply now <ArrowUpRight size={14} /></span>
@@ -427,7 +428,7 @@ export default function Home() {
 function TestimonialWallCard({ t }) {
   return (
     <div className="shrink-0 w-[360px] sm:w-[400px] bg-[#F6F6FA] rounded-2xl p-5 lg:p-6 flex flex-col gap-3">
-      <Quote size={32} className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]" aria-hidden="true" />
+      <Quote size={32} className="text-[#8A6F2B]" aria-hidden="true" />
       <p className="text-sm text-[#3A4759] leading-relaxed flex-1">
         {t.quote}
       </p>
@@ -459,7 +460,7 @@ function TestimonialsBlock() {
               <span className="text-white text-xs font-medium tracking-wide">Trusted by suppliers and buyers worldwide</span>
             </span>
             <h2 className="font-display text-3xl lg:text-4xl text-[#012D76] tracking-tight">
-              Words of praise from our <em className="italic font-normal text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">global network.</em>
+              Words of praise from our <em className="italic font-normal text-[#8A6F2B]">global network.</em>
             </h2>
           </div>
           <div className="eec-tmarquee-row overflow-hidden" style={edgeMask}>
@@ -475,9 +476,13 @@ function TestimonialsBlock() {
 
 // Ease-out count-up from 0 to `value`, driven by requestAnimationFrame. `start` is a
 // one-way trigger (parent flips it true once and never resets it) so the animation runs
-// exactly once per page load.
+// exactly once per page load. Initial state is `value` itself (not 0) so the real number
+// is what's present in the markup before any effect runs — a crawler or no-JS client
+// reading the raw/prerendered HTML sees the correct figure, not a stuck "0+". The rAF tick
+// below still computes progress from 0 on trigger, so scrolling into view replays the
+// familiar count-up animation for real users.
 function StatItem({ value, suffix, label, start }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(value);
 
   useEffect(() => {
     if (!start) return;

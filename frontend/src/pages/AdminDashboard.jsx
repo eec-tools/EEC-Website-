@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Users, Factory, ClipboardCheck, FileText, Search, ChevronDown, ChevronRight,
-  Globe2, Mail, Phone, ArrowUpRight, Building2, Trash2, Loader2,
+  Globe2, Mail, Phone, ArrowUpRight, Building2, Trash2, Loader2, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -181,24 +181,81 @@ function BuyerIntakeRow({ intake }) {
   );
 }
 
+function NewsletterRow({ subscriber }) {
+  return (
+    <div className="p-5 border-b hairline last:border-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center" data-testid={`admin-newsletter-${subscriber.subscriber_id}`}>
+      <div className="md:col-span-5 text-sm text-[#012D76] truncate">{subscriber.email}</div>
+      <div className="md:col-span-4 text-xs text-[#6B7280]">{subscriber.source_page || "—"}</div>
+      <div className="md:col-span-3 text-xs text-[#6B7280] text-right">
+        {subscriber.submitted_at ? new Date(subscriber.submitted_at).toLocaleString() : "—"}
+      </div>
+    </div>
+  );
+}
+
+const ROLE_LABELS = { buyer: "Buyer", supplier: "Supplier", admin: "Admin" };
+
+function UserRow({ userRow, onDeleted }) {
+  return (
+    <div className="p-5 border-b hairline last:border-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center" data-testid={`admin-user-${userRow.user_id}`}>
+      <div className="md:col-span-3">
+        <div className="font-display text-base text-[#012D76]">{userRow.name || "—"}</div>
+        <div className="text-xs text-[#6B7280] mt-1">{userRow.company || "no company on file"}</div>
+      </div>
+      <div className="md:col-span-3 text-sm text-[#3A4759] truncate">{userRow.email}</div>
+      <div className="md:col-span-1">
+        <span className="text-xs uppercase tracking-widest text-[#012D76]">
+          {ROLE_LABELS[userRow.role] || userRow.role}
+        </span>
+      </div>
+      <div className="md:col-span-2 text-sm text-[#3A4759]">
+        {userRow.supplier_applications || 0} apps · {userRow.buyer_intakes || 0} briefs · {userRow.files || 0} docs
+      </div>
+      <div className="md:col-span-2 text-xs text-[#6B7280]">
+        {userRow.created_at ? new Date(userRow.created_at).toLocaleDateString() : "—"}
+      </div>
+      <div className="md:col-span-1 text-right">
+        <DeleteUserButton userId={userRow.user_id} label={`${userRow.name} (${userRow.email})`} onDeleted={onDeleted} />
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [tab, setTab] = useState("suppliers");
   const [apps, setApps] = useState([]);
   const [intakes, setIntakes] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [newsletterSubs, setNewsletterSubs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [usersError, setUsersError] = useState(null);
+  const [roleFilter, setRoleFilter] = useState("all");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     Promise.allSettled([
       api.get("/supplier/applications"),
       api.get("/buyer/intakes"),
-    ]).then(([appsRes, intakesRes]) => {
+      api.get("/admin/users"),
+      api.get("/newsletter/subscribers"),
+    ]).then(([appsRes, intakesRes, usersRes, newsletterRes]) => {
       if (appsRes.status === "fulfilled") setApps(appsRes.value.data);
       if (intakesRes.status === "fulfilled") setIntakes(intakesRes.value.data);
+      if (usersRes.status === "fulfilled") {
+        setUsers(usersRes.value.data);
+      } else {
+        const msg = usersRes.reason?.response?.data?.detail;
+        setUsersError(typeof msg === "string" ? msg : "Failed to load users");
+      }
+      if (newsletterRes.status === "fulfilled") setNewsletterSubs(newsletterRes.value.data);
       setLoading(false);
     });
   }, []);
+
+  const handleUserDeleted = (deletedUserId) => {
+    setUsers((prev) => prev.filter((u) => u.user_id !== deletedUserId));
+  };
 
   const filteredApps = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -222,6 +279,27 @@ export default function AdminDashboard() {
     () => apps.reduce((sum, a) => sum + (a.documents?.length || 0), 0),
     [apps]
   );
+
+  const filteredUsers = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let rows = users;
+    if (roleFilter !== "all") rows = rows.filter((u) => u.role === roleFilter);
+    if (q) {
+      rows = rows.filter((u) =>
+        [u.name, u.email, u.company]
+          .filter(Boolean).some((v) => String(v).toLowerCase().includes(q))
+      );
+    }
+    return rows;
+  }, [users, query, roleFilter]);
+
+  const filteredNewsletter = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return newsletterSubs;
+    return newsletterSubs.filter((s) =>
+      [s.email, s.source_page].filter(Boolean).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }, [newsletterSubs, query]);
 
   return (
     <PortalShell testid="admin-dashboard-shell">
@@ -258,6 +336,8 @@ export default function AdminDashboard() {
         {[
           { id: "suppliers", label: `Supplier applications (${apps.length})` },
           { id: "buyers", label: `Buyer intakes (${intakes.length})` },
+          { id: "users", label: `Users (${users.length})` },
+          { id: "newsletter", label: `Newsletter (${newsletterSubs.length})` },
         ].map((t) => (
           <button
             key={t.id}
@@ -274,9 +354,33 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {tab === "users" && (
+        <div className="flex items-center gap-2 border-x hairline bg-surface px-5 py-3">
+          {[
+            { id: "all", label: "All" },
+            { id: "buyer", label: "Buyers" },
+            { id: "supplier", label: "Suppliers" },
+            { id: "admin", label: "Admins" },
+          ].map((r) => (
+            <button
+              key={r.id}
+              onClick={() => setRoleFilter(r.id)}
+              data-testid={`admin-user-role-filter-${r.id}`}
+              className={`text-xs px-3 py-1.5 uppercase tracking-widest border transition-colors ${
+                roleFilter === r.id
+                  ? "border-[#012D76] text-[#012D76] bg-[#F5F9FC]"
+                  : "border-transparent text-[#6B7280] hover:text-[#012D76]"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="border-x border-b hairline bg-surface">
         {loading ? (
-          <div className="p-10 text-[#6B7280] text-sm">Loading…</div>
+          <div className="p-10 text-[#6B7280] text-sm" data-testid="admin-loading">Loading…</div>
         ) : tab === "suppliers" ? (
           filteredApps.length === 0 ? (
             <div className="p-10 text-center text-[#6B7280] text-sm">No supplier applications {query && "match your search"}</div>
@@ -287,12 +391,39 @@ export default function AdminDashboard() {
               ))}
             </div>
           )
-        ) : filteredIntakes.length === 0 ? (
-          <div className="p-10 text-center text-[#6B7280] text-sm">No buyer intakes {query && "match your search"}</div>
+        ) : tab === "buyers" ? (
+          filteredIntakes.length === 0 ? (
+            <div className="p-10 text-center text-[#6B7280] text-sm">No buyer intakes {query && "match your search"}</div>
+          ) : (
+            <div data-testid="admin-buyers-list">
+              {filteredIntakes.map((it) => (
+                <BuyerIntakeRow key={it.intake_id} intake={it} />
+              ))}
+            </div>
+          )
+        ) : tab === "newsletter" ? (
+          filteredNewsletter.length === 0 ? (
+            <div className="p-10 text-center text-[#6B7280] text-sm">No newsletter subscribers {query && "match your search"}</div>
+          ) : (
+            <div data-testid="admin-newsletter-list">
+              {filteredNewsletter.map((s) => (
+                <NewsletterRow key={s.subscriber_id} subscriber={s} />
+              ))}
+            </div>
+          )
+        ) : usersError ? (
+          <div className="p-10 text-center text-[#B23B3B] text-sm flex flex-col items-center gap-2" data-testid="admin-users-error">
+            <AlertCircle size={18} />
+            {usersError}
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-10 text-center text-[#6B7280] text-sm" data-testid="admin-users-empty">
+            No users {query || roleFilter !== "all" ? "match your filters" : "found"}
+          </div>
         ) : (
-          <div data-testid="admin-buyers-list">
-            {filteredIntakes.map((it) => (
-              <BuyerIntakeRow key={it.intake_id} intake={it} />
+          <div data-testid="admin-users-list">
+            {filteredUsers.map((u) => (
+              <UserRow key={u.user_id} userRow={u} onDeleted={handleUserDeleted} />
             ))}
           </div>
         )}

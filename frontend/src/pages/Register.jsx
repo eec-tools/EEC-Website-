@@ -69,25 +69,25 @@ export default function Register() {
           <div className="grid grid-cols-2 gap-4">
             <Field label="Name" testid="register-name">
               <input required value={form.name} onChange={(e) => set("name", e.target.value)}
-                className="input-eec" data-testid="register-name-input" />
+                className="mt-2 w-full bg-white border hairline px-4 py-3 text-[#012D76] focus:outline-none focus:border-[#C9A23F]/70" data-testid="register-name-input" />
             </Field>
             <Field label="Company" testid="register-company">
               <input value={form.company} onChange={(e) => set("company", e.target.value)}
-                className="input-eec" data-testid="register-company-input" />
+                className="mt-2 w-full bg-white border hairline px-4 py-3 text-[#012D76] focus:outline-none focus:border-[#C9A23F]/70" data-testid="register-company-input" />
             </Field>
           </div>
           <Field label="Email">
             <input required type="email" value={form.email} onChange={(e) => set("email", e.target.value)}
-              className="input-eec" data-testid="register-email-input" />
+              className="mt-2 w-full bg-white border hairline px-4 py-3 text-[#012D76] focus:outline-none focus:border-[#C9A23F]/70" data-testid="register-email-input" />
           </Field>
           <Field label="Password">
             <div className="relative">
               <input required type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)}
-                className="input-eec pr-12" data-testid="register-password-input" minLength={6} />
+                className="mt-2 w-full bg-white border hairline px-4 py-3 pr-12 text-[#012D76] focus:outline-none focus:border-[#C9A23F]/70" data-testid="register-password-input" minLength={6} />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#012D76]"
+                className="absolute right-1 top-1/2 -translate-y-1/2 p-3.5 text-[#6B7280] hover:text-[#012D76]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 data-testid="register-password-toggle"
               >
@@ -111,7 +111,6 @@ export default function Register() {
           Already registered? <Link to="/login" className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] hover:text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))]">Sign in</Link>
         </div>
       </div>
-      <style>{`.input-eec{margin-top:0.5rem;width:100%;background:#05050A;border:1px solid rgba(255,255,255,0.08);padding:0.75rem 1rem;color:#fff;outline:none;}.input-eec:focus{border-color:rgba(212,175,55,0.5);}`}</style>
     </div>
   );
 }

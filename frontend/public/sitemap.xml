@@ -8,7 +8,7 @@
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://eectrade.com/og-image.png</image:loc>
-      <image:title>India Sourcing and Procurement Consultancy | Verified Suppliers | EEC</image:title>
+      <image:title>Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC</image:title>
       <image:caption>Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia.</image:caption>
     </image:image>
   </url>
@@ -26,6 +26,36 @@
     <loc>https://eectrade.com/categories</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/food-commodities</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/processed-packaged-foods</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/fresh-agricultural</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/healthcare-hospital</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/home-textile-hospitality</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://eectrade.com/categories/eco-friendly-sustainable</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://eectrade.com/services</loc>

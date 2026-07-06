@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import Seo from "@/components/Seo";
+import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 
-const fallbackCategories = [
+export const fallbackCategories = [
   {
     id: "food",
     anchor: "food-commodities",
+    slug: "food-commodities",
     name: "Food Commodities",
     tagline: "Rice, Sugar, Pulses, Lentils, Beans, Seeds, Salt, Edible Oils, Spices",
     image: "/images/categories/food-commodities.jpg",
@@ -20,6 +22,7 @@ const fallbackCategories = [
   {
     id: "processed",
     anchor: "processed-packaged-foods",
+    slug: "processed-packaged-foods",
     name: "Processed and Packaged Foods",
     tagline: "Instant Noodles, Biscuits, Snacks, Peanut Butter, Sauces, Beverages, Frozen Foods, Ready Meals, Private Label Foods",
     image: "/images/categories/processed-packaged-foods.jpg",
@@ -30,9 +33,10 @@ const fallbackCategories = [
   {
     id: "fresh",
     anchor: "fresh-agricultural",
+    slug: "fresh-agricultural",
     name: "Fresh and Agricultural Products",
     tagline: "Fruits, Vegetables, Frozen Fruits, Frozen Vegetables, Herbs, Agricultural Produce, Organic Produce",
-    image: "/images/categories/fresh-agricultural-products.jpg",
+    image: "/images/categories/fresh-agricultural-produce.jpg",
     alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens",
     cta: "Source fresh produce",
     body: "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P., GRASP and amfori BSCI certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
@@ -40,6 +44,7 @@ const fallbackCategories = [
   {
     id: "healthcare",
     anchor: "healthcare-hospital",
+    slug: "healthcare-hospital",
     name: "Healthcare and Hospital Textile Supplies",
     tagline: "Hospital Textiles, Patient Gowns, Scrubs, Surgical Drapes, Hospital Bed Linen, Institutional Uniforms, Curtains, Healthcare Procurement Products",
     image: "/images/categories/healthcare-hospital-textiles.jpg",
@@ -50,6 +55,7 @@ const fallbackCategories = [
   {
     id: "home-textile",
     anchor: "home-textile-hospitality",
+    slug: "home-textile-hospitality",
     name: "Home Textile, Apparel and Hospitality Products",
     tagline: "Bed Linen, Hotel Linen, Towels, Bathrobes, Curtains, Uniforms, Home Textiles, Home Furnishings, Hotel Textiles, Hospitality Products",
     image: "/images/categories/home-textile-apparel-hospitality.jpg",
@@ -60,6 +66,7 @@ const fallbackCategories = [
   {
     id: "eco",
     anchor: "eco-friendly-sustainable",
+    slug: "eco-friendly-sustainable",
     name: "Eco-Friendly, Sustainable and Organic Products",
     tagline: "Organic Foods, Organic Textiles, Sustainable Textiles, Bamboo Products, Coconut-based Products, Areca Leaf Products, Compostable Products, Sustainable Packaging Solutions, Fair Trade Products, Green Alternatives",
     image: "/images/categories/eco-friendly-sustainable-organic.jpg",
@@ -69,7 +76,7 @@ const fallbackCategories = [
   },
 ];
 
-const FAQ = [
+export const FAQ = [
   { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks. Food Commodities covers rice, sugar, pulses, edible oils and spices. Processed and Packaged Foods covers snacks, beverages, frozen foods and ready meals. Fresh and Agricultural Products covers fruits, vegetables and organic produce. Healthcare and Hospital Textile Supplies covers patient gowns, scrubs, surgical drapes, hospital bed linen and institutional uniforms. Home Textile, Apparel and Hospitality Products covers bed linen, towels, uniforms and hotel textiles. Eco-Friendly, Sustainable and Organic Products covers biodegradable packaging, organic textiles and green alternatives." },
   { q: "What certifications does EEC check for food sourcing categories?", a: "Food Commodities suppliers are screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification, with HACCP certification screened as a baseline requirement. Processed and Packaged Foods suppliers are screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification, with IFS Food certification required for suppliers serving German and French buyers. Fresh and Agricultural Products suppliers are screened for GlobalG.A.P., GRASP and amfori BSCI certification." },
   { q: "What certifications does EEC check for textile and healthcare categories?", a: "Healthcare and Hospital Textile Supplies manufacturers are screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Home Textile, Apparel and Hospitality Products manufacturers are screened for BSCI and/or SEDEX audit compliance, with GOTS and OEKO-TEX STEP certification available for organic and sustainable textile requirements." },
@@ -173,7 +180,7 @@ export default function Categories() {
             Active sourcing desks across <span className="gold-text">six categories.</span>
           </p>
           <p className="mt-6 text-[#3A4759] max-w-2xl">
-            We maintain <span className="text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
+            We maintain <span className="text-[#8A6F2B] font-semibold">dedicated supplier benches</span> for each category. Click a category to see the products EEC sources, the certifications screened and the brief format we use.
           </p>
         </div>
       </section>
@@ -190,17 +197,21 @@ export default function Categories() {
                     alt={c.alt || c.name}
                     loading="lazy"
                     decoding="async"
+                    width={IMAGE_DIMENSIONS[c.image]?.width}
+                    height={IMAGE_DIMENSIONS[c.image]?.height}
                     className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700"
                   />
                 </div>
                 <div className="p-8 flex flex-col justify-between">
                   <div>
                     <div className="overline mb-3">{(i + 1).toString().padStart(2, "0")}</div>
-                    <div className="font-display text-2xl text-[#012D76] tracking-tight mb-2">{c.name}</div>
+                    <Link to={`/categories/${c.slug || c.anchor || c.id}`} className="font-display text-2xl text-[#012D76] tracking-tight mb-2 block hover:text-[#8A6F2B] transition-colors" data-testid={`category-link-${c.id}`}>
+                      {c.name}
+                    </Link>
                     <p className="text-[#3A4759] text-sm leading-relaxed">{c.tagline}</p>
                     <p className="text-[#3A4759] text-sm leading-relaxed mt-4">{c.body}</p>
                   </div>
-                  <Link to="/buyer/intake" className="inline-flex items-center gap-2 text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] hover:text-[rgb(201_162_63_/_var(--tw-text-opacity,_1))] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
+                  <Link to="/buyer/intake" className="inline-flex items-center gap-2 text-[#8A6F2B] hover:text-[#8A6F2B] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
                     {c.cta || `Source ${c.name.toLowerCase()}`} →
                   </Link>
                 </div>

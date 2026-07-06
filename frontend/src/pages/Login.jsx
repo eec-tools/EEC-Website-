@@ -66,7 +66,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#012D76]"
+                className="absolute right-1 top-1/2 -translate-y-1/2 p-3.5 text-[#6B7280] hover:text-[#012D76]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 data-testid="login-password-toggle"
               >

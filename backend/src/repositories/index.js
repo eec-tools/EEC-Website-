@@ -4,6 +4,7 @@ const memoryImpls = {
   buyerIntakes: require("./memory/buyerIntakesRepo"),
   supplierApplications: require("./memory/supplierApplicationsRepo"),
   leads: require("./memory/leadsRepo"),
+  newsletterSubscribers: require("./memory/newsletterSubscribersRepo"),
   passwordResetTokens: require("./memory/passwordResetTokensRepo"),
 };
 
@@ -13,6 +14,7 @@ const supabaseImpls = {
   buyerIntakes: require("./supabase/buyerIntakesRepo"),
   supplierApplications: require("./supabase/supplierApplicationsRepo"),
   leads: require("./supabase/leadsRepo"),
+  newsletterSubscribers: require("./supabase/newsletterSubscribersRepo"),
   passwordResetTokens: require("./supabase/passwordResetTokensRepo"),
 };
 
@@ -49,5 +51,6 @@ module.exports = {
   buyerIntakes: proxy("buyerIntakes"),
   supplierApplications: proxy("supplierApplications"),
   leads: proxy("leads"),
+  newsletterSubscribers: proxy("newsletterSubscribers"),
   passwordResetTokens: proxy("passwordResetTokens"),
 };

@@ -276,6 +276,15 @@ input::placeholder, textarea::placeholder {
   animation-play-state: paused;
 }
 
+@keyframes eec-certwall-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.3333%); }
+}
+.animate-certwall-scroll { animation: eec-certwall-scroll 36s linear infinite; }
+.eec-certwall-marquee:hover .animate-certwall-scroll {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -13,6 +13,7 @@ const filesRouter = require("./routes/files");
 const buyerIntakeRouter = require("./routes/buyerIntake");
 const supplierApplicationRouter = require("./routes/supplierApplication");
 const leadsRouter = require("./routes/leads");
+const newsletterRouter = require("./routes/newsletter");
 const adminRouter = require("./routes/admin");
 const googleAuthRouter = require("./routes/googleAuth");
 
@@ -42,6 +43,7 @@ function buildApp() {
   api.use(buyerIntakeRouter);
   api.use(supplierApplicationRouter);
   api.use(leadsRouter);
+  api.use(newsletterRouter);
   api.use(adminRouter);
   api.use(googleAuthRouter);
 

@@ -8,6 +8,7 @@ const tables = {
   buyerIntakes: [],
   supplierApplications: [],
   leads: [],
+  newsletterSubscribers: [],
   passwordResetTokens: [],
 };
 

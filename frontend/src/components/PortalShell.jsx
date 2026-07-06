@@ -34,6 +34,8 @@ export default function PortalShell({ children, testid }) {
         draggable="false"
         loading="lazy"
         decoding="async"
+        width="200"
+        height="200"
         className="pointer-events-none select-none absolute -bottom-24 -right-24 w-[420px] md:w-[560px] lg:w-[720px] opacity-[0.045] -z-10"
         style={{ color: "#012D76" }}
       />
@@ -45,6 +47,8 @@ export default function PortalShell({ children, testid }) {
         draggable="false"
         loading="lazy"
         decoding="async"
+        width="200"
+        height="200"
         className="pointer-events-none select-none hidden lg:block absolute top-16 -left-20 w-[260px] opacity-[0.035] -z-10"
       />
       <div className="relative">{children}</div>

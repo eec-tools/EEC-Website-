@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "./TeamSection.css";
+import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 
 // Add members here — each card reads from this array
 const TEAM = [
@@ -124,6 +125,8 @@ export default function TeamSection() {
                     <img
                       src={member.image}
                       alt={`${member.name}, ${member.role}, Elan Exports Consultancy`}
+                      width={IMAGE_DIMENSIONS[member.image]?.width}
+                      height={IMAGE_DIMENSIONS[member.image]?.height}
                       loading="lazy"
                     />
                   </div>
