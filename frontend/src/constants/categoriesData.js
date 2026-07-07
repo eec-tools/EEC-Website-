@@ -1,0 +1,92 @@
+export const fallbackCategories = [
+  {
+    id: "food",
+    anchor: "food-commodities",
+    slug: "food-commodities",
+    name: "Food Commodities",
+    tagline: "Rice, Sugar, Pulses, Lentils, Beans, Seeds, Salt, Edible Oils, Spices",
+    image: "/images/categories/food-commodities.jpg",
+    alt: "Rice, spices, pulses, edible oils and whole spices laid out for food commodity sourcing",
+    cta: "Source food commodities",
+    body: "EEC sources rice, sugar, pulses, edible oils and spices from manufacturers screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification. HACCP certification is screened as a baseline requirement, with Aflatoxin testing reports, EU Health Certificates and Rainforest Alliance certification coordinated where required by the destination market.",
+  },
+  {
+    id: "processed",
+    anchor: "processed-packaged-foods",
+    slug: "processed-packaged-foods",
+    name: "Processed and Packaged Foods",
+    tagline: "Instant Noodles, Biscuits, Snacks, Peanut Butter, Sauces, Beverages, Frozen Foods, Ready Meals, Private Label Foods",
+    image: "/images/categories/processed-packaged-foods.jpg",
+    alt: "Assorted packaged snacks and confectionery bars for processed and packaged food sourcing",
+    cta: "Source processed foods",
+    body: "EEC sources snacks, beverages, frozen foods and ready meals from manufacturers screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification. IFS Food certification is required for suppliers serving German and French buyers, with Aflatoxin testing reports coordinated where required.",
+  },
+  {
+    id: "fresh",
+    anchor: "fresh-agricultural",
+    slug: "fresh-agricultural",
+    name: "Fresh and Agricultural Products",
+    tagline: "Fruits, Vegetables, Frozen Fruits, Frozen Vegetables, Herbs, Agricultural Produce, Organic Produce",
+    image: "/images/categories/fresh-agricultural-produce.jpg",
+    alt: "Crates of fresh fruits, vegetables and organic produce including peppers, tomatoes, carrots and greens",
+    cta: "Source fresh produce",
+    body: "EEC sources fruits, vegetables and organic produce from farms screened for GlobalG.A.P., GRASP and amfori BSCI certification. Phytosanitary certificates and MRL testing reports are coordinated where required by the destination market.",
+  },
+  {
+    id: "healthcare",
+    anchor: "healthcare-hospital",
+    slug: "healthcare-hospital",
+    name: "Healthcare and Hospital Textile Supplies",
+    tagline: "Patient Gowns, Scrubs, Surgical Drapes, Hospital Bed Linen, Staff Uniforms, Institutional Textiles, Hospital Linens, Medical Consumables",
+    image: "/images/categories/healthcare-hospital-textiles.jpg",
+    alt: "Medical scrubs, surgical drapes and hospital textiles neatly stacked for healthcare sourcing",
+    cta: "Source healthcare textiles",
+    body: "EEC sources hospital textiles, PPE, medical linen and non-regulated consumables from manufacturers screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Medical devices, pharmaceuticals and regulated clinical products are outside EEC scope.",
+  },
+  {
+    id: "home-textile",
+    anchor: "home-textile-hospitality",
+    slug: "home-textile-hospitality",
+    name: "Home Textile, Apparel and Hospitality Products",
+    tagline: "Bed Linen, Hotel Linen, Towels, Bathrobes, Curtains, Uniforms, Home Textiles, Home Furnishings, Hotel Textiles, Hospitality Products",
+    image: "/images/categories/home-textile-apparel-hospitality.jpg",
+    alt: "Bed linen, towels, uniforms and hotel textiles for home textile and hospitality sourcing",
+    cta: "Source home textiles",
+    body: "EEC sources bed linen, towels, uniforms and hotel textiles from manufacturers screened for BSCI and/or SEDEX audit compliance. GOTS and OEKO-TEX STEP certification is available for organic and sustainable textile requirements.",
+  },
+  {
+    id: "eco",
+    anchor: "eco-friendly-sustainable",
+    slug: "eco-friendly-sustainable",
+    name: "Eco-Friendly, Sustainable and Organic Products",
+    tagline: "Organic Foods, Organic Textiles, Sustainable Textiles, Bamboo Products, Coconut-based Products, Areca Leaf Products, Compostable Products, Sustainable Packaging Solutions, Fair Trade Products, Green Alternatives",
+    image: "/images/categories/eco-friendly-sustainable-organic.jpg",
+    alt: "Biodegradable packaging, organic textiles and green alternative products",
+    cta: "Source eco-friendly products",
+    body: "EEC sources biodegradable packaging, organic textiles and green alternatives from manufacturers screened for GOTS certification and EU Organic / NPOP equivalence.",
+  },
+];
+
+export const FAQ = [
+  { q: "What product categories does EEC source?", a: "EEC operates six active sourcing desks. Food Commodities covers rice, sugar, pulses, edible oils and spices. Processed and Packaged Foods covers snacks, beverages, frozen foods and ready meals. Fresh and Agricultural Products covers fruits, vegetables and organic produce. Healthcare and Hospital Textile Supplies covers patient gowns, scrubs, surgical drapes, hospital bed linen and institutional uniforms. Home Textile, Apparel and Hospitality Products covers bed linen, towels, uniforms and hotel textiles. Eco-Friendly, Sustainable and Organic Products covers biodegradable packaging, organic textiles and green alternatives." },
+  { q: "What certifications does EEC check for food sourcing categories?", a: "Food Commodities suppliers are screened for FSSAI registration, BRC/BRCGS and amfori BSCI certification, with HACCP certification screened as a baseline requirement. Processed and Packaged Foods suppliers are screened for BRC/BRCGS, FSSC 22000 and amfori BSCI certification, with IFS Food certification required for suppliers serving German and French buyers. Fresh and Agricultural Products suppliers are screened for GlobalG.A.P., GRASP and amfori BSCI certification." },
+  { q: "What certifications does EEC check for textile and healthcare categories?", a: "Healthcare and Hospital Textile Supplies manufacturers are screened for ISO 9001, OEKO-TEX Standard 100 and BSCI compliance. Home Textile, Apparel and Hospitality Products manufacturers are screened for BSCI and/or SEDEX audit compliance, with GOTS and OEKO-TEX STEP certification available for organic and sustainable textile requirements." },
+  { q: "Does EEC source organic and eco-friendly products?", a: "Yes. Eco-Friendly, Sustainable and Organic Products is one of the six active sourcing desks, covering biodegradable packaging, organic textiles and green alternatives from manufacturers screened for GOTS certification and EU Organic or NPOP equivalence." },
+];
+
+export const REQS = [
+  "Valid IEC (Import Export Code) and GST registration, current and in active compliance",
+  "Established manufacturing operations at the production facility level with a proven export history and prior international shipments.",
+  "Factory audit-ready. BSCI, SEDEX or equivalent audit scheduled within 90 days of network activation",
+  "Documented quality management system (ISO 9001 preferred; internal QMS acceptable if ISO is in progress)",
+  "Demonstrated export experience to North America (NA), Europe (EU), Middle East (ME) or Asia-Pacific (APAC) markets",
+];
+
+export const CERT_CARDS = [
+  { cat: "Food Commodities", certs: ["HACCP", "FSSC 22000", "BRC/BRCGS", "amfori BSCI", "FSSAI", "MRL Testing Reports", "Phytosanitary Certificate", "Aflatoxin Testing Reports", "EU Health Certificate", "Rainforest Alliance"], note: "FSSAI registration is mandatory." },
+  { cat: "Processed and Packaged Foods", certs: ["BRC/BRCGS", "HACCP", "FSSC 22000", "amfori BSCI", "FSSAI", "Aflatoxin Testing Reports"], note: "IFS Food required for buyers in Germany and France." },
+  { cat: "Fresh and Agricultural Products", certs: ["GlobalG.A.P.", "GRASP", "SMETA", "amfori BSCI", "Phytosanitary Certificate", "MRL Testing Reports"], note: null },
+  { cat: "Healthcare and Hospital Textile Supplies", certs: ["ISO 9001", "OEKO-TEX Standard 100", "BSCI"], note: "EEC sources hospital textiles, PPE, medical linen and non-regulated consumables. Medical devices, pharmaceuticals and regulated clinical products are outside EEC scope." },
+  { cat: "Home Textile, Apparel and Hospitality Products", certs: ["BSCI", "SEDEX", "OEKO-TEX Standard 100", "GOTS", "OEKO-TEX STEP"], note: null },
+  { cat: "Eco-Friendly, Sustainable and Organic Products", certs: ["ISO 9001", "GOTS", "EU Organic", "NPOP"], note: null },
+];

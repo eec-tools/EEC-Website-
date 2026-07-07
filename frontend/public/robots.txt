@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /buyer
+Allow: /buyer/intake
+Disallow: /supplier
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+Sitemap: https://eectrade.com/sitemap.xml

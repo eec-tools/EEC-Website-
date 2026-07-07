@@ -1,0 +1,15 @@
+export const IMAGE_DIMENSIONS = {
+  "/images/categories/food-commodities.jpg": { width: 2320, height: 1383 },
+  "/images/categories/processed-packaged-foods.jpg": { width: 2352, height: 1221 },
+  "/images/categories/fresh-agricultural-produce.jpg": { width: 1536, height: 1024 },
+  "/images/categories/healthcare-hospital-textiles.jpg": { width: 2257, height: 1288 },
+  "/images/categories/home-textile-apparel-hospitality.jpg": { width: 2360, height: 1299 },
+  "/images/categories/eco-friendly-sustainable-organic.jpg": { width: 2401, height: 1396 },
+  "/images/hero-image.jpeg": { width: 2257, height: 1288, webp: "/images/hero-image.webp" },
+  "/images/team/shirali-shetty.png": { width: 941, height: 1672 },
+  "/images/team/mohita-vadrevu.png": { width: 1536, height: 2752 },
+  "/images/team/madan-maskara.png": { width: 941, height: 1672 },
+  "/images/team/vandana-ahire.png": { width: 1536, height: 2752 },
+  "/images/team/shovan-karmakar.png": { width: 941, height: 1672 },
+  "/images/EEC-logo-WBG.png": { width: 1254, height: 1254 },
+};

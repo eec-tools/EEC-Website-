@@ -1,0 +1,52 @@
+name: SEO Crawler Parity Audit
+
+on:
+  push:
+    branches: [main]   # Runs on every code push to main
+  workflow_dispatch:   # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  seo-verify:
+    name: Raw HTML vs Rendered DOM Parity Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install frontend dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build Next.js app
+        run: yarn build
+        working-directory: frontend
+
+      - name: Start Next.js production server
+        run: yarn start &
+        working-directory: frontend
+        env:
+          PORT: 3000
+
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000 --timeout 30000
+
+      - name: Run SEO Parity Diff Audit
+        run: node scripts/seo-verify.js
+        working-directory: frontend
+        env:
+          TEST_HOST: http://localhost:3000
+
+      - name: Upload audit log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-audit-failure-log
+          path: frontend/scripts/seo-verify.js

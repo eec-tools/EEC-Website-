@@ -1,0 +1,154 @@
+{
+  "theme_and_archetype": {
+    "domain": "B2B Supply Chain & Exports Consultancy",
+    "theme": "DARK",
+    "archetype": "5 (Luxury) - Premium, Depth, Mystery",
+    "vibe": "Cinematic, moody, expensive, authoritative, highly professional.",
+    "rationale": "For global trade and B2B sourcing, the design needs to evoke immense trust, scale, and premium quality. A cinematic dark mode with gold/amber accents signals 'elite corporate' rather than 'startup tech'. We avoid neon or pure black, favoring deep slate/obsidian to maintain corporate credibility."
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Outfit",
+        "description": "Used for all headings to provide a modern, sleek, and premium tech-forward corporate feel.",
+        "fallback": "sans-serif"
+      },
+      "body": {
+        "family": "Manrope",
+        "description": "Clean, geometric sans-serif for high legibility in dense dashboards and forms.",
+        "fallback": "sans-serif"
+      }
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter font-light to font-medium",
+      "h2": "text-3xl sm:text-4xl tracking-tight font-medium",
+      "h3": "text-2xl sm:text-3xl tracking-tight",
+      "h4": "text-xl sm:text-2xl",
+      "body": "text-base leading-relaxed",
+      "small_labels": "text-xs tracking-[0.2em] uppercase font-semibold"
+    },
+    "rules": [
+      "Headlines > 32px MUST use tracking-tight or tracking-tighter.",
+      "Never center text by default; prioritize left-alignment for B2B readability.",
+      "Overlines/labels must be uppercase, tiny, and widely spaced."
+    ]
+  },
+  "color_palette": {
+    "base": {
+      "background": "#05050A",
+      "surface": "#0C0C14",
+      "surface_elevated": "#14141F"
+    },
+    "accents": {
+      "primary": "#D4AF37",
+      "primary_hover": "#F0C852",
+      "secondary": "#2A2A3A"
+    },
+    "text": {
+      "primary": "#F8F9FA",
+      "secondary": "#A0AEC0",
+      "muted": "#64748B"
+    },
+    "borders": {
+      "default": "rgba(255, 255, 255, 0.08)",
+      "focus": "rgba(212, 175, 55, 0.5)"
+    },
+    "rules": [
+      "No pure black (#000000) or pure white (#FFFFFF) backgrounds. Use tinted grays.",
+      "Only use Gold/Amber (#D4AF37) for primary CTAs, active states, and key highlights.",
+      "Hover state text MUST be explicitly set (e.g., hover:text-white)."
+    ]
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing (p-8 to p-24) to emphasize luxury and breathing room.",
+    "grids": {
+      "marketing_pages": "Mode A (Bento/Tetris Grid) - grid-cols-1 md:grid-cols-8 lg:grid-cols-12 with gap-8. Mix spans (col-span-4, col-span-8) to avoid boring symmetry.",
+      "dashboard_portal": "Mode B (Control Room Grid) - grid-cols-1 md:grid-cols-3 lg:grid-cols-4 with gap-6. Strict hierarchy, every pixel utilized."
+    },
+    "containers": "Max-w-7xl mx-auto px-6 lg:px-8",
+    "rules": [
+      "Containers with borders MUST have internal padding (p-6 or p-8).",
+      "Hero sections must use gradient overlays (e.g., bg-gradient-to-r from-black/80 via-black/50 to-transparent) instead of flat blankets."
+    ]
+  },
+  "surfaces": {
+    "navigation": "Crystal Glassmorphism: backdrop-blur-xl bg-[#05050A]/70, 1px bottom border border-white/10.",
+    "cards_marketing": "Grid Borders or subtle 1px border-white/5, bg-[#0C0C14], hover:-translate-y-1 hover:border-white/20 transition-all.",
+    "cards_dashboard": "Flat Solid: bg-[#0C0C14], border border-white/10, rounded-xl.",
+    "modals": "Heavy Blur: backdrop-blur-2xl bg-[#05050A]/80, 1px inner border."
+  },
+  "components": {
+    "forms": "Use Shadcn customized for Dark Luxury. Dark inputs (bg-[#05050A]), subtle white/10 borders, Amber focus rings.",
+    "buttons": {
+      "primary": "bg-[#D4AF37] text-black font-semibold hover:bg-[#F0C852] transition-colors rounded-none or rounded-sm",
+      "secondary": "bg-transparent border border-white/20 text-white hover:bg-white/5 transition-colors rounded-none or rounded-sm"
+    },
+    "tables": "Shadcn tables for dashboard. Dark headers, subtle border separators, no alternating row colors (too generic)."
+  },
+  "motion": {
+    "marketing": "Lenis smooth scrolling (momentum). Fade-in-up staggered entrance for bento grids.",
+    "interactions": "Subtle scales on cards (scale-[1.02]), opacity fades on links.",
+    "rules": "Disable/reduce motion for prefers-reduced-motion media query."
+  },
+  "icons_and_assets": {
+    "library": "lucide-react (use lightweight, crisp stroke widths, 1.5px or 1px).",
+    "style": "Minimalist, strictly functional. No multi-colored illustrations."
+  },
+  "media_urls": {
+    "hero": [
+      {
+        "url": "https://images.pexels.com/photos/17835642/pexels-photo-17835642.jpeg",
+        "description": "Container ship sailing at night - Use for main Homepage Hero background."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1779700210487-a01758a3c55a",
+        "description": "Empty conference room panoramic city view sunset - Use for About or Services Hero background."
+      }
+    ],
+    "supplier_pages": [
+      {
+        "url": "https://images.unsplash.com/photo-1720036236697-018370867320",
+        "description": "Dark high-tech factory room - Use for Supplier Onboarding/For Suppliers Hero."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1730584474338-aa8d9d186bf7",
+        "description": "Man working on a machine - Use for Supplier features section."
+      }
+    ],
+    "buyer_pages": [
+      {
+        "url": "https://images.pexels.com/photos/28506813/pexels-photo-28506813.jpeg",
+        "description": "Sleek modern office space - Use for 'For Buyers' page."
+      }
+    ],
+    "categories": [
+      {
+        "url": "https://images.pexels.com/photos/262353/pexels-photo-262353.jpeg",
+        "description": "Cargo ship at sunset - Use for Logistics/Shipping category card."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1692975466923-731d262414df",
+        "description": "Train traveling at night - Use for Rail/Inland category card."
+      }
+    ],
+    "trust_signals": [
+      {
+        "url": "https://images.pexels.com/photos/21898300/pexels-photo-21898300.jpeg",
+        "description": "Brand logo placeholder for Trust Bar (Apply grayscale filter and high contrast)."
+      }
+    ]
+  },
+  "testing": {
+    "attributes": "All interactive elements (buttons, forms, links) MUST include a kebab-case data-testid attribute (e.g., data-testid='hero-cta-buyer', data-testid='supplier-submit')."
+  },
+  "instructions_to_main_agent": [
+    "You are building a premium, dark-mode B2B corporate site for Elan Exports Consultancy.",
+    "Implement pure HTML+Tailwind for marketing layouts (Home, Services, About) using bento/asymmetric grids. Avoid Shadcn container constraints here.",
+    "Use Shadcn components for the Dynamic Buyer Portal and Supplier Onboarding Dashboard, heavily restyling them to match the dark luxury palette (#0C0C14 backgrounds, #D4AF37 accents).",
+    "Install and use 'framer-motion' for staggered entrance animations and micro-interactions.",
+    "Ensure all hero images utilize a dark gradient overlay (e.g., from-black/90 to-transparent) to ensure text contrast (APCA compliant).",
+    "Never use placeholder URLs (like placehold.co). Only use the URLs provided in the media_urls section.",
+    "Include 'lucide-react' for all iconography.",
+    "Apply 'data-testid' to ALL interactive elements for automated testing."
+  ]
+}
