@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
 import TeamSection from "@/components/TeamSection";
+import AboutMeFounderSection from "@/components/AboutMeFounderSection";
 
 const BG = "/images/hero-about-buyers.jpg";
 
@@ -98,6 +99,8 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      <AboutMeFounderSection />
 
       <TeamSection />
 
