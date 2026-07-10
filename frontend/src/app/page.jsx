@@ -90,6 +90,21 @@ export default function Home() {
 
   return (
     <div data-testid="home-page">
+      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": FAQ.map(({ q, a }) => ({
+              "@type": "Question",
+              "name": q,
+              "acceptedAnswer": { "@type": "Answer", "text": a }
+            }))
+          })
+        }}
+      />
       <section className="relative overflow-hidden grain pt-6 lg:pt-10" data-testid="hero-section">
         <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-[rgba(201,162,75,0.06)] to-transparent pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-10 pb-20 lg:pb-28 relative">
