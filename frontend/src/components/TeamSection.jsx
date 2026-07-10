@@ -18,25 +18,18 @@ const TEAM = [
     mt: 280,
   },
   {
-    id: "madan-maskara",
-    name: "Madan Maskara",
-    role: "Tech & CRM Lead",
-    image: "/images/team/madan-maskara.png",
-    mt: 160,
-  },
-  {
     id: "vandana-ahire",
     name: "Vandana Ahire",
     role: "Global Procurement Strategist",
     image: "/images/team/vandana-ahire.png",
-    mt: 290,
+    mt: 80,
   },
   {
     id: "shovan-karmakar",
     name: "Shovan Karmakar",
     role: "Supplier Acquisition Specialist",
     image: "/images/team/shovan-karmakar.png",
-    mt: 170,
+    mt: 280,
   },
 ];
 
