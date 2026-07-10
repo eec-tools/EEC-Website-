@@ -3,7 +3,7 @@
 ## Original Problem Statement
 Build a full-stack B2B website for 'Elan Exports Consultancy' with slug 'elan-exports-v2'.
 Pages: Home, For Buyers, For Suppliers, About EEC, Services, Categories.
-Homepage: hero with dark overlay & headline "Cut sourcing risk, landed cost, and supplier uncertainty across your India & Asia supply chain.", dual CTAs (Book Sourcing Call & Apply to Network), trust bar, 6 category cards, 4-step buyer process, 3 pricing tier cards.
+Homepage:- hero with dark overlay & headline "Cut sourcing risk, landed cost, and supplier uncertainty across your India & Asia supply chain.", dual CTAs (Book Sourcing Call & Apply to Network), trust bar, 6 category cards, 4-step buyer process, 3 pricing tier cards.
 Dynamic Buyer Portal — multi-step intake form, dashboard.
 Dynamic Supplier Onboarding — application with IEC/GST/certifications upload.
 Style: premium international trade aesthetic — dark cinematic, gold/amber accents, premium typography.
