@@ -4,7 +4,7 @@ export const metadata = {
   title: "Privacy Policy | Elan Exports Consultancy",
   description: "Privacy Policy for Elan Exports Consultancy. Learn how we collect, use and protect your personal data.",
   alternates: {
-    canonical: "https://eectrade.com/privacy",
+    canonical: "https://www.eectrade.com/privacy",
   },
   robots: {
     index: false,

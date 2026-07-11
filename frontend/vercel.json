@@ -1,11 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://eec-website-backend.vercel.app/api/:path*" },
-    { "source": "/about", "destination": "/about/index.html" },
-    { "source": "/services", "destination": "/services/index.html" },
-    { "source": "/categories", "destination": "/categories/index.html" },
-    { "source": "/for-buyers", "destination": "/for-buyers/index.html" },
-    { "source": "/for-suppliers", "destination": "/for-suppliers/index.html" }
+    { "source": "/api/:path*", "destination": "https://eec-website-backend.vercel.app/api/:path*" }
   ],
   "headers": [
     {

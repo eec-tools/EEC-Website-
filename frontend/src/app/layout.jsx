@@ -10,12 +10,13 @@ export const viewport = {
 };
 
 export const metadata = {
+  metadataBase: new URL("https://www.eectrade.com"),
   title: "Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC",
   description: "Elan Exports Consultancy (EEC) is a Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Open-book costs. Factory-audited suppliers. Incorporated January 2025.",
   keywords: "India sourcing, Asia sourcing, export consultancy, supplier qualification, IEC GST verification, landed cost optimization, Singapore export firm, B2B sourcing",
   authors: [{ name: "Elan Exports Consultancy" }],
   alternates: {
-    canonical: "https://eectrade.com/",
+    canonical: "https://www.eectrade.com/",
   },
   icons: {
     icon: [
@@ -32,10 +33,10 @@ export const metadata = {
     siteName: "Elan Exports Consultancy",
     title: "Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC",
     description: "Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025.",
-    url: "https://eectrade.com/",
+    url: "https://www.eectrade.com/",
     images: [
       {
-        url: "https://eectrade.com/og-image.png",
+        url: "https://www.eectrade.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "Elan Exports Consultancy, Singapore Headquartered sourcing for India and Asia",
@@ -47,7 +48,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Global Sourcing and Procurement Consultancy | Verified Suppliers | EEC",
     description: "Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Incorporated January 2025.",
-    images: ["https://eectrade.com/og-image.png"],
+    images: ["https://www.eectrade.com/og-image.png"],
   },
   robots: {
     index: true,
@@ -77,9 +78,9 @@ export default function RootLayout({ children }) {
               "name": "Elan Exports Consultancy",
               "alternateName": ["EEC", "Elan Exports"],
               "legalName": "Elan Exports Consultancy Pte. Ltd.",
-              "url": "https://eectrade.com/",
-              "logo": "https://eectrade.com/eec-logo.png",
-              "image": "https://eectrade.com/og-image.png",
+              "url": "https://www.eectrade.com/",
+              "logo": "https://www.eectrade.com/eec-logo.png",
+              "image": "https://www.eectrade.com/og-image.png",
               "description": "Elan Exports Consultancy (EEC) is a Singapore Headquartered sourcing consultancy connecting global buyers with verified manufacturers across India and Asia. Open-book costs. Factory-audited suppliers. Incorporated January 2025.",
               "foundingDate": "2025-01-13",
               "areaServed": [
@@ -127,7 +128,7 @@ export default function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "Elan Exports Consultancy",
-              "url": "https://eectrade.com/",
+              "url": "https://www.eectrade.com/",
               "inLanguage": "en"
             })
           }}

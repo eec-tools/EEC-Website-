@@ -4,14 +4,14 @@ export const metadata = {
   title: "For Buyers | India Procurement Sourcing Consultancy | EEC",
   description: "EEC helps institutional buyers source from verified manufacturers worldwide. Headquartered in Singapore, we specialise in supplier qualification, procurement support and sourcing across India, Asia and global markets.",
   alternates: {
-    canonical: "https://eectrade.com/for-buyers",
+    canonical: "https://www.eectrade.com/for-buyers",
   },
   openGraph: {
     type: "website",
     siteName: "Elan Exports Consultancy",
     title: "For Buyers | India Procurement Sourcing Consultancy | EEC",
     description: "EEC helps institutional buyers source from verified manufacturers worldwide. Singapore Headquartered. Open-book costs. Factory-audited suppliers.",
-    url: "https://eectrade.com/for-buyers",
+    url: "https://www.eectrade.com/for-buyers",
   },
 };
 
@@ -26,8 +26,8 @@ export default function ForBuyersPage() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://eectrade.com" },
-              { "@type": "ListItem", position: 2, name: "For Buyers", item: "https://eectrade.com/for-buyers" }
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.eectrade.com" },
+              { "@type": "ListItem", position: 2, name: "For Buyers", item: "https://www.eectrade.com/for-buyers" }
             ]
           })
         }}

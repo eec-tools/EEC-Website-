@@ -33,9 +33,9 @@ EEC identifies, qualifies and audits manufacturers, then connects them with proc
 
 ## Key pages
 
-- Homepage: https://eectrade.com/
-- For Buyers: https://eectrade.com/for-buyers
-- For Suppliers: https://eectrade.com/for-suppliers
-- Categories: https://eectrade.com/categories
-- Services (engagement models): https://eectrade.com/services
-- About / Leadership: https://eectrade.com/about
+- Homepage: https://www.eectrade.com/
+- For Buyers: https://www.eectrade.com/for-buyers
+- For Suppliers: https://www.eectrade.com/for-suppliers
+- Categories: https://www.eectrade.com/categories
+- Services (engagement models): https://www.eectrade.com/services
+- About / Leadership: https://www.eectrade.com/about
