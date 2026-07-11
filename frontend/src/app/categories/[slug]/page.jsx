@@ -25,14 +25,14 @@ export async function generateMetadata(props) {
     title: `${category.name} Sourcing | Verified Manufacturers | EEC`,
     description: category.body,
     alternates: {
-      canonical: `https://www.eectrade.com/categories/${slug}`,
+      canonical: `https://eectrade.com/categories/${slug}`,
     },
     openGraph: {
       type: "website",
       siteName: "Elan Exports Consultancy",
       title: `${category.name} Sourcing | Verified Manufacturers | EEC`,
       description: category.body,
-      url: `https://www.eectrade.com/categories/${slug}`,
+      url: `https://eectrade.com/categories/${slug}`,
     },
   };
 }
@@ -48,7 +48,7 @@ export default async function CategoryPage(props) {
 
   const certEntry = CERT_CARDS.find((c) => c.cat === category.name);
   const related = fallbackCategories.filter((c) => c.id !== category.id).slice(0, 3);
-  const canonical = `https://www.eectrade.com/categories/${slug}`;
+  const canonical = `https://eectrade.com/categories/${slug}`;
 
   return (
     <div data-testid="category-page">
@@ -60,8 +60,8 @@ export default async function CategoryPage(props) {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.eectrade.com" },
-              { "@type": "ListItem", position: 2, name: "Categories", item: "https://www.eectrade.com/categories" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://eectrade.com" },
+              { "@type": "ListItem", position: 2, name: "Categories", item: "https://eectrade.com/categories" },
               { "@type": "ListItem", position: 3, name: category.name, item: canonical }
             ]
           })
@@ -75,7 +75,7 @@ export default async function CategoryPage(props) {
             "@type": "Service",
             "name": `${category.name} Sourcing`,
             "description": category.body,
-            "provider": { "@type": "Organization", "name": "Elan Exports Consultancy", "url": "https://www.eectrade.com" },
+            "provider": { "@type": "Organization", "name": "Elan Exports Consultancy", "url": "https://eectrade.com" },
             "areaServed": ["Europe", "United States", "Middle East", "Asia-Pacific"],
             "url": canonical
           })

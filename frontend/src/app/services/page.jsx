@@ -4,14 +4,14 @@ export const metadata = {
   title: "Global Sourcing and Procurement Services | Singapore Headquartered | EEC",
   description: "EEC provides supplier identification, supplier qualification, procurement support and sourcing strategy for businesses worldwide. Headquartered in Singapore with extensive sourcing expertise across India and Asia.",
   alternates: {
-    canonical: "https://www.eectrade.com/services",
+    canonical: "https://eectrade.com/services",
   },
   openGraph: {
     type: "website",
     siteName: "Elan Exports Consultancy",
     title: "Global Sourcing and Procurement Services | Singapore Headquartered | EEC",
     description: "EEC provides supplier identification, supplier qualification, procurement support and sourcing strategy for businesses worldwide.",
-    url: "https://www.eectrade.com/services",
+    url: "https://eectrade.com/services",
   },
 };
 
@@ -26,8 +26,8 @@ export default function ServicesPage() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.eectrade.com" },
-              { "@type": "ListItem", position: 2, name: "Services", item: "https://www.eectrade.com/services" }
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://eectrade.com" },
+              { "@type": "ListItem", position: 2, name: "Services", item: "https://eectrade.com/services" }
             ]
           })
         }}
@@ -42,7 +42,7 @@ export default function ServicesPage() {
             "provider": {
               "@type": "Organization",
               "name": "Elan Exports Consultancy Pte. Ltd.",
-              "url": "https://www.eectrade.com"
+              "url": "https://eectrade.com"
             },
             "areaServed": ["Europe", "United States", "Middle East", "Asia"],
             "hasOfferCatalog": {

@@ -7,7 +7,6 @@ import { ArrowUpRight, ChevronRight, Quote, Star, BarChart3, Users } from "lucid
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
-import BlogSection from "@/components/blog/BlogSection";
 
 const HERO_IMG = "/images/hero-container-ship.jpg";
 
@@ -325,8 +324,6 @@ export default function Home() {
       <section data-testid="testimonials-section" aria-label="Supplier testimonials">
         <TestimonialsBlock />
       </section>
-
-      <BlogSection />
 
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">

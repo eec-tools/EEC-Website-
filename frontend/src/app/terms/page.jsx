@@ -4,7 +4,7 @@ export const metadata = {
   title: "Terms of Service | Elan Exports Consultancy",
   description: "Terms of Service for Elan Exports Consultancy. Please read these terms carefully before using our platform and services.",
   alternates: {
-    canonical: "https://www.eectrade.com/terms",
+    canonical: "https://eectrade.com/terms",
   },
   robots: {
     index: false,
