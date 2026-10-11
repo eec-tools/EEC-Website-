@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Factory, FileBadge, TrendingUp, Handshake } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { CertGrid } from "@/components/CertLogoMarquee";
+import SupplierExportSupport from "@/components/SupplierExportSupport";
 
 const BG = "/images/hero-suppliers.jpg";
 // TODO: Replace metalworking image with food/textile/packaged goods production image
@@ -80,6 +81,8 @@ export default function ForSuppliers() {
           </div>
         </div>
       </section>
+
+      <SupplierExportSupport />
 
       <section className="py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">

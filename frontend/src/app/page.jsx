@@ -7,6 +7,7 @@ import { ArrowUpRight, ChevronRight, Quote, Star, BarChart3, Users } from "lucid
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
+import HomeServices from "@/components/HomeServices";
 
 const HERO_IMG = "/images/hero-container-ship.jpg";
 
@@ -214,6 +215,8 @@ export default function Home() {
       </section>
 
       <StatsSection />
+
+      <HomeServices />
 
       <section className="py-20 lg:py-28" data-testid="categories-section">
         <div className="mx-auto max-w-7xl px-5 lg:px-10">

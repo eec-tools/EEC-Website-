@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, ShieldCheck, FileSpreadsheet, Award, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { CertLogosMarquee } from "@/components/CertLogoMarquee";
+import BuyerServiceOffers from "@/components/BuyerServiceOffers";
 
 const BG = "/images/hero-about-buyers.jpg";
 
@@ -82,6 +83,8 @@ export default function ForBuyers() {
           </p>
         </div>
       </section>
+
+      <BuyerServiceOffers />
 
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
