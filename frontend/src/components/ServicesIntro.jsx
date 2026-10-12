@@ -38,9 +38,9 @@ const DESTINATIONS = [
 });
 
 const SERVICES = [
-  { n: "01", title: "Supplier Background Check", tag: "For buyers" },
-  { n: "02", title: "India Sourcing Feasibility Snapshot", tag: "For buyers" },
-  { n: "03", title: "Export Readiness Diagnostic", tag: "For suppliers · Limited pilot" },
+  { n: "01", title: "Supplier Background Check", tag: "For buyers", href: "/for-buyers#offer-background-check" },
+  { n: "02", title: "India Sourcing Feasibility Snapshot", tag: "For buyers", href: "/for-buyers#offer-feasibility-snapshot" },
+  { n: "03", title: "Export Readiness Diagnostic", tag: "For suppliers · Limited pilot", href: "/for-suppliers#export-readiness" },
 ];
 
 // The overlay is rendered on the server and animated with CSS, so it covers the page from the
@@ -227,11 +227,22 @@ export default function ServicesIntro() {
         </p>
 
         <ul className="mt-10 grid gap-3 sm:grid-cols-3">
-          {SERVICES.map(({ n, title, tag }, i) => (
-            <li key={n} className="eec-i-card eec-i-rise p-5" style={{ "--d": `${4.8 + i * 0.25}s` }}>
-              <div className="font-display text-2xl text-[#E7C873]">{n}</div>
-              <div className="mt-3 font-display text-lg leading-snug">{title}</div>
-              <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-white/60">{tag}</div>
+          {SERVICES.map(({ n, title, tag, href }, i) => (
+            <li key={n} className="eec-i-card eec-i-rise" style={{ "--d": `${4.8 + i * 0.25}s` }}>
+              <Link
+                href={href}
+                onClick={close}
+                className="group block h-full p-5 transition-colors duration-300 hover:bg-white/10 focus-visible:bg-white/10"
+                data-testid={`services-intro-card-${n}`}
+              >
+                <div className="font-display text-2xl text-[#E7C873]">{n}</div>
+                <div className="mt-3 font-display text-lg leading-snug">{title}</div>
+                <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-white/60">{tag}</div>
+                <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.16em] text-[#E7C873]">
+                  View service
+                  <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </div>
+              </Link>
             </li>
           ))}
         </ul>

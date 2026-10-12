@@ -20,7 +20,7 @@ function BulletList({ items }) {
 
 function FixedFeeOffer({ offer, index }) {
   return (
-    <article className="border hairline bg-white p-7 lg:p-9 flex flex-col" data-testid={`buyer-offer-${offer.id}`}>
+    <article id={`offer-${offer.id}`} className="border hairline bg-white p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
       <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</div>
       <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{offer.title}</h3>
       <p className="mt-4 text-sm text-[#3A4759] leading-relaxed">{offer.intro}</p>
@@ -109,7 +109,7 @@ export default function BuyerServiceOffers() {
   const custom = CUSTOM_SOURCING_OFFER;
 
   return (
-    <section id="buyer-services" className="py-24 border-b hairline bg-surface scroll-mt-20" data-testid="buyer-services">
+    <section id="buyer-services" className="py-24 border-b hairline bg-surface scroll-mt-32" data-testid="buyer-services">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="overline mb-3">EEC Buyer Services</div>
         <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl">
@@ -122,7 +122,7 @@ export default function BuyerServiceOffers() {
           ))}
         </div>
 
-        <article className="mt-6 border hairline bg-white p-7 lg:p-9" data-testid={`buyer-offer-${custom.id}`}>
+        <article id={`offer-${custom.id}`} className="mt-6 border hairline bg-white p-7 lg:p-9 scroll-mt-36" data-testid={`buyer-offer-${custom.id}`}>
           <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer 3</div>
           <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{custom.title}</h3>
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

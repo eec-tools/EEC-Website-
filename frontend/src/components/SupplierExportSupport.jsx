@@ -30,7 +30,7 @@ function BlockHeading({ children }) {
 // with its own application path (not /register?role=supplier).
 export default function SupplierExportSupport() {
   return (
-    <section id="export-readiness" className="py-20 lg:py-24 border-y-4 border-[#C9A23F]/50 bg-[#FDF8EE]/60 scroll-mt-20" data-testid="export-readiness">
+    <section id="export-readiness" className="py-20 lg:py-24 border-y-4 border-[#C9A23F]/50 bg-[#FDF8EE]/60 scroll-mt-32" data-testid="export-readiness">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="overline mb-3">EEC Export Support</div>
         <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl">
