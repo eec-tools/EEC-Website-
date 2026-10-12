@@ -296,7 +296,7 @@ export default function Services() {
                     Go to dashboard <ArrowUpRight size={14} />
                   </Link>
                 ) : (
-                  <Link href="/buyer/intake" className={p.popular ? "eec-btn-primary" : "eec-btn-secondary"} data-testid={`services-pricing-cta-${p.id}`}>
+                  <Link href="/buyer-service-request?service=custom-sourcing" className={p.popular ? "eec-btn-primary" : "eec-btn-secondary"} data-testid={`services-pricing-cta-${p.id}`}>
                     {p.cta} <ArrowUpRight size={14} />
                   </Link>
                 )}
@@ -334,8 +334,8 @@ export default function Services() {
             <div className="font-display text-2xl sm:text-3xl text-[#012D76]">Not sure which service fits?</div>
             <p className="mt-2 text-[#3A4759]">Tell us what you are working on and EEC will recommend the right starting point.</p>
           </div>
-          <Link href="/buyer/intake" className="eec-btn-primary shrink-0" data-testid="services-final-cta-link">
-            Book a free discovery call <ArrowUpRight size={16} />
+          <Link href="/buyer-service-request" className="eec-btn-primary shrink-0" data-testid="services-final-cta-link">
+            Request a Buyer Service <ArrowUpRight size={16} />
           </Link>
         </div>
       </section>

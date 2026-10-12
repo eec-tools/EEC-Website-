@@ -184,17 +184,17 @@ export default function Home() {
                     <Link href={dashboardHref} className="eec-btn-primary group" data-testid="hero-cta-dashboard">
                       Go to dashboard <ArrowUpRight size={16} className="ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
-                    <Link href="/buyer/intake" className="eec-btn-secondary" data-testid="hero-cta-new-brief">
-                      Book a free discovery call <ChevronRight size={16} />
+                    <Link href="/buyer-service-request" className="eec-btn-secondary" data-testid="hero-cta-new-brief">
+                      Request a Buyer Service <ChevronRight size={16} />
                     </Link>
                   </>
                 ) : (
                   <>
-                    <Link href="/buyer/intake" className="eec-btn-primary group" data-testid="hero-cta-buyer">
-                      Submit a sourcing brief <ArrowUpRight size={16} className="ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <Link href="/buyer-service-request" className="eec-btn-primary group" data-testid="hero-cta-buyer">
+                      Request a Buyer Service <ArrowUpRight size={16} className="ml-1 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
-                    <Link href="/buyer/intake" className="eec-btn-secondary" data-testid="hero-cta-supplier">
-                      Book a free discovery call <ChevronRight size={16} />
+                    <Link href="/for-buyers#buyer-services" className="eec-btn-secondary" data-testid="hero-cta-supplier">
+                      Explore Buyer Services <ChevronRight size={16} />
                     </Link>
                   </>
                 )}
@@ -299,8 +299,8 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-14 flex flex-col sm:flex-row gap-3">
-            <Link href="/buyer/intake" className="inline-flex items-center justify-center gap-2 bg-[#C9A23F] text-[#012D76] hover:bg-[#DBB85A] h-14 px-6 text-sm font-medium transition-colors" data-testid="process-cta-book">
-              Book a free 20-min discovery call <ArrowUpRight size={16} />
+            <Link href="/buyer-service-request" className="inline-flex items-center justify-center gap-2 bg-[#C9A23F] text-[#012D76] hover:bg-[#DBB85A] h-14 px-6 text-sm font-medium transition-colors" data-testid="process-cta-book">
+              Request a Buyer Service <ArrowUpRight size={16} />
             </Link>
             <Link href="/for-buyers" className="inline-flex items-center justify-center gap-2 text-[#FFFFFF] hover:bg-white/10 h-14 px-6 text-sm font-medium transition-colors">
               See the buyer playbook
@@ -356,17 +356,17 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-px bg-[#E5EBF2]">
-              <Link href="/buyer/intake" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-buyer">
+              <Link href="/buyer-service-request" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-buyer">
                 <p className="text-xs uppercase tracking-[0.22em] text-[#8A6F2B]">For Buyers</p>
-                <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Book a free 20-minute sourcing call.</h3>
+                <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Request a buyer service.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">No commitment required. EEC maps your category, target landed cost, compliance requirements and a realistic 90-day sourcing plan.</p>
-                <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Book now <ArrowUpRight size={14} /></span>
+                <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Request now <ArrowUpRight size={14} /></span>
               </Link>
-              <Link href="/supplier/apply" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-supplier">
+              <Link href="/register?role=supplier" className="group bg-[#FFFFFF] p-10 lg:p-14 hover:bg-[#F5F9FC] transition-colors duration-500" data-testid="closing-cta-supplier">
                 <p className="text-xs uppercase tracking-[0.22em] text-[#8A6F2B]">For Suppliers</p>
-                <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Apply to the EEC Supplier Network.</h3>
+                <h3 className="font-display text-3xl lg:text-4xl text-[#012D76] mt-4 tracking-tight">Join the EEC Supplier Network.</h3>
                 <p className="text-[#3A4759] mt-4 text-sm leading-relaxed max-w-md">Structured sourcing briefs, defined payment schedules and recurring export programmes. Not one-off spot RFQs.</p>
-                <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Apply now <ArrowUpRight size={14} /></span>
+                <span className="inline-flex items-center gap-2 mt-8 text-[#012D76] font-medium">Join the network <ArrowUpRight size={14} /></span>
               </Link>
             </div>
           )}
@@ -389,9 +389,9 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
-            <p className="text-[#3A4759] text-sm">Still have questions? Book a free 20-minute call.</p>
-            <Link href="/buyer/intake" className="eec-btn-primary" data-testid="faq-cta">
-              Book a discovery call <ArrowUpRight size={14} />
+            <p className="text-[#3A4759] text-sm">Still have questions? Tell us what you need.</p>
+            <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta">
+              Request a Buyer Service <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>

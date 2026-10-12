@@ -38,7 +38,7 @@ const FAQ = [
   { q: "What certifications does EEC consider during supplier evaluation?", a: "Compliance verification is part of our core risk-mitigation process, not an afterthought. Requirements are matched to your destination market and product category, for example, BRC/BRCGS and HACCP for EU food buyers, or IFS Food for German and French accounts.", link: "/for-buyers#certifications", linkText: "Full compliance screening breakdown" },
   { q: "What is a sourcing brief?", a: "A sourcing brief is a document that outlines product specifications, quality expectations, commercial requirements and sourcing objectives. It enables our sourcing specialists to identify manufacturers best suited to the buyer procurement needs." },
   { q: "How do I start working with EEC as a buyer?", a: "The fastest way to start is a free 20-minute discovery call with no commitment required. EEC maps your sourcing category, target landed cost, compliance requirements and timelines. After the call, EEC recommends the appropriate engagement tier and provides a scope and pricing outline within 2 working days. Buyers can also submit a sourcing brief directly through the EEC Buyer Portal, which takes under 5 minutes to complete." },
-  { q: "Why choose Elan Exports Consultancy?", a: "Buyers choose EEC for the same reason they'd hire an in-house procurement office rather than trust a broker: full cost transparency, boots-on-the-ground factory management, and zero hidden trading margins. Every landed cost is modelled open-book before you commit, every supplier is verified independently, and there is no commission sitting between you and the manufacturer's actual price." },
+  { q: "Why choose Elan Exports Consultancy?", a: "Buyers choose EEC for the same reason they'd hire an in-house procurement office rather than trust a broker: full cost transparency, boots-on-the-ground factory management, and zero hidden trading margins. Every landed cost is modelled open-book before you commit, and every supplier is verified independently." },
 ];
 
 export default function ForBuyers() {
@@ -68,11 +68,11 @@ export default function ForBuyers() {
                 Go to dashboard <ArrowUpRight size={16} />
               </Link>
             ) : (
-              <Link href="/buyer/intake" className="eec-btn-primary" data-testid="buyer-cta-brief">
-                Submit a sourcing brief <ArrowUpRight size={16} />
+              <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="buyer-cta-brief">
+                Request a Buyer Service <ArrowUpRight size={16} />
               </Link>
             )}
-            <Link href="/buyer/intake" className="eec-btn-secondary">Book a free discovery call</Link>
+            <Link href="#buyer-services" className="eec-btn-secondary">See buyer services</Link>
           </div>
           <a
             href="#buyer-services"
@@ -159,8 +159,8 @@ export default function ForBuyers() {
           </div>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">See how EEC would work for your category.</p>
-            <Link href="/buyer/intake" className="eec-btn-primary" data-testid="compare-cta-buyers">
-              Submit a sourcing brief <ArrowUpRight size={14} />
+            <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="compare-cta-buyers">
+              Request a Buyer Service <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>
@@ -183,8 +183,8 @@ export default function ForBuyers() {
                 </Link>
               ) : (
                 <>
-                  <Link href="/buyer/intake" className="eec-btn-primary self-start" data-testid="buyer-portal-brief">
-                    Submit a brief <ArrowUpRight size={16} />
+                  <Link href="/buyer-service-request" className="eec-btn-primary self-start" data-testid="buyer-portal-brief">
+                    Request a Buyer Service <ArrowUpRight size={16} />
                   </Link>
                   <p className="text-sm text-[#3A4759]">
                     <Link href="/login" className="text-[#012D76] hover:underline">Already have an account? Sign in.</Link>
@@ -229,7 +229,7 @@ export default function ForBuyers() {
           </div>
           <p className="mt-4 text-xs text-[#6B7280]">Certifications are supplier-held. EEC screens and verifies compliance documentation on every supplier before network approval.</p>
           <div className="mt-4 flex flex-wrap gap-4 items-center">
-            <Link href="/buyer/intake" className="eec-btn-secondary text-sm">Request a supplier audit report</Link>
+            <Link href="/buyer-service-request?service=background-check" className="eec-btn-secondary text-sm">Request a Supplier Background Check</Link>
             <Link href="/for-suppliers#qualification" className="text-sm text-[#012D76] hover:underline">See how suppliers are qualified</Link>
           </div>
         </div>
@@ -253,8 +253,8 @@ export default function ForBuyers() {
           </div>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Ready to discuss your sourcing requirements?</p>
-            <Link href="/buyer/intake" className="eec-btn-primary" data-testid="faq-cta-buyers">
-              Book a free 20-minute call <ArrowUpRight size={14} />
+            <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta-buyers">
+              Request a Buyer Service <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>

@@ -65,7 +65,7 @@ export default function ForSuppliers() {
               </Link>
             ) : (
               <Link href="/register?role=supplier" className="eec-btn-primary" data-testid="supplier-cta-apply">
-                Apply to Network <ArrowUpRight size={16} />
+                Join the Supplier Network <ArrowUpRight size={16} />
               </Link>
             )}
             <Link href="#qualification" className="eec-btn-secondary">See qualification requirements</Link>
@@ -160,7 +160,7 @@ export default function ForSuppliers() {
               </Link>
             ) : (
               <Link href="/register?role=supplier" className="eec-btn-primary mt-8" data-testid="supplier-cta-req-apply">
-                Start application <ArrowUpRight size={16} />
+                Join the Supplier Network <ArrowUpRight size={16} />
               </Link>
             )}
           </div>
@@ -271,7 +271,7 @@ export default function ForSuppliers() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Ready to apply? Start your factory profile now.</p>
             <Link href="/register?role=supplier" className="eec-btn-primary" data-testid="faq-cta-suppliers">
-              Apply to the EEC Network <ArrowUpRight size={14} />
+              Join the Supplier Network <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>
