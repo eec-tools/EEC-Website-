@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
 import HomeServices from "@/components/HomeServices";
+import ServicesIntro from "@/components/ServicesIntro";
 
 const HERO_IMG = "/images/hero-container-ship.jpg";
 
@@ -106,6 +107,7 @@ export default function Home() {
           })
         }}
       />
+      <ServicesIntro />
       <section className="relative overflow-hidden grain pt-6 lg:pt-10" data-testid="hero-section">
         <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-[rgba(201,162,75,0.06)] to-transparent pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-10 pb-20 lg:pb-28 relative">

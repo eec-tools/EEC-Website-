@@ -1,5 +1,5 @@
 // Launch offers (October 2026). Copy is the approved brief wording, so keep it verbatim.
-// Buyer prices (USD 195 / USD 295) are proposed and need EEC approval before launch.
+// Prices are intentionally not shown on the site for now (proposed: USD 195 / USD 295, pending EEC approval).
 
 // Form routes. The forms (Form A / Form B) are built separately; the `service` / `support`
 // query values below are what they should read to prefill the selected service.
@@ -13,7 +13,6 @@ export const BUYER_OFFERS = [
   {
     id: "background-check",
     title: "Supplier Background Check",
-    price: "USD 195 per supplier",
     intro:
       "Before engaging with a new supplier, obtain an independent initial review of publicly available company information and potential risk indicators.",
     provides: [
@@ -27,13 +26,13 @@ export const BUYER_OFFERS = [
     delivery: "Target of 3 working days after payment and receipt of complete required information.",
     important:
       "This is an initial information review, not a factory audit, financial audit, legal investigation or guarantee of supplier reliability.",
+    facts: ["One supplier", "One country", "Target: 3 working days"],
     cta: "REQUEST SUPPLIER BACKGROUND CHECK",
     href: buyerRequestHref("background-check"),
   },
   {
     id: "feasibility-snapshot",
     title: "India Sourcing Feasibility Snapshot",
-    price: "USD 295 per assessment",
     intro:
       "Considering sourcing a product from India? Understand the market opportunities and potential sourcing challenges before committing significant resources.",
     provides: [
@@ -47,6 +46,7 @@ export const BUYER_OFFERS = [
     delivery: "Target of 5 working days after payment and receipt of complete product requirements.",
     important:
       "This service does not include supplier introductions, confirmed quotations, supplier audits or guaranteed pricing.",
+    facts: ["One product", "One destination country", "Target: 5 working days"],
     cta: "REQUEST SOURCING FEASIBILITY SNAPSHOT",
     href: buyerRequestHref("feasibility-snapshot"),
   },

@@ -4,11 +4,11 @@ import { ArrowUpRight } from "lucide-react";
 
 const BUYER_ITEMS = [
   {
-    title: "Supplier Background Check — USD 195",
+    title: "Supplier Background Check",
     desc: "Research and assess essential company information before proceeding with a potential supplier.",
   },
   {
-    title: "India Sourcing Feasibility Snapshot — USD 295",
+    title: "India Sourcing Feasibility Snapshot",
     desc: "Understand the opportunities, potential challenges and feasibility of sourcing your product from India.",
   },
   {
