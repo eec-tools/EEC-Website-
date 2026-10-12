@@ -308,7 +308,7 @@ input::placeholder, textarea::placeholder {
     radial-gradient(ellipse at 50% -10%, rgba(201, 162, 63, 0.28), transparent 55%),
     radial-gradient(ellipse at 50% 120%, rgba(0, 150, 214, 0.22), transparent 55%),
     #012d76;
-  animation: eec-intro-out 0.9s var(--ease) 9s forwards;
+  animation: eec-intro-out 0.9s var(--ease) 19s forwards;
 }
 .eec-intro[data-phase="leaving"] {
   animation: eec-intro-out 0.6s var(--ease) 0s forwards;
@@ -448,7 +448,7 @@ input::placeholder, textarea::placeholder {
 
 .eec-i-progress {
   transform-origin: left;
-  animation: eec-i-draw 9s linear both;
+  animation: eec-i-draw 19s linear both;
 }
 
 @media (prefers-reduced-motion: reduce) {

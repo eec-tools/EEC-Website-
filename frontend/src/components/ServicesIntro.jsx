@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { WORLD_DOTS_PATH } from "@/constants/worldDots";
 
-const TOTAL_MS = 10000; // CSS wipe-out starts at 9.0s and takes 0.9s (see .eec-intro in index.css)
+const TOTAL_MS = 20000; // CSS wipe-out starts at 19.0s and takes 0.9s (see .eec-intro in index.css)
 
 // Plays on every full page load of the homepage (including refresh), but not when someone
 // navigates back to it from another page inside the app.
