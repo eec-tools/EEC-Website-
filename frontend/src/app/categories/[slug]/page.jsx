@@ -115,7 +115,7 @@ export default async function CategoryPage(props) {
             </h1>
             <p className="text-[#3A4759] text-lg leading-relaxed max-w-2xl">{category.tagline}</p>
             <p className="mt-4 text-[#3A4759] leading-relaxed max-w-2xl">{category.body}</p>
-            <Link href="/buyer/intake" className="eec-btn-primary mt-8 inline-flex" data-testid="category-cta-intake">
+            <Link href="/buyer-service-request?service=custom-sourcing" className="eec-btn-primary mt-8 inline-flex" data-testid="category-cta-intake">
               {category.cta || `Source ${category.name.toLowerCase()}`} <ArrowUpRight size={16} />
             </Link>
           </div>

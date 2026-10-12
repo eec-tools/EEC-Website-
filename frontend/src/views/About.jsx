@@ -144,8 +144,8 @@ export default function About() {
                 Go to dashboard <ArrowUpRight size={16} />
               </Link>
             ) : (
-              <Link href="/buyer/intake" className="eec-btn-primary" data-testid="about-cta">
-                Talk to Our Sourcing Team <ArrowUpRight size={16} />
+              <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="about-cta">
+                Request a Buyer Service <ArrowUpRight size={16} />
               </Link>
             )}
           </div>

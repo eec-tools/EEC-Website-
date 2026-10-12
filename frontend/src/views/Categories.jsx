@@ -56,7 +56,7 @@ export default function Categories() {
                     <p className="text-[#3A4759] text-sm leading-relaxed">{c.tagline}</p>
                     <p className="text-[#3A4759] text-sm leading-relaxed mt-4">{c.body}</p>
                   </div>
-                  <Link href="/buyer/intake" className="inline-flex items-center gap-2 text-[#8A6F2B] hover:text-[#8A6F2B] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
+                  <Link href="/buyer-service-request?service=custom-sourcing" className="inline-flex items-center gap-2 text-[#8A6F2B] hover:text-[#8A6F2B] text-sm tracking-wide mt-6 self-start" data-testid={`category-cta-${c.id}`}>
                     {c.cta || `Source ${c.name.toLowerCase()}`} →
                   </Link>
                 </div>

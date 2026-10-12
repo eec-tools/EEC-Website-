@@ -94,45 +94,45 @@ const CTA_CONFIG = {
   "/for-buyers": {
     eyebrow: "Get Started",
     heading: "Start Your Sourcing Engagement with EEC",
-    description: "Response within two working days. The discovery call is free.",
-    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
-    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+    description: "Response within two working days.",
+    primaryCta: { label: "Request a Buyer Service", href: "/buyer-service-request" },
+    secondaryCta: { label: "See buyer services", href: "/for-buyers#buyer-services" },
     footnote: "Singapore HQ | Verified supplier network | India and Asia operations",
   },
   "/for-suppliers": {
     eyebrow: "Ready to apply?",
     heading: "Apply to Join the EEC Verified Supplier Network",
     description: "Applications reviewed within 3 to 5 business days. No listing fees, ever. Manufacturers with active production facilities only.",
-    primaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
-    secondaryCta: { label: "See qualification requirements", href: "/for-suppliers#qualification" },
+    primaryCta: { label: "Join the Supplier Network", href: "/register?role=supplier" },
+    secondaryCta: { label: "Apply for Export Readiness Support", href: "/export-readiness-application" },
     footnote: "Singapore HQ | No supplier listing fees | Active buyer programmes across Europe, US and Middle East",
   },
   "/categories": {
     eyebrow: "Get started",
     heading: "Ready to source from our global supplier network?",
-    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
-    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+    primaryCta: { label: "Request a Buyer Service", href: "/buyer-service-request" },
+    secondaryCta: { label: "Explore Buyer Services", href: "/for-buyers#buyer-services" },
   },
   "/services": {
     eyebrow: "Get Started",
     heading: "Ready to scope your sourcing engagement?",
-    description: "No commitment required. The discovery call is free.",
-    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
-    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+    description: "No commitment required. Response within two working days.",
+    primaryCta: { label: "Request a Buyer Service", href: "/buyer-service-request" },
+    secondaryCta: { label: "Explore Buyer Services", href: "/for-buyers#buyer-services" },
   },
   "/about": {
     eyebrow: "Get Started",
     heading: "Ready to work with EEC?",
-    description: "No commitment required. The discovery call is free.",
-    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
-    secondaryCta: { label: "Book a free discovery call", href: "/buyer/intake" },
+    description: "No commitment required. Response within two working days.",
+    primaryCta: { label: "Request a Buyer Service", href: "/buyer-service-request" },
+    secondaryCta: { label: "Join the Supplier Network", href: "/register?role=supplier" },
   },
   "/": {
     eyebrow: "Get Started",
     heading: "Build Your Sourcing Advantage",
-    description: "From qualified suppliers to landed goods, one team, start to finish. The discovery call is free.",
-    primaryCta: { label: "Submit a sourcing brief", href: "/buyer/intake" },
-    secondaryCta: { label: "Apply to the EEC Network", href: "/register?role=supplier" },
+    description: "From qualified suppliers to landed goods, one team, start to finish.",
+    primaryCta: { label: "Request a Buyer Service", href: "/buyer-service-request" },
+    secondaryCta: { label: "Join the Supplier Network", href: "/register?role=supplier" },
     footnote: "Singapore HQ | Verified supplier network | India and Asia operations",
   },
 };
@@ -253,8 +253,8 @@ export default function NextLayout({ children }) {
                 <Link href="/login" className="text-sm text-[#3A4759] hover:text-[#012D76] tracking-wide" data-testid="nav-login">
                   Sign in
                 </Link>
-                <Link href="/register" className="eec-btn-primary text-xs h-10 px-5" data-testid="nav-apply">
-                  Apply <ArrowUpRight size={14} />
+                <Link href="/services" className="eec-btn-primary text-xs h-10 px-5" data-testid="nav-apply">
+                  Get Started <ArrowUpRight size={14} />
                 </Link>
               </>
             )}
@@ -301,7 +301,7 @@ export default function NextLayout({ children }) {
               ) : (
                 <>
                   <Link href="/login" className="text-[#012D76] py-2" onClick={() => setOpen(false)}>Sign in</Link>
-                  <Link href="/register" className="eec-btn-primary" onClick={() => setOpen(false)}>Apply</Link>
+                  <Link href="/services" className="eec-btn-primary" onClick={() => setOpen(false)}>Get Started</Link>
                 </>
               )}
             </div>
@@ -349,7 +349,7 @@ export default function NextLayout({ children }) {
               <FooterColHeader title="BUYERS" />
               <ul className="space-y-3">
                 <FooterLink to="/for-buyers">For Buyers</FooterLink>
-                <FooterLink to="/buyer/intake">Submit a Sourcing Brief</FooterLink>
+                <FooterLink to="/buyer-service-request">Request a Buyer Service</FooterLink>
                 <FooterLink to="/services">Services</FooterLink>
                 <FooterLink to="/categories">Categories</FooterLink>
               </ul>
@@ -359,7 +359,8 @@ export default function NextLayout({ children }) {
               <FooterColHeader title="SUPPLIERS" />
               <ul className="space-y-3">
                 <FooterLink to="/for-suppliers">For Suppliers</FooterLink>
-                <FooterLink to="/register?role=supplier">Apply to Network</FooterLink>
+                <FooterLink to="/register?role=supplier">Join the Supplier Network</FooterLink>
+                <FooterLink to="/export-readiness-application">Export Readiness Support</FooterLink>
                 <FooterLink to="/about">About Us</FooterLink>
               </ul>
             </div>

@@ -67,11 +67,11 @@ export default function ForBuyers() {
                 Go to dashboard <ArrowUpRight size={16} />
               </Link>
             ) : (
-              <Link href="/buyer/intake" className="eec-btn-primary" data-testid="buyer-cta-brief">
-                Submit a sourcing brief <ArrowUpRight size={16} />
+              <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="buyer-cta-brief">
+                Request a Buyer Service <ArrowUpRight size={16} />
               </Link>
             )}
-            <Link href="/buyer/intake" className="eec-btn-secondary">Book a free discovery call</Link>
+            <Link href="#buyer-services" className="eec-btn-secondary">See buyer services</Link>
           </div>
         </div>
       </section>
@@ -149,8 +149,8 @@ export default function ForBuyers() {
           </div>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">See how EEC would work for your category.</p>
-            <Link href="/buyer/intake" className="eec-btn-primary" data-testid="compare-cta-buyers">
-              Submit a sourcing brief <ArrowUpRight size={14} />
+            <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="compare-cta-buyers">
+              Request a Buyer Service <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>
@@ -173,8 +173,8 @@ export default function ForBuyers() {
                 </Link>
               ) : (
                 <>
-                  <Link href="/buyer/intake" className="eec-btn-primary self-start" data-testid="buyer-portal-brief">
-                    Submit a brief <ArrowUpRight size={16} />
+                  <Link href="/buyer-service-request" className="eec-btn-primary self-start" data-testid="buyer-portal-brief">
+                    Request a Buyer Service <ArrowUpRight size={16} />
                   </Link>
                   <p className="text-sm text-[#3A4759]">
                     <Link href="/login" className="text-[#012D76] hover:underline">Already have an account? Sign in.</Link>
@@ -219,7 +219,7 @@ export default function ForBuyers() {
           </div>
           <p className="mt-4 text-xs text-[#6B7280]">Certifications are supplier-held. EEC screens and verifies compliance documentation on every supplier before network approval.</p>
           <div className="mt-4 flex flex-wrap gap-4 items-center">
-            <Link href="/buyer/intake" className="eec-btn-secondary text-sm">Request a supplier audit report</Link>
+            <Link href="/buyer-service-request?service=background-check" className="eec-btn-secondary text-sm">Request a Supplier Background Check</Link>
             <Link href="/for-suppliers#qualification" className="text-sm text-[#012D76] hover:underline">See how suppliers are qualified</Link>
           </div>
         </div>
@@ -243,8 +243,8 @@ export default function ForBuyers() {
           </div>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Ready to discuss your sourcing requirements?</p>
-            <Link href="/buyer/intake" className="eec-btn-primary" data-testid="faq-cta-buyers">
-              Book a free 20-minute call <ArrowUpRight size={14} />
+            <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta-buyers">
+              Request a Buyer Service <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>
