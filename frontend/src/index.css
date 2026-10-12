@@ -490,3 +490,16 @@ input::placeholder, textarea::placeholder {
 @media (prefers-reduced-motion: reduce) {
   .eec-new-pulse, .eec-announce, .eec-glow { animation: none; }
 }
+
+
+/* The "new service" card theme: gold frame on warm cream, used wherever the October 2026
+   services appear (homepage hero, buyer offers, supplier export support, services page). */
+.eec-new-card {
+  border: 2px solid #c9a23f;
+  background: rgba(253, 248, 238, 0.72);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.eec-new-card:hover {
+  box-shadow: 0 18px 40px -22px rgba(166, 131, 31, 0.75);
+}
+.eec-new-card--lift:hover { transform: translateY(-3px); }

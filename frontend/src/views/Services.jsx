@@ -120,14 +120,17 @@ const FAQ = [
 function OfferCard({ id, icon: Icon, title, badge, desc, facts, cta, href, detailHref }) {
   return (
     <article
-      className="group flex flex-col border hairline bg-white p-7 lg:p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A23F] hover:shadow-[0_18px_40px_-20px_rgba(1,45,118,0.35)]"
+      className="eec-new-card eec-new-card--lift group flex flex-col p-7 lg:p-8"
       data-testid={`services-offer-${id}`}
     >
       <div className="flex items-start justify-between gap-4">
         <Icon size={28} className="text-[#8A6F2B]" aria-hidden="true" />
-        {badge && (
-          <span className="bg-[#C9A23F] text-black text-[10px] tracking-[0.2em] uppercase font-semibold px-3 py-1">{badge}</span>
-        )}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <NewBadge />
+          {badge && (
+            <span className="border border-[#C9A23F] bg-white text-[#012D76] text-[10px] tracking-[0.2em] uppercase font-semibold px-3 py-0.5">{badge}</span>
+          )}
+        </div>
       </div>
       <h3 className="font-display text-2xl text-[#012D76] mt-6 mb-3">{title}</h3>
       <p className="text-sm text-[#3A4759] leading-relaxed">{desc}</p>

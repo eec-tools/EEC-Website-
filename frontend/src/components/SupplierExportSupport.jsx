@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import NewBadge from "@/components/NewBadge";
 import {
   SUPPLIER_ASSESSMENT_AREAS,
   SUPPLIER_DELIVERABLES,
@@ -30,9 +31,12 @@ function BlockHeading({ children }) {
 // with its own application path (not /register?role=supplier).
 export default function SupplierExportSupport() {
   return (
-    <section id="export-readiness" className="py-20 lg:py-24 border-y-4 border-[#C9A23F]/50 bg-[#FDF8EE]/60 scroll-mt-32" data-testid="export-readiness">
+    <section id="export-readiness" className="py-20 lg:py-24 border-y-4 border-[#C9A23F]/50 bg-white scroll-mt-32" data-testid="export-readiness">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="overline mb-3">EEC Export Support</div>
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <NewBadge />
+          <div className="overline">EEC Export Support</div>
+        </div>
         <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl">
           EEC Export Readiness Diagnostic
         </h2>
@@ -47,17 +51,17 @@ export default function SupplierExportSupport() {
         </p>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="border hairline bg-white p-7 lg:p-9">
+          <div className="eec-new-card p-7 lg:p-9">
             <BlockHeading>What EEC will assess</BlockHeading>
             <CheckList items={SUPPLIER_ASSESSMENT_AREAS} />
           </div>
-          <div className="border hairline bg-white p-7 lg:p-9">
+          <div className="eec-new-card p-7 lg:p-9">
             <BlockHeading>What participating companies receive</BlockHeading>
             <CheckList items={SUPPLIER_DELIVERABLES} />
           </div>
         </div>
 
-        <div className="mt-6 border hairline bg-white p-7 lg:p-9">
+        <div className="eec-new-card mt-6 p-7 lg:p-9">
           <BlockHeading>Pilot Terms</BlockHeading>
           <CheckList items={SUPPLIER_PILOT_TERMS} />
           <Link href={SUPPLIER_DIAGNOSTIC_CTA.href} className="eec-btn-primary mt-8" data-testid="export-diagnostic-cta">

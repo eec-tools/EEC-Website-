@@ -92,7 +92,7 @@ export default function ForSuppliers() {
                 </Link>
               </div>
             </div>
-            <div className="border-2 border-[#C9A23F] bg-[#FDF8EE]/70 p-7 lg:p-8 flex flex-col">
+            <div className="eec-new-card p-7 lg:p-8 flex flex-col">
               <div className="flex items-center gap-3">
                 <NewBadge />
                 <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Option B · Export Support</span>

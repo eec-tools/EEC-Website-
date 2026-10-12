@@ -21,8 +21,11 @@ function BulletList({ items }) {
 
 function FixedFeeOffer({ offer, index }) {
   return (
-    <article id={`offer-${offer.id}`} className="border hairline bg-white p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
-      <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</div>
+    <article id={`offer-${offer.id}`} className="eec-new-card p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
+      <div className="flex items-center gap-3">
+        <NewBadge />
+        <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</span>
+      </div>
       <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{offer.title}</h3>
       <p className="mt-3 text-sm font-semibold text-[#8A6F2B]" data-testid={`buyer-offer-pricing-${offer.id}`}>
         Pricing will be shared after you submit a request.
@@ -45,7 +48,7 @@ function FixedFeeOffer({ offer, index }) {
         </div>
       </dl>
 
-      <p className="mt-5 border hairline border-[#C9A23F]/60 bg-[#FDF8EE] p-4 text-sm text-[#5C3A00] leading-relaxed">
+      <p className="mt-5 border hairline border-[#C9A23F]/60 bg-white p-4 text-sm text-[#5C3A00] leading-relaxed">
         <span className="font-semibold">Important:</span> {offer.important}
       </p>
 
@@ -68,7 +71,7 @@ function Chooser() {
           <a
             key={o.id}
             href={`#offer-${o.id}`}
-            className="group block border hairline bg-white p-5 transition-all duration-300 hover:border-[#C9A23F] hover:-translate-y-0.5"
+            className="eec-new-card eec-new-card--lift group block p-5"
           >
             <div className="font-display text-lg text-[#012D76] leading-snug">{o.title}</div>
             <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
@@ -165,8 +168,11 @@ export default function BuyerServiceOffers() {
           ))}
         </div>
 
-        <article id={`offer-${custom.id}`} className="mt-6 border hairline bg-white p-7 lg:p-9 scroll-mt-36" data-testid={`buyer-offer-${custom.id}`}>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer 3</div>
+        <article id={`offer-${custom.id}`} className="eec-new-card mt-6 p-7 lg:p-9 scroll-mt-36" data-testid={`buyer-offer-${custom.id}`}>
+          <div className="flex items-center gap-3">
+            <NewBadge />
+            <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer 3</span>
+          </div>
           <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{custom.title}</h3>
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div>
