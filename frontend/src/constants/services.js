@@ -27,6 +27,8 @@ export const BUYER_OFFERS = [
     important:
       "This is an initial information review, not a factory audit, financial audit, legal investigation or guarantee of supplier reliability.",
     facts: ["One supplier", "One country", "Target: 3 working days"],
+    useWhen: "You already have a supplier in mind and want an independent check before engaging with them.",
+    compare: { scope: "One supplier, one country", delivery: "3 working days (target)" },
     cta: "REQUEST SUPPLIER BACKGROUND CHECK",
     href: buyerRequestHref("background-check"),
   },
@@ -47,6 +49,8 @@ export const BUYER_OFFERS = [
     important:
       "This service does not include supplier introductions, confirmed quotations, supplier audits or guaranteed pricing.",
     facts: ["One product", "One destination country", "Target: 5 working days"],
+    useWhen: "You are considering sourcing a product from India and want to know if it is feasible before committing resources.",
+    compare: { scope: "One product, one destination country", delivery: "5 working days (target)" },
     cta: "REQUEST SOURCING FEASIBILITY SNAPSHOT",
     href: buyerRequestHref("feasibility-snapshot"),
   },
@@ -64,6 +68,8 @@ export const CUSTOM_SOURCING_OFFER = {
     "Ongoing outsourced sourcing assistance.",
   ],
   note: "Assignments are scoped and priced individually according to product requirements, sourcing complexity and the level of support required.",
+  useWhen: "You need suppliers identified, quotations compared or ongoing sourcing assistance.",
+  compare: { scope: "Scoped to your requirements", delivery: "Agreed in your proposal" },
   cta: "REQUEST A CUSTOM SOURCING PROPOSAL",
   href: buyerRequestHref("custom-sourcing"),
 };

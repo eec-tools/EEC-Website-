@@ -6,6 +6,7 @@ import { ArrowUpRight, Factory, FileBadge, TrendingUp, Handshake } from "lucide-
 import { useAuth } from "@/context/AuthContext";
 import { CertGrid } from "@/components/CertLogoMarquee";
 import SupplierExportSupport from "@/components/SupplierExportSupport";
+import NewBadge from "@/components/NewBadge";
 
 const BG = "/images/hero-suppliers.jpg";
 // TODO: Replace metalworking image with food/textile/packaged goods production image
@@ -68,6 +69,44 @@ export default function ForSuppliers() {
               </Link>
             )}
             <Link href="#qualification" className="eec-btn-secondary">See qualification requirements</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b hairline bg-surface py-14 lg:py-16" data-testid="supplier-path-chooser">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="overline mb-3">Two ways to work with EEC</div>
+          <h2 className="font-display text-2xl sm:text-3xl text-[#012D76] tracking-tight font-light max-w-3xl">
+            Choose the one that fits where your company is today.
+          </h2>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border hairline bg-white p-7 lg:p-8 flex flex-col">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[#6B7280] font-semibold">Option A · Supplier Network</div>
+              <h3 className="font-display text-2xl text-[#012D76] mt-3">Join the EEC Supplier Network</h3>
+              <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
+                For manufacturers ready to be qualified and matched with named buyer requirements. Includes document review and a factory assessment. Trading and re-export businesses are not eligible.
+              </p>
+              <div className="mt-auto pt-6">
+                <Link href="#qualification" className="eec-btn-secondary" data-testid="supplier-path-network">
+                  See requirements &amp; apply <ArrowUpRight size={16} />
+                </Link>
+              </div>
+            </div>
+            <div className="border-2 border-[#C9A23F] bg-[#FDF8EE]/70 p-7 lg:p-8 flex flex-col">
+              <div className="flex items-center gap-3">
+                <NewBadge />
+                <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Option B · Export Support</span>
+              </div>
+              <h3 className="font-display text-2xl text-[#012D76] mt-3">Check your Export Readiness</h3>
+              <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
+                For manufacturers and exporters who want to know how ready they are for international buyers. A desk-based assessment with a readiness score and a 90-day action plan. Separate from the Supplier Network application. Complimentary pilot for the first 10 qualified companies.
+              </p>
+              <div className="mt-auto pt-6">
+                <Link href="#export-readiness" className="eec-btn-primary" data-testid="supplier-path-diagnostic">
+                  See the diagnostic <ArrowUpRight size={16} />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

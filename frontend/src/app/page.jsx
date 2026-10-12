@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
 import HomeServices from "@/components/HomeServices";
 import ServicesIntro from "@/components/ServicesIntro";
+import NewBadge from "@/components/NewBadge";
 
 const HERO_IMG = "/images/hero-container-ship.jpg";
 
@@ -113,6 +114,16 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 lg:px-10 pb-20 lg:pb-28 relative">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
             <div className="lg:col-span-7">
+              <a
+                href="#our-services"
+                className="eec-announce group mb-5 inline-flex max-w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm text-white shadow-[0_10px_30px_-12px_rgba(1,45,118,0.6)]"
+                data-testid="hero-new-services"
+              >
+                <NewBadge className="eec-new-pulse" />
+                <span className="font-medium">Sourcing &amp; Export Support Services are here</span>
+                <span className="text-white/75">Background Check · Feasibility Snapshot · Export Diagnostic</span>
+                <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </a>
               <div className="flex flex-wrap gap-2">
                 <span className="overline">Singapore Headquartered</span>
                 <span className="overline">India operations</span>

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import NewBadge from "@/components/NewBadge";
 
 const BUYER_ITEMS = [
   {
@@ -51,7 +52,10 @@ export default function HomeServices() {
   return (
     <section id="our-services" className="py-20 lg:py-28 border-t hairline bg-surface" data-testid="services-section">
       <div className="mx-auto max-w-7xl px-5 lg:px-10">
-        <span className="overline">Our Services</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <NewBadge className="eec-new-pulse" />
+          <span className="overline">Our Services</span>
+        </div>
         <h2 className="font-display text-4xl lg:text-5xl text-[#012D76] mt-5 max-w-3xl tracking-tight">
           EEC&apos;s New Sourcing &amp; Export Support Services
         </h2>
@@ -63,10 +67,10 @@ export default function HomeServices() {
           decisions and manufacturers prepare for international markets.
         </p>
 
-        <div className="mt-12 grid md:grid-cols-2 gap-px bg-[#E5EBF2] border hairline">
+        <div className="eec-glow mt-12"><div className="grid md:grid-cols-2 gap-px bg-[#E5EBF2]">
           <ServiceColumn label="For International Buyers" items={BUYER_ITEMS} />
           <ServiceColumn label="For Manufacturers & Exporters" items={SUPPLIER_ITEMS} />
-        </div>
+        </div></div>
 
         <div className="mt-10 flex flex-wrap gap-4">
           <Link href="/for-buyers#buyer-services" className="eec-btn-primary" data-testid="services-cta-buyers">

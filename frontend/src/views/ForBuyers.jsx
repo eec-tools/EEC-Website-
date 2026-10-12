@@ -6,6 +6,7 @@ import { ArrowUpRight, ShieldCheck, FileSpreadsheet, Award, User } from "lucide-
 import { useAuth } from "@/context/AuthContext";
 import { CertLogosMarquee } from "@/components/CertLogoMarquee";
 import BuyerServiceOffers from "@/components/BuyerServiceOffers";
+import NewBadge from "@/components/NewBadge";
 
 const BG = "/images/hero-about-buyers.jpg";
 
@@ -73,6 +74,15 @@ export default function ForBuyers() {
             )}
             <Link href="/buyer/intake" className="eec-btn-secondary">Book a free discovery call</Link>
           </div>
+          <a
+            href="#buyer-services"
+            className="mt-6 inline-flex flex-wrap items-center gap-3 border hairline border-[#C9A23F]/70 bg-white/80 px-4 py-3 text-sm text-[#012D76] backdrop-blur-sm transition-colors hover:bg-white"
+            data-testid="buyer-new-services-link"
+          >
+            <NewBadge />
+            <span>Just need a quick check? Supplier Background Check &amp; India Sourcing Feasibility Snapshot</span>
+            <span aria-hidden="true">↓</span>
+          </a>
         </div>
       </section>
 

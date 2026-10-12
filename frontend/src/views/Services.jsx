@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, Check, Search, ClipboardCheck, FileBarChart, Anchor, ShieldCheck, Compass, Handshake, Gauge, Globe } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import NewBadge from "@/components/NewBadge";
 import { ENGAGEMENT_TIERS } from "@/constants/engagementTiers";
 import {
   BUYER_OFFERS,
@@ -182,7 +183,7 @@ export default function Services() {
 
       <section id="buyer-services" className="py-20 lg:py-24 scroll-mt-20" data-testid="services-buyer-section">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="overline mb-3">For international buyers</div>
+          <div className="flex flex-wrap items-center gap-3 mb-3"><NewBadge /><div className="overline">For international buyers</div></div>
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl mb-4">
             Know your supplier and your market before you commit.
           </h2>
@@ -203,7 +204,7 @@ export default function Services() {
 
       <section id="supplier-services" className="py-20 lg:py-24 border-t hairline bg-surface scroll-mt-20" data-testid="services-supplier-section">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="overline mb-3">For manufacturers &amp; exporters</div>
+          <div className="flex flex-wrap items-center gap-3 mb-3"><NewBadge /><div className="overline">For manufacturers &amp; exporters</div></div>
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl mb-4">
             Find out how ready you are to win international business.
           </h2>

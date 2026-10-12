@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
+import NewBadge from "@/components/NewBadge";
 import { BUYER_OFFERS, CUSTOM_SOURCING_OFFER, SERVICE_TERMS } from "@/constants/services";
 
 function BulletList({ items }) {
@@ -54,6 +55,37 @@ function FixedFeeOffer({ offer, index }) {
         </Link>
       </div>
     </article>
+  );
+}
+
+function Chooser() {
+  const options = [...BUYER_OFFERS, CUSTOM_SOURCING_OFFER];
+  return (
+    <div className="mt-10" data-testid="buyer-service-chooser">
+      <div className="text-xs uppercase tracking-[0.14em] text-[#012D76] font-semibold mb-4">Which service is right for you?</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {options.map((o) => (
+          <a
+            key={o.id}
+            href={`#offer-${o.id}`}
+            className="group block border hairline bg-white p-5 transition-all duration-300 hover:border-[#C9A23F] hover:-translate-y-0.5"
+          >
+            <div className="font-display text-lg text-[#012D76] leading-snug">{o.title}</div>
+            <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
+              <span className="font-semibold text-[#012D76]">Choose this if: </span>
+              {o.useWhen}
+            </p>
+            <dl className="mt-4 space-y-1 text-xs text-[#3A4759]">
+              <div><dt className="inline font-semibold text-[#012D76]">Covers: </dt><dd className="inline">{o.compare.scope}</dd></div>
+              <div><dt className="inline font-semibold text-[#012D76]">Delivery: </dt><dd className="inline">{o.compare.delivery}</dd></div>
+            </dl>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.14em] text-[#8A6F2B]">
+              See details <span aria-hidden="true">↓</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -114,12 +146,20 @@ export default function BuyerServiceOffers() {
   return (
     <section id="buyer-services" className="py-24 border-b hairline bg-surface scroll-mt-32" data-testid="buyer-services">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="overline mb-3">EEC Buyer Services</div>
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <NewBadge />
+          <div className="overline">EEC Buyer Services</div>
+        </div>
         <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl">
           Sourcing &amp; Export Support Services for International Buyers
         </h2>
+        <p className="mt-4 text-[#3A4759] leading-relaxed max-w-3xl">
+          Quick, fixed-scope research services. They are separate from EEC&apos;s full sourcing programme and the Buyer Portal, so you can start with one focused piece of work.
+        </p>
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <Chooser />
+
+        <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {BUYER_OFFERS.map((offer, i) => (
             <FixedFeeOffer key={offer.id} offer={offer} index={i} />
           ))}

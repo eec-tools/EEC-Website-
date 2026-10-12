@@ -7,13 +7,14 @@ import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRigh
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { api, formatApiErrorDetail } from "@/lib/api";
+import NewBadge from "@/components/NewBadge";
 
 const NAV = [
   { to: "/", label: "Home" },
   { to: "/for-buyers", label: "For Buyers" },
   { to: "/for-suppliers", label: "For Suppliers" },
   { to: "/categories", label: "Categories" },
-  { to: "/services", label: "Services" },
+  { to: "/services", label: "Services", isNew: true },
   { to: "/about", label: "About" },
 ];
 
@@ -225,6 +226,7 @@ export default function NextLayout({ children }) {
                   }`}
                 >
                   {n.label}
+                  {n.isNew && <NewBadge className="eec-new-pulse ml-2 align-middle" />}
                 </Link>
               );
             })}
@@ -286,6 +288,7 @@ export default function NextLayout({ children }) {
                     data-testid={`mobile-nav-${n.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {n.label}
+                    {n.isNew && <NewBadge className="eec-new-pulse ml-2 align-middle" />}
                   </Link>
                 );
               })}
