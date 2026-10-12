@@ -1,5 +1,10 @@
 const { z } = require("zod");
 const SOURCING_CATEGORIES = require("../data/sourcingCategories");
+const {
+  BUYER_SERVICES,
+  SUPPLIER_SUPPORT_TYPES,
+  BUSINESS_TYPES,
+} = require("../data/serviceRequests");
 
 const email = z.string().email();
 
@@ -100,7 +105,120 @@ const newsletterSubscribeSchema = z.object({
   source_page: z.string().nullable().optional(),
 });
 
+// ---- Public enquiry forms (Form A / Form B) ----
+// Form A arrives as multipart/form-data, so every value is a string.
+
+const text = (label, max = 300) =>
+  z.preprocess(
+    (v) => (typeof v === "string" ? v.trim() : v),
+    z
+      .string({ required_error: `${label} is required.`, invalid_type_error: `${label} is required.` })
+      .min(1, `${label} is required.`)
+      .max(max, `${label} is too long.`)
+  );
+
+const optionalText = (label, max = 300) =>
+  z.preprocess(
+    (v) => (typeof v === "string" ? v.trim() : v ?? ""),
+    z.string().max(max, `${label} is too long.`)
+  );
+
+const formEmail = z.preprocess(
+  (v) => (typeof v === "string" ? v.trim() : v),
+  z
+    .string({ required_error: "Business email is required." })
+    .email("Enter a valid business email address.")
+    .max(254, "Business email is too long.")
+);
+
+const mustAgree = (message) =>
+  z.preprocess((v) => v === true || v === "true" || v === "on", z.literal(true, { errorMap: () => ({ message }) }));
+
+const requireWhen = (ctx, data, fields) => {
+  for (const [key, label] of fields) {
+    if (!data[key]) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [key], message: `${label} is required.` });
+  }
+};
+
+const buyerServiceRequestSchema = z
+  .object({
+    full_name: text("Full name", 120),
+    company_name: text("Company name", 200),
+    company_website: text("Company website", 300),
+    country: text("Country", 100),
+    business_email: formEmail,
+    contact_number: text("Contact number", 40),
+    service: z.enum(Object.keys(BUYER_SERVICES), {
+      errorMap: () => ({ message: "Select a service." }),
+    }),
+    product_category: text("Product / product category", 300),
+    supplier_name: optionalText("Supplier name", 200),
+    supplier_website: optionalText("Supplier website", 300),
+    supplier_country: optionalText("Supplier country", 100),
+    product_specifications: optionalText("Product specifications", 4000),
+    destination_country: optionalText("Intended destination country", 100),
+    order_quantity: optionalText("Estimated order quantity", 200),
+    purchasing_timeline: optionalText("Expected purchasing timeline", 200),
+    additional_information: optionalText("Additional information", 4000),
+    consent_accuracy_privacy: mustAgree("Please confirm the accuracy and privacy statement."),
+    consent_service_terms: mustAgree("Please agree to the Service Terms."),
+  })
+  .superRefine((data, ctx) => {
+    if (data.service === "background-check") {
+      requireWhen(ctx, data, [
+        ["supplier_name", "Supplier name"],
+        ["supplier_website", "Supplier website"],
+        ["supplier_country", "Supplier country"],
+      ]);
+    }
+    if (data.service === "feasibility-snapshot") {
+      requireWhen(ctx, data, [
+        ["product_specifications", "Product specifications"],
+        ["destination_country", "Intended destination country"],
+      ]);
+    }
+    // "For sourcing enquiries" in the brief: Feasibility Snapshot and Custom Sourcing.
+    if (data.service === "feasibility-snapshot" || data.service === "custom-sourcing") {
+      requireWhen(ctx, data, [
+        ["order_quantity", "Estimated order quantity"],
+        ["purchasing_timeline", "Expected purchasing timeline"],
+      ]);
+    }
+  });
+
+const supplierExportApplicationSchema = z
+  .object({
+    full_name: text("Full name", 120),
+    company_name: text("Company name", 200),
+    country: text("Country", 100),
+    company_website: optionalText("Company website", 300),
+    business_email: formEmail,
+    contact_number: text("Contact number", 40),
+    business_type: z.enum(BUSINESS_TYPES, {
+      errorMap: () => ({ message: "Select whether you are a manufacturer, exporter or trader." }),
+    }),
+    main_product: text("Main product / product category", 300),
+    currently_exporting: z.enum(["Yes", "No"], {
+      errorMap: () => ({ message: "Tell us whether you are currently exporting." }),
+    }),
+    current_export_countries: optionalText("Current export countries", 500),
+    target_export_countries: text("Target export countries", 500),
+    main_export_challenges: text("Main export challenges", 4000),
+    support_sought: text("What support you are seeking", 4000),
+    support_type: z.enum(Object.keys(SUPPLIER_SUPPORT_TYPES), {
+      errorMap: () => ({ message: "Select the Complimentary Diagnostic Pilot or Paid Export Support." }),
+    }),
+    consent_eligibility_privacy: mustAgree("Please confirm the eligibility and privacy statement."),
+  })
+  .superRefine((data, ctx) => {
+    if (data.currently_exporting === "Yes") {
+      requireWhen(ctx, data, [["current_export_countries", "Current export countries"]]);
+    }
+  });
+
 module.exports = {
+  buyerServiceRequestSchema,
+  supplierExportApplicationSchema,
   registerSchema,
   loginSchema,
   passwordResetRequestSchema,

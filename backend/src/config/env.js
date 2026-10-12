@@ -45,6 +45,13 @@ const config = {
     return process.env.SMTP_FROM || this.smtpUsername || "no-reply@eectrade.com";
   },
 
+  // Public enquiry forms (Form A / Form B)
+  serviceRequestNotifyEmail: process.env.SERVICE_REQUEST_NOTIFY_EMAIL || "partners@eectrade.com",
+  // n8n webhook that appends each submission to the "EEC Website Service Requests" Google Sheet.
+  serviceRequestSheetWebhookUrl:
+    process.env.SERVICE_REQUEST_SHEET_WEBHOOK_URL ||
+    "https://eectrade.app.n8n.cloud/webhook/eec-service-requests-7fe9e1f7-d706-4e56-bc68-e2a9001aa0d4",
+
   get corsOrigins() {
     return process.env.CORS_ORIGINS || this.frontendUrl;
   },
