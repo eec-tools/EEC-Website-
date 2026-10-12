@@ -113,7 +113,7 @@ export default function Services() {
             Smarter sourcing for buyers. <span className="gold-text">Stronger exports</span> for suppliers.
           </p>
           <p className="mt-6 text-[#3A4759] max-w-2xl text-lg leading-relaxed">
-            Practical, AI-enabled consultancy that helps international buyers make informed sourcing decisions and helps manufacturers prepare for international markets.
+            A specialist consultancy that combines industry expertise, market intelligence, and practical support to help international buyers source with confidence and manufacturers succeed in global markets.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="#buyer-services" className="eec-btn-primary" data-testid="services-hero-buyers">
