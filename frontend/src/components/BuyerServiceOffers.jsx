@@ -23,6 +23,9 @@ function FixedFeeOffer({ offer, index }) {
     <article id={`offer-${offer.id}`} className="border hairline bg-white p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
       <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</div>
       <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{offer.title}</h3>
+      <p className="mt-3 text-sm font-semibold text-[#8A6F2B]" data-testid={`buyer-offer-pricing-${offer.id}`}>
+        Pricing will be shared after you submit a request.
+      </p>
       <p className="mt-4 text-sm text-[#3A4759] leading-relaxed">{offer.intro}</p>
 
       <div className="mt-6 text-xs uppercase tracking-[0.14em] text-[#012D76] font-semibold">What EEC will provide</div>
