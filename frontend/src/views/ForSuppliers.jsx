@@ -83,12 +83,22 @@ export default function ForSuppliers() {
             <div className="eec-supplier-card p-7 lg:p-8 flex flex-col">
               <div className="flex items-center gap-3">
                 <NewBadge />
-                <span className="text-[10px] uppercase tracking-[0.18em] text-[#0F766E] font-semibold">Option A · Export Support</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-[#0F766E] font-semibold">Option A · Export Support Services</span>
               </div>
-              <h3 className="font-display text-2xl text-[#0B4F4A] mt-3">Check your Export Readiness</h3>
+              <h3 className="font-display text-2xl text-[#0B4F4A] mt-3">Export Readiness &amp; Compliance Support</h3>
               <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
-                For manufacturers and exporters who want to know how ready they are for international buyers. A desk-based assessment with a readiness score and a 90-day action plan. Separate from the Supplier Network application. Complimentary pilot for the first 10 qualified companies.
+                For manufacturers and exporters preparing to win international buyers. Two services, separate from the Supplier Network application:
               </p>
+              <ul className="mt-4 space-y-3" data-testid="supplier-path-export-services">
+                <li className="border-l-4 border-[#0F766E] bg-white px-4 py-3 text-sm text-[#3A4759] leading-relaxed">
+                  <span className="font-semibold text-[#0B4F4A]">Export Readiness Diagnostic: </span>
+                  a desk-based assessment with a readiness score and a 90-day action plan. Complimentary pilot for the first 10 qualified companies.
+                </li>
+                <li className="border-l-4 border-[#0F766E] bg-white px-4 py-3 text-sm text-[#3A4759] leading-relaxed">
+                  <span className="font-semibold text-[#0B4F4A]">Export Compliance &amp; Growth Support: </span>
+                  tailored advisory on readiness gaps, destination-market compliance and buyer preparedness, with a customised proposal.
+                </li>
+              </ul>
               <div className="mt-auto pt-6">
                 <Link href="#export-readiness" className="eec-btn-supplier" data-testid="supplier-path-diagnostic">
                   See export support services <ArrowUpRight size={16} />
