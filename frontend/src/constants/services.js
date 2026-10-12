@@ -139,3 +139,27 @@ export const SUPPLIER_PAID_CTA = {
   label: "REQUEST PAID EXPORT SUPPORT",
   href: supplierRequestHref("paid-export-support"),
 };
+
+// Form A / Form B options. Keep the ids in sync with backend/src/data/serviceRequests.js.
+export const PURCHASING_TIMELINES = [
+  "Within 30 days",
+  "1–3 months",
+  "3–6 months",
+  "6–12 months",
+  "Not decided yet",
+];
+
+export const SUPPLIER_SUPPORT_OPTIONS = [
+  {
+    value: "complimentary-diagnostic",
+    label: "Complimentary Diagnostic Pilot",
+    sub: "Limited to 10 accepted companies, subject to eligibility review",
+  },
+  {
+    value: "paid-export-support",
+    label: "Paid Export Support",
+    sub: "Proposed according to your business and requirements",
+  },
+];
+
+export const SUPPLIER_BUSINESS_TYPES = ["Manufacturer", "Exporter", "Trader", "Manufacturer and exporter"];
