@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
@@ -88,6 +88,11 @@ export default function ExportReadinessApplication() {
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+
+  // Always open the form at the top, even when arriving from a button lower down another page.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
 
   const set = (name, value) => {
     setForm((f) => ({ ...f, [name]: value }));

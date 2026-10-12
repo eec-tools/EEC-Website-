@@ -17,8 +17,12 @@ export const metadata = {
 export default function Page() {
   // Suspense is required because the form reads ?service= to prefill the selected service.
   return (
-    <Suspense fallback={null}>
-      <BuyerServiceRequest />
-    </Suspense>
+    // The wrapper div gives Next.js an element to scroll to the top on navigation
+    // (with a null Suspense fallback the page would open at the previous page's scroll position).
+    <div>
+      <Suspense fallback={null}>
+        <BuyerServiceRequest />
+      </Suspense>
+    </div>
   );
 }
