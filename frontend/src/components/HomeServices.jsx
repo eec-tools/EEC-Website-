@@ -103,7 +103,7 @@ export default function HomeServices() {
             Smarter Sourcing for Buyers. Stronger Export Capabilities for Suppliers.
           </p>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#3A4759] lg:text-base">
-            EEC helps international buyers identify, evaluate, and select reliable manufacturing partners while supporting manufacturers in improving their export readiness, meeting buyer expectations, and accessing new international business opportunities.
+            EEC helps international buyers identify, evaluate, and select reliable manufacturing partners while supporting suppliers in improving their export readiness, meeting buyer expectations, and accessing new international business opportunities.
           </p>
         </div>
 
