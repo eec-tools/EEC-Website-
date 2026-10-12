@@ -24,7 +24,7 @@ function FixedFeeOffer({ offer, index }) {
       <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</div>
       <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{offer.title}</h3>
       <p className="mt-3 text-sm font-semibold text-[#8A6F2B]" data-testid={`buyer-offer-pricing-${offer.id}`}>
-        Pricing will be available on registration.
+        Pricing will be shared after you submit a request.
       </p>
       <p className="mt-4 text-sm text-[#3A4759] leading-relaxed">{offer.intro}</p>
 
