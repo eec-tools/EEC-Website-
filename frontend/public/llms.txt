@@ -24,12 +24,12 @@ EEC identifies, qualifies and audits manufacturers, then connects them with proc
 
 ## Active sourcing categories
 
-1. Food Commodities (rice, sugar, pulses, edible oils, spices) — FSSAI, HACCP, BRC/BRCGS, amfori BSCI
-2. Processed and Packaged Foods (snacks, beverages, frozen foods, ready meals) — BRC/BRCGS, FSSC 22000, amfori BSCI, IFS Food (Germany/France buyers)
-3. Fresh and Agricultural Products (fruits, vegetables, organic produce) — GlobalG.A.P., GRASP, amfori BSCI, phytosanitary/MRL testing
-4. Healthcare and Hospital Textile Supplies (patient gowns, scrubs, surgical drapes, hospital linen) — ISO 9001, OEKO-TEX Standard 100, BSCI
-5. Home Textile, Apparel and Hospitality Products (bed linen, towels, uniforms, hotel textiles) — BSCI, SEDEX, GOTS, OEKO-TEX
-6. Eco-Friendly, Sustainable and Organic Products (biodegradable packaging, organic textiles) — GOTS, EU Organic, NPOP
+1. Food Commodities (rice, sugar, pulses, edible oils, spices): FSSAI, HACCP, BRC/BRCGS, amfori BSCI
+2. Processed and Packaged Foods (snacks, beverages, frozen foods, ready meals): BRC/BRCGS, FSSC 22000, amfori BSCI, IFS Food (Germany/France buyers)
+3. Fresh and Agricultural Products (fruits, vegetables, organic produce): GlobalG.A.P., GRASP, amfori BSCI, phytosanitary/MRL testing
+4. Healthcare and Hospital Textile Supplies (patient gowns, scrubs, surgical drapes, hospital linen): ISO 9001, OEKO-TEX Standard 100, BSCI
+5. Home Textile, Apparel and Hospitality Products (bed linen, towels, uniforms, hotel textiles): BSCI, SEDEX, GOTS, OEKO-TEX
+6. Eco-Friendly, Sustainable and Organic Products (biodegradable packaging, organic textiles): GOTS, EU Organic, NPOP
 
 ## Key pages
 

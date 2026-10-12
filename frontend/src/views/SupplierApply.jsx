@@ -306,19 +306,19 @@ export default function SupplierApply() {
             <div className="border hairline">
               {[
                 ["Company", form.company_name],
-                ["Headquarters", form.headquarters_address || "—"],
-                ["Contact", `${form.contact_name} (${form.contact_position || "—"}) · ${form.contact_email} · ${form.contact_phone}`],
+                ["Headquarters", form.headquarters_address || "Not provided"],
+                ["Contact", `${form.contact_name} (${form.contact_position || "Not provided"}) · ${form.contact_email} · ${form.contact_phone}`],
                 ["Location", `${form.country}${form.state ? ", " + form.state : ""}`],
-                ["Key markets", form.key_markets || "—"],
+                ["Key markets", form.key_markets || "Not provided"],
                 ["Categories", form.product_categories.join(", ")],
                 ["Capacity", form.annual_capacity],
                 ["Experience", form.export_experience],
-                ["IEC / GST", `${form.iec_number || "—"} / ${form.gst_number || "—"}`],
+                ["IEC / GST", `${form.iec_number || "Not provided"} / ${form.gst_number || "Not provided"}`],
                 ["Documents", `${form.documents.length} uploaded`],
               ].map(([k, v], i) => (
                 <div key={k} className={`grid grid-cols-3 gap-4 p-4 ${i !== 0 ? "border-t hairline" : ""}`}>
                   <div className="text-xs uppercase tracking-widest text-[#6B7280]">{k}</div>
-                  <div className="col-span-2 text-[#012D76]/95 text-sm">{v || <span className="text-[#012D76]/35">—</span>}</div>
+                  <div className="col-span-2 text-[#012D76]/95 text-sm">{v || <span className="text-[#012D76]/35">Not provided</span>}</div>
                 </div>
               ))}
             </div>

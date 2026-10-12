@@ -1,7 +1,7 @@
 /* ─── Card slot (pre-allocates full expanded height so section never grows) ── */
 
 .team-card-slot {
-  /* photo(360) + panel(280) = 640px — section height stays fixed on hover */
+  /* photo(360) + panel(280) = 640px: section height stays fixed on hover */
   height: 660px;
   flex: 1 1 0;
   min-width: 0;
@@ -29,13 +29,13 @@
 }
 
 .team-card:focus-visible {
-  /* inset ring stays inside overflow:hidden — visible without clipping */
+  /* inset ring stays inside overflow:hidden: visible without clipping */
   box-shadow: inset 0 0 0 3px #C9A23F;
   outline: none;
 }
 
 .team-card--active {
-  /* subtle depth lift — no scale so the card never moves from its slot */
+  /* subtle depth lift: no scale so the card never moves from its slot */
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
   transition: box-shadow 450ms ease-out;
 }
@@ -67,13 +67,13 @@
   background: #1a1a1a;
   height: 0;
   overflow: hidden;
-  /* exit — faster */
+  /* exit: faster */
   transition: height 300ms ease-out;
 }
 
 .team-card--active .team-panel {
   height: 280px;
-  /* enter — slower, eases open */
+  /* enter: slower, eases open */
   transition: height 480ms ease-out;
 }
 
@@ -106,7 +106,7 @@
 .team-card--active .team-panel__name {
   opacity: 1;
   transform: translateY(0);
-  /* enter — slight delay so panel visually opens first */
+  /* enter: slight delay so panel visually opens first */
   transition: opacity 360ms ease-out 160ms, transform 360ms ease-out 160ms;
 }
 
@@ -127,7 +127,7 @@
 .team-card--active .team-panel__role {
   opacity: 1;
   transform: translateY(0);
-  /* enter — slightly staggered after name */
+  /* enter: slightly staggered after name */
   transition: opacity 360ms ease-out 220ms, transform 360ms ease-out 220ms;
 }
 

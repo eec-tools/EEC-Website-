@@ -341,7 +341,7 @@ export default function NextLayout({ children }) {
               <p className="text-sm text-[#616873] leading-relaxed max-w-[300px]">
                 Singapore-headquartered sourcing consultancy. Embedded procurement support for global buyers sourcing from India and Asia.
               </p>
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
                 <FooterBadge icon={<Globe size={17} />} label1="Global" label2="Network" />
                 <FooterBadge icon={<Handshake size={17} />} label1="Trusted" label2="Partnerships" />
                 <FooterBadge icon={<ShieldCheck size={17} />} label1="Reliable" label2="Sourcing" />

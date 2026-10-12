@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import NewBadge from "@/components/NewBadge";
+import AudienceTag from "@/components/AudienceTag";
 import { BUYER_OFFERS, CUSTOM_SOURCING_OFFER, SERVICE_TERMS } from "@/constants/services";
 
 function BulletList({ items }) {
@@ -19,9 +20,18 @@ function BulletList({ items }) {
   );
 }
 
+function BestFor({ text }) {
+  return (
+    <p className="mt-4 border-l-4 border-[#1B4A99] bg-white px-4 py-3 text-sm text-[#3A4759] leading-relaxed">
+      <span className="font-semibold text-[#012D76]">Best for: </span>
+      {text}
+    </p>
+  );
+}
+
 function FixedFeeOffer({ offer, index }) {
   return (
-    <article id={`offer-${offer.id}`} className="eec-new-card p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
+    <article id={`offer-${offer.id}`} className="eec-buyer-card p-7 lg:p-9 flex flex-col scroll-mt-36" data-testid={`buyer-offer-${offer.id}`}>
       <div className="flex items-center gap-3">
         <NewBadge />
         <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer {index + 1}</span>
@@ -30,6 +40,7 @@ function FixedFeeOffer({ offer, index }) {
       <p className="mt-3 text-sm font-semibold text-[#8A6F2B]" data-testid={`buyer-offer-pricing-${offer.id}`}>
         Pricing will be shared after you submit a request.
       </p>
+      <BestFor text={offer.useWhen} />
       <p className="mt-4 text-sm text-[#3A4759] leading-relaxed">{offer.intro}</p>
 
       <div className="mt-6 text-xs uppercase tracking-[0.14em] text-[#012D76] font-semibold">What EEC will provide</div>
@@ -58,37 +69,6 @@ function FixedFeeOffer({ offer, index }) {
         </Link>
       </div>
     </article>
-  );
-}
-
-function Chooser() {
-  const options = [...BUYER_OFFERS, CUSTOM_SOURCING_OFFER];
-  return (
-    <div className="mt-10" data-testid="buyer-service-chooser">
-      <div className="text-xs uppercase tracking-[0.14em] text-[#012D76] font-semibold mb-4">Which service is right for you?</div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {options.map((o) => (
-          <a
-            key={o.id}
-            href={`#offer-${o.id}`}
-            className="eec-new-card eec-new-card--lift group block p-5"
-          >
-            <div className="font-display text-lg text-[#012D76] leading-snug">{o.title}</div>
-            <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
-              <span className="font-semibold text-[#012D76]">Choose this if: </span>
-              {o.useWhen}
-            </p>
-            <dl className="mt-4 space-y-1 text-xs text-[#3A4759]">
-              <div><dt className="inline font-semibold text-[#012D76]">Covers: </dt><dd className="inline">{o.compare.scope}</dd></div>
-              <div><dt className="inline font-semibold text-[#012D76]">Delivery: </dt><dd className="inline">{o.compare.delivery}</dd></div>
-            </dl>
-            <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.14em] text-[#8A6F2B]">
-              See details <span aria-hidden="true">↓</span>
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -150,8 +130,8 @@ export default function BuyerServiceOffers() {
     <section id="buyer-services" className="py-24 border-b hairline bg-surface scroll-mt-32" data-testid="buyer-services">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-3 mb-3">
+          <AudienceTag audience="buyer" />
           <NewBadge />
-          <div className="overline">EEC Buyer Services</div>
         </div>
         <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl">
           Sourcing &amp; Export Support Services for International Buyers
@@ -160,21 +140,21 @@ export default function BuyerServiceOffers() {
           Quick, fixed-scope research services. They are separate from EEC&apos;s full sourcing programme and the Buyer Portal, so you can start with one focused piece of work.
         </p>
 
-        <Chooser />
 
-        <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {BUYER_OFFERS.map((offer, i) => (
             <FixedFeeOffer key={offer.id} offer={offer} index={i} />
           ))}
         </div>
 
-        <article id={`offer-${custom.id}`} className="eec-new-card mt-6 p-7 lg:p-9 scroll-mt-36" data-testid={`buyer-offer-${custom.id}`}>
+        <article id={`offer-${custom.id}`} className="eec-buyer-card mt-6 p-7 lg:p-9 scroll-mt-36" data-testid={`buyer-offer-${custom.id}`}>
           <div className="flex items-center gap-3">
             <NewBadge />
             <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Offer 3</span>
           </div>
           <h3 className="font-display text-2xl lg:text-3xl text-[#012D76] mt-3">{custom.title}</h3>
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <BestFor text={custom.useWhen} />
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div>
               <p className="text-sm text-[#3A4759] leading-relaxed mb-4">{custom.intro}</p>
               <BulletList items={custom.provides} />

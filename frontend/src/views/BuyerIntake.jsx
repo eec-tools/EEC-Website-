@@ -154,7 +154,7 @@ export default function BuyerIntake() {
               ].map(([k, v], i) => (
                 <div key={k} className={`grid grid-cols-3 gap-4 p-4 ${i !== 0 ? "border-t hairline" : ""}`}>
                   <div className="text-xs uppercase tracking-widest text-[#6B7280]">{k}</div>
-                  <div className="col-span-2 text-[#012D76]/95 text-sm">{v || <span className="text-[#012D76]/35">—</span>}</div>
+                  <div className="col-span-2 text-[#012D76]/95 text-sm">{v || <span className="text-[#012D76]/35">Not provided</span>}</div>
                 </div>
               ))}
             </div>

@@ -86,9 +86,9 @@ function SupplierApplicationRow({ app, defaultOpen = false }) {
             </div>
           </div>
           <div className="md:col-span-3 text-sm text-[#3A4759]">
-            {(app.product_categories || []).slice(0, 2).join(", ") || <span className="text-[#6B7280]">—</span>}
+            {(app.product_categories || []).slice(0, 2).join(", ") || <span className="text-[#6B7280]">Not provided</span>}
           </div>
-          <div className="md:col-span-2 text-sm text-[#3A4759]">{app.annual_capacity || "—"}</div>
+          <div className="md:col-span-2 text-sm text-[#3A4759]">{app.annual_capacity || "Not provided"}</div>
           <div className="md:col-span-2 text-sm text-[#3A4759]">
             {docs.length} {docs.length === 1 ? "doc" : "docs"}
           </div>
@@ -107,17 +107,17 @@ function SupplierApplicationRow({ app, defaultOpen = false }) {
               <div className="overline mb-3">Contact</div>
               <ul className="space-y-1.5 text-sm text-[#3A4759]">
                 <li className="flex items-center gap-2"><Mail size={14} className="text-[#6B7280]" /><span>{app.contact_email}</span></li>
-                <li className="flex items-center gap-2"><Phone size={14} className="text-[#6B7280]" /><span>{app.contact_phone || "—"}</span></li>
+                <li className="flex items-center gap-2"><Phone size={14} className="text-[#6B7280]" /><span>{app.contact_phone || "Not provided"}</span></li>
                 <li className="flex items-center gap-2"><Globe2 size={14} className="text-[#6B7280]" /><span>{app.website || "no website"}</span></li>
               </ul>
             </div>
             <div>
               <div className="overline mb-3">Compliance &amp; capacity</div>
               <ul className="space-y-1.5 text-sm text-[#3A4759]">
-                <li><span className="text-[#6B7280]">IEC:</span> {app.iec_number || <span className="text-[#6B7280]">—</span>}</li>
-                <li><span className="text-[#6B7280]">GSTIN:</span> {app.gst_number || <span className="text-[#6B7280]">—</span>}</li>
-                <li><span className="text-[#6B7280]">Experience:</span> {app.export_experience || "—"}</li>
-                <li><span className="text-[#6B7280]">Factory size / employees:</span> {app.factory_size || "—"} / {app.employee_count || "—"}</li>
+                <li><span className="text-[#6B7280]">IEC:</span> {app.iec_number || <span className="text-[#6B7280]">Not provided</span>}</li>
+                <li><span className="text-[#6B7280]">GSTIN:</span> {app.gst_number || <span className="text-[#6B7280]">Not provided</span>}</li>
+                <li><span className="text-[#6B7280]">Experience:</span> {app.export_experience || "Not provided"}</li>
+                <li><span className="text-[#6B7280]">Factory size / employees:</span> {app.factory_size || "Not provided"} / {app.employee_count || "Not provided"}</li>
               </ul>
             </div>
           </div>
@@ -186,9 +186,9 @@ function NewsletterRow({ subscriber }) {
   return (
     <div className="p-5 border-b hairline last:border-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center" data-testid={`admin-newsletter-${subscriber.subscriber_id}`}>
       <div className="md:col-span-5 text-sm text-[#012D76] truncate">{subscriber.email}</div>
-      <div className="md:col-span-4 text-xs text-[#6B7280]">{subscriber.source_page || "—"}</div>
+      <div className="md:col-span-4 text-xs text-[#6B7280]">{subscriber.source_page || "Not provided"}</div>
       <div className="md:col-span-3 text-xs text-[#6B7280] text-right">
-        {subscriber.submitted_at ? new Date(subscriber.submitted_at).toLocaleString() : "—"}
+        {subscriber.submitted_at ? new Date(subscriber.submitted_at).toLocaleString() : "Not provided"}
       </div>
     </div>
   );
@@ -200,7 +200,7 @@ function UserRow({ userRow, onDeleted }) {
   return (
     <div className="p-5 border-b hairline last:border-0 grid grid-cols-1 md:grid-cols-12 gap-4 items-center" data-testid={`admin-user-${userRow.user_id}`}>
       <div className="md:col-span-3">
-        <div className="font-display text-base text-[#012D76]">{userRow.name || "—"}</div>
+        <div className="font-display text-base text-[#012D76]">{userRow.name || "Not provided"}</div>
         <div className="text-xs text-[#6B7280] mt-1">{userRow.company || "no company on file"}</div>
       </div>
       <div className="md:col-span-3 text-sm text-[#3A4759] truncate">{userRow.email}</div>
@@ -213,7 +213,7 @@ function UserRow({ userRow, onDeleted }) {
         {userRow.supplier_applications || 0} apps · {userRow.buyer_intakes || 0} briefs · {userRow.files || 0} docs
       </div>
       <div className="md:col-span-2 text-xs text-[#6B7280]">
-        {userRow.created_at ? new Date(userRow.created_at).toLocaleDateString() : "—"}
+        {userRow.created_at ? new Date(userRow.created_at).toLocaleDateString() : "Not provided"}
       </div>
       <div className="md:col-span-1 text-right">
         <DeleteUserButton userId={userRow.user_id} label={`${userRow.name} (${userRow.email})`} onDeleted={onDeleted} />
@@ -432,7 +432,7 @@ export default function AdminDashboard() {
 
       <div className="mt-12 text-xs text-[#6B7280] flex items-center gap-2">
         <Building2 size={12} />
-        Admin can view documents from any supplier — files stream from S3 via 1-hour presigned URLs.
+        Admin can view documents from any supplier. Files stream from S3 via 1-hour presigned URLs.
       </div>
     </div>
     </PortalShell>

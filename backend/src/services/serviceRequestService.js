@@ -130,7 +130,7 @@ function eecEmail(form, data, reference, rows, submittedAt, files) {
     : "No supporting documents uploaded.";
   const intro = `New ${form.formName} from the EEC website.\nReference: ${reference}\nSubmitted: ${submittedAt}\nReply to this email to respond to the customer directly.`;
   return {
-    subject: `New ${form.formName}: ${service} – ${data.company_name} (${reference})`,
+    subject: `New ${form.formName} from ${data.company_name}: ${service} (${reference})`,
     text: `${intro}\n\n${fieldsAsText(rows)}\n\n${fileNote}`,
     html: wrapHtml(
       `<p>${intro.split("\n").map(escapeHtml).join("<br>")}</p>${fieldsAsHtml(rows)}<p>${escapeHtml(fileNote)}</p>`

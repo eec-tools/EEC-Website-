@@ -2,15 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, Search, ClipboardCheck, FileBarChart, Anchor, ShieldCheck, Compass, Handshake, Gauge, Globe } from "lucide-react";
+import { ArrowUpRight, Check, Search, ClipboardCheck, FileBarChart, Anchor, ShieldCheck, Compass, Handshake } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import NewBadge from "@/components/NewBadge";
+import AudienceTag from "@/components/AudienceTag";
+import { OfferCard, SupplierServiceCards } from "@/components/ServiceOfferCard";
 import { ENGAGEMENT_TIERS } from "@/constants/engagementTiers";
 import {
   BUYER_OFFERS,
   CUSTOM_SOURCING_OFFER,
-  SUPPLIER_DIAGNOSTIC_CTA,
-  SUPPLIER_PAID_CTA,
 } from "@/constants/services";
 
 const OFFER_ICONS = {
@@ -36,30 +36,6 @@ const BUYER_CARDS = [
     facts: ["Scoped individually", "Project or ongoing"],
     cta: CUSTOM_SOURCING_OFFER.cta,
     href: CUSTOM_SOURCING_OFFER.href,
-  },
-];
-
-const SUPPLIER_CARDS = [
-  {
-    id: "export-diagnostic",
-    icon: Gauge,
-    title: "Export Readiness Diagnostic",
-    badge: "Complimentary pilot",
-    desc: "Discover how prepared your company is to meet international buyer requirements, identify critical gaps and understand what to improve first. Receive an EEC Export Readiness Score and a practical 90-day action plan.",
-    facts: ["First 10 qualified companies", "Desk-based assessment"],
-    cta: SUPPLIER_DIAGNOSTIC_CTA.label,
-    href: SUPPLIER_DIAGNOSTIC_CTA.href,
-    detailHref: "/for-suppliers#export-readiness",
-  },
-  {
-    id: "export-support",
-    icon: Globe,
-    title: "Export Compliance & Growth Support",
-    desc: "Tailored advisory to help you address export-readiness gaps, destination-market compliance requirements and international buyer preparedness.",
-    facts: ["Customised proposal", "Per business and market"],
-    cta: SUPPLIER_PAID_CTA.label,
-    href: SUPPLIER_PAID_CTA.href,
-    detailHref: "/for-suppliers#export-readiness",
   },
 ];
 
@@ -117,40 +93,6 @@ const FAQ = [
   { q: "Does EEC coordinate supplier verification?", a: "Yes. Where a sourcing engagement calls for it, EEC manages the verification workflow directly, coordinating capability assessments, documentation review and inspection scheduling with recognised third-party partners, and routing the resulting reports back to you as part of the project deliverables." },
 ];
 
-function OfferCard({ id, icon: Icon, title, badge, desc, facts, cta, href, detailHref }) {
-  return (
-    <article
-      className="eec-new-card eec-new-card--lift group flex flex-col p-7 lg:p-8"
-      data-testid={`services-offer-${id}`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <Icon size={28} className="text-[#8A6F2B]" aria-hidden="true" />
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <NewBadge />
-          {badge && (
-            <span className="border border-[#C9A23F] bg-white text-[#012D76] text-[10px] tracking-[0.2em] uppercase font-semibold px-3 py-0.5">{badge}</span>
-          )}
-        </div>
-      </div>
-      <h3 className="font-display text-2xl text-[#012D76] mt-6 mb-3">{title}</h3>
-      <p className="text-sm text-[#3A4759] leading-relaxed">{desc}</p>
-      <ul className="mt-5 flex flex-wrap gap-2">
-        {facts.map((f) => (
-          <li key={f} className="border hairline bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[#012D76]">{f}</li>
-        ))}
-      </ul>
-      <div className="mt-auto pt-8 flex flex-col items-start gap-4">
-        <Link href={href} className="eec-btn-primary" data-testid={`services-offer-cta-${id}`}>
-          {cta} <ArrowUpRight size={16} />
-        </Link>
-        {detailHref && (
-          <Link href={detailHref} className="text-sm text-[#012D76] hover:underline">See full details</Link>
-        )}
-      </div>
-    </article>
-  );
-}
-
 export default function Services() {
   const { user } = useAuth();
   const isAuthed = user && user.user_id;
@@ -177,16 +119,16 @@ export default function Services() {
             <Link href="#buyer-services" className="eec-btn-primary" data-testid="services-hero-buyers">
               Services for buyers <ArrowUpRight size={16} />
             </Link>
-            <Link href="#supplier-services" className="eec-btn-secondary" data-testid="services-hero-suppliers">
-              Services for manufacturers &amp; exporters
+            <Link href="#supplier-services" className="eec-btn-supplier" data-testid="services-hero-suppliers">
+              Services for manufacturers &amp; exporters <ArrowUpRight size={16} />
             </Link>
           </div>
         </div>
       </section>
 
-      <section id="buyer-services" className="py-20 lg:py-24 scroll-mt-20" data-testid="services-buyer-section">
+      <section id="buyer-services" className="py-20 lg:py-24 border-t-4 border-[#1B4A99] bg-[#F8FAFE] scroll-mt-20" data-testid="services-buyer-section">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-wrap items-center gap-3 mb-3"><NewBadge /><div className="overline">For international buyers</div></div>
+          <div className="flex flex-wrap items-center gap-3 mb-3"><AudienceTag audience="buyer" /><NewBadge /></div>
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl mb-4">
             Know your supplier and your market before you commit.
           </h2>
@@ -195,7 +137,7 @@ export default function Services() {
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {BUYER_CARDS.map((c) => (
-              <OfferCard key={c.id} {...c} detailHref="/for-buyers#buyer-services" />
+              <OfferCard key={c.id} audience="buyer" {...c} detailHref={`/for-buyers#offer-${c.id}`} />
             ))}
           </div>
           <p className="mt-6 text-sm text-[#3A4759]">
@@ -205,20 +147,16 @@ export default function Services() {
         </div>
       </section>
 
-      <section id="supplier-services" className="py-20 lg:py-24 border-t hairline bg-surface scroll-mt-20" data-testid="services-supplier-section">
+      <section id="supplier-services" className="py-20 lg:py-24 border-t-4 border-[#0F766E] bg-[#F7FBFA] scroll-mt-20" data-testid="services-supplier-section">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-wrap items-center gap-3 mb-3"><NewBadge /><div className="overline">For manufacturers &amp; exporters</div></div>
+          <div className="flex flex-wrap items-center gap-3 mb-3"><AudienceTag audience="supplier" /><NewBadge /></div>
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl mb-4">
             Find out how ready you are to win international business.
           </h2>
           <p className="text-[#3A4759] leading-relaxed max-w-3xl mb-12">
             Separate from the EEC supplier network application, these services help you understand your gaps and prepare for international buyers.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl">
-            {SUPPLIER_CARDS.map((c) => (
-              <OfferCard key={c.id} {...c} />
-            ))}
-          </div>
+          <SupplierServiceCards />
           <p className="mt-6 text-sm text-[#3A4759]">
             Looking to join the EEC supplier network instead?{" "}
             <Link href="/for-suppliers" className="text-[#012D76] underline hover:no-underline">See supplier qualification</Link>.

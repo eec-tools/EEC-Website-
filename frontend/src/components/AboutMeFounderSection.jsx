@@ -20,7 +20,7 @@ const FOUNDER_PROFILE = {
 // LinkedIn points to Shirali's personal profile (not the company page used site-wide).
 // Instagram reuses the same URL already used site-wide (footer/header).
 // Email and WhatsApp reuse the same contact channels already used elsewhere in the codebase.
-// All four icons share the same plain outlined style — no filled backgrounds.
+// All four icons share the same plain outlined style, with no filled backgrounds.
 const SOCIALS = [
   { key: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/shirali-shetty/", Icon: LinkedinIcon, external: true },
   { key: "instagram", label: "Instagram", href: COMPANY.socialLinks[1], Icon: InstagramIcon, external: true },

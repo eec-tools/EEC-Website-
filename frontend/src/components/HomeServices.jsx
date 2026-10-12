@@ -20,7 +20,7 @@ const BUYER_ITEMS = [
 
 const SUPPLIER_ITEMS = [
   {
-    title: "Complimentary Export Readiness Diagnostic — Limited Pilot",
+    title: "Complimentary Export Readiness Diagnostic (Limited Pilot)",
     desc: "Discover how prepared your company is to meet international buyer requirements, identify critical gaps and understand what improvements to prioritise.",
     note: "Available to the first 10 qualified manufacturers and exporters accepted into EEC's pilot programme.",
   },
@@ -31,30 +31,52 @@ const SUPPLIER_ITEMS = [
   },
 ];
 
-// Each column sits on a softly faded photo (same treatment as the For Buyers hero) so the
-// block feels alive without hurting readability.
-function ServiceColumn({ label, items, image, className = "" }) {
+// Blue for international buyers, teal for manufacturers & exporters (same as .eec-buyer-card / .eec-supplier-card).
+const THEMES = {
+  buyer: {
+    band: "bg-[#1B4A99]",
+    tint: "from-[#F2F6FC] via-[#F2F6FC]/92 to-[#F2F6FC]/85",
+    title: "text-[#012D76]",
+    note: "text-[#1B4A99]",
+    button: "eec-btn-primary",
+  },
+  supplier: {
+    band: "bg-[#0F766E]",
+    tint: "from-[#EFF8F6] via-[#EFF8F6]/92 to-[#EFF8F6]/85",
+    title: "text-[#0B4F4A]",
+    note: "text-[#0F766E]",
+    button: "eec-btn-supplier",
+  },
+};
+
+// One audience column: a bold coloured header so buyers and suppliers can spot their side at a glance,
+// the services for that audience on a softly faded photo, and the matching button underneath.
+function ServiceColumn({ audience, heading, subheading, items, image, cta, className = "" }) {
+  const t = THEMES[audience];
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${image})` }}
-        aria-hidden="true"
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-b from-[#FDF8EE] via-[#FDF8EE]/90 to-[#FDF8EE]/80"
-        aria-hidden="true"
-      />
-      <div className="relative p-6 lg:p-8">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold mb-5">{label}</div>
-        <div className="space-y-5">
-          {items.map(({ title, desc, note }) => (
-            <div key={title}>
-              <h3 className="font-display text-lg lg:text-xl text-[#012D76] leading-snug">{title}</h3>
-              <p className="mt-1.5 text-sm text-[#3A4759] leading-relaxed">{desc}</p>
-              {note && <p className="mt-1.5 text-sm text-[#012D76] font-medium leading-relaxed">{note}</p>}
-            </div>
-          ))}
+    <div className={`relative flex flex-col overflow-hidden ${className}`} data-testid={`home-services-${audience}`}>
+      <div className={`${t.band} px-6 py-5 text-white lg:px-8 lg:py-6`}>
+        <h3 className="font-display text-2xl font-medium tracking-tight lg:text-3xl">{heading}</h3>
+        <p className="mt-1 text-sm text-white/85">{subheading}</p>
+      </div>
+      <div className="relative flex flex-1 flex-col">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} aria-hidden="true" />
+        <div className={`absolute inset-0 bg-gradient-to-b ${t.tint}`} aria-hidden="true" />
+        <div className="relative flex flex-1 flex-col p-6 lg:p-8">
+          <div className="space-y-5">
+            {items.map(({ title, desc, note }) => (
+              <div key={title}>
+                <h4 className={`font-display text-lg leading-snug lg:text-xl ${t.title}`}>{title}</h4>
+                <p className="mt-1.5 text-sm leading-relaxed text-[#3A4759]">{desc}</p>
+                {note && <p className={`mt-1.5 text-sm font-medium leading-relaxed ${t.note}`}>{note}</p>}
+              </div>
+            ))}
+          </div>
+          <div className="mt-auto pt-7">
+            <Link href={cta.href} className={t.button} data-testid={cta.testid}>
+              {cta.label} <ArrowUpRight size={16} />
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -86,23 +108,24 @@ export default function HomeServices() {
           </p>
         </div>
 
-        <div className="mt-2 grid md:grid-cols-2">
-          <ServiceColumn label="For International Buyers" items={BUYER_ITEMS} image="/images/hero-about-buyers.jpg" />
+        <div className="mt-6 grid md:grid-cols-2">
           <ServiceColumn
-            label="For Manufacturers & Exporters"
+            audience="buyer"
+            heading="For International Buyers"
+            subheading="Find and check suppliers in India before you commit."
+            items={BUYER_ITEMS}
+            image="/images/hero-about-buyers.jpg"
+            cta={{ label: "Explore Buyer Services", href: "/for-buyers#buyer-services", testid: "services-cta-buyers" }}
+          />
+          <ServiceColumn
+            audience="supplier"
+            heading="For Manufacturers & Exporters"
+            subheading="Get ready to win international buyers."
             items={SUPPLIER_ITEMS}
             image="/images/hero-suppliers.jpg"
-            className="border-t border-[#C9A23F]/40 md:border-l md:border-t-0"
+            className="border-t-4 border-white md:border-l-4 md:border-t-0"
+            cta={{ label: "Explore Supplier Services", href: "/for-suppliers#export-readiness", testid: "services-cta-suppliers" }}
           />
-        </div>
-
-        <div className="flex flex-wrap gap-4 border-t border-[#C9A23F]/40 px-6 py-5 lg:px-8">
-          <Link href="/for-buyers#buyer-services" className="eec-btn-primary" data-testid="services-cta-buyers">
-            Explore Buyer Services <ArrowUpRight size={16} />
-          </Link>
-          <Link href="/for-suppliers#export-readiness" className="eec-btn-secondary" data-testid="services-cta-suppliers">
-            Explore Supplier Services <ArrowUpRight size={16} />
-          </Link>
         </div>
       </div>
     </div>

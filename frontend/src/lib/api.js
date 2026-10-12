@@ -12,7 +12,7 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Treat 401 on /auth/me as "not logged in" — an expected state, not an error.
+// Treat 401 on /auth/me as "not logged in": an expected state, not an error.
 // Without this, axios throws a rejected promise that the browser logs to the
 // DevTools console on every page load for logged-out visitors, failing
 // Lighthouse Best Practices ("No browser errors logged to the console").

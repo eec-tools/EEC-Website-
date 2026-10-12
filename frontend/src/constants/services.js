@@ -149,9 +149,9 @@ export const SUPPLIER_PAID_CTA = {
 // Form A / Form B options. Keep the ids in sync with backend/src/data/serviceRequests.js.
 export const PURCHASING_TIMELINES = [
   "Within 30 days",
-  "1–3 months",
-  "3–6 months",
-  "6–12 months",
+  "1 to 3 months",
+  "3 to 6 months",
+  "6 to 12 months",
   "Not decided yet",
 ];
 

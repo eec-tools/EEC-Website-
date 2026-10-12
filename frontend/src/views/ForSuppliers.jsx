@@ -80,8 +80,23 @@ export default function ForSuppliers() {
             Choose the one that fits where your company is today.
           </h2>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="eec-supplier-card p-7 lg:p-8 flex flex-col">
+              <div className="flex items-center gap-3">
+                <NewBadge />
+                <span className="text-[10px] uppercase tracking-[0.18em] text-[#0F766E] font-semibold">Option A · Export Support</span>
+              </div>
+              <h3 className="font-display text-2xl text-[#0B4F4A] mt-3">Check your Export Readiness</h3>
+              <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
+                For manufacturers and exporters who want to know how ready they are for international buyers. A desk-based assessment with a readiness score and a 90-day action plan. Separate from the Supplier Network application. Complimentary pilot for the first 10 qualified companies.
+              </p>
+              <div className="mt-auto pt-6">
+                <Link href="#export-readiness" className="eec-btn-supplier" data-testid="supplier-path-diagnostic">
+                  See export support services <ArrowUpRight size={16} />
+                </Link>
+              </div>
+            </div>
             <div className="border hairline bg-white p-7 lg:p-8 flex flex-col">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-[#6B7280] font-semibold">Option A · Supplier Network</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[#6B7280] font-semibold">Option B · Supplier Network</div>
               <h3 className="font-display text-2xl text-[#012D76] mt-3">Join the EEC Supplier Network</h3>
               <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
                 For manufacturers ready to be qualified and matched with named buyer requirements. Includes document review and a factory assessment. Trading and re-export businesses are not eligible.
@@ -89,21 +104,6 @@ export default function ForSuppliers() {
               <div className="mt-auto pt-6">
                 <Link href="#qualification" className="eec-btn-secondary" data-testid="supplier-path-network">
                   See requirements &amp; apply <ArrowUpRight size={16} />
-                </Link>
-              </div>
-            </div>
-            <div className="eec-new-card p-7 lg:p-8 flex flex-col">
-              <div className="flex items-center gap-3">
-                <NewBadge />
-                <span className="text-[10px] uppercase tracking-[0.18em] text-[#8A6F2B] font-semibold">Option B · Export Support</span>
-              </div>
-              <h3 className="font-display text-2xl text-[#012D76] mt-3">Check your Export Readiness</h3>
-              <p className="mt-3 text-sm text-[#3A4759] leading-relaxed">
-                For manufacturers and exporters who want to know how ready they are for international buyers. A desk-based assessment with a readiness score and a 90-day action plan. Separate from the Supplier Network application. Complimentary pilot for the first 10 qualified companies.
-              </p>
-              <div className="mt-auto pt-6">
-                <Link href="#export-readiness" className="eec-btn-primary" data-testid="supplier-path-diagnostic">
-                  See the diagnostic <ArrowUpRight size={16} />
                 </Link>
               </div>
             </div>
