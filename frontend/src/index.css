@@ -308,7 +308,7 @@ input::placeholder, textarea::placeholder {
     radial-gradient(ellipse at 50% -10%, rgba(201, 162, 63, 0.28), transparent 55%),
     radial-gradient(ellipse at 50% 120%, rgba(0, 150, 214, 0.22), transparent 55%),
     #012d76;
-  animation: eec-intro-out 0.9s var(--ease) 5.8s forwards;
+  animation: eec-intro-out 0.9s var(--ease) 9s forwards;
 }
 .eec-intro[data-phase="leaving"] {
   animation: eec-intro-out 0.6s var(--ease) 0s forwards;
@@ -322,9 +322,11 @@ input::placeholder, textarea::placeholder {
 .eec-i-pop,
 .eec-i-draw,
 .eec-i-mask > span,
-.eec-i-ring,
-.eec-i-route,
-.eec-i-dot {
+.eec-i-arc,
+.eec-i-dot,
+.eec-i-fade,
+.eec-i-wave,
+.eec-i-pulse {
   animation-delay: var(--d, 0s);
   animation-fill-mode: both;
   animation-timing-function: var(--ease);
@@ -364,25 +366,52 @@ input::placeholder, textarea::placeholder {
   to { background-position: -50% 0; }
 }
 
-/* ripples behind the headline */
-.eec-i-ring {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  width: 70vmin;
-  height: 70vmin;
-  margin: -35vmin 0 0 -35vmin;
-  border: 1px solid rgba(231, 200, 115, 0.45);
-  border-radius: 50%;
-  pointer-events: none;
-  animation-name: eec-i-ring;
-  animation-duration: 4.2s;
+/* India -> the world: dotted map, spreading wave, arcs to buyers worldwide */
+.eec-i-arc {
+  stroke-dasharray: 1;
+  animation-name: eec-i-arc;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+@keyframes eec-i-arc {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.eec-i-dot,
+.eec-i-wave,
+.eec-i-pulse { transform-box: fill-box; transform-origin: center; }
+.eec-i-dot { animation-name: eec-i-pop; animation-duration: 0.6s; }
+.eec-i-fade { animation-name: eec-i-fade; animation-duration: 0.5s; }
+@keyframes eec-i-fade { from { opacity: 0; } to { opacity: 1; } }
+.eec-i-wave {
+  animation-name: eec-i-wave;
+  animation-duration: 5.2s;
+  animation-timing-function: cubic-bezier(0.3, 0.1, 0.3, 1);
+}
+@keyframes eec-i-wave {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+.eec-i-pulse {
+  animation-name: eec-i-pulse;
+  animation-duration: 2.6s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-out;
 }
-@keyframes eec-i-ring {
-  from { transform: scale(0.15); opacity: 0.7; }
-  to { transform: scale(1.7); opacity: 0; }
+@keyframes eec-i-pulse {
+  from { transform: scale(0.3); opacity: 0.9; }
+  to { transform: scale(4); opacity: 0; }
+}
+/* keeps the headline legible over the map: dark on the text side, clear around India */
+.eec-i-scrim { background: rgba(1, 45, 118, 0.55); }
+@media (min-width: 1024px) {
+  .eec-i-scrim {
+    background: linear-gradient(90deg, rgba(1, 45, 118, 0.94) 0%, rgba(1, 45, 118, 0.8) 34%, rgba(1, 45, 118, 0.15) 66%, rgba(1, 45, 118, 0) 80%);
+  }
+}
+.eec-i-label { font-family: 'Outfit', system-ui, sans-serif; }
+@media (max-width: 639px) {
+  .eec-i-label-city { display: none; }
 }
 
 /* service cards: gold edge draws in, then a sheen passes over */
@@ -417,17 +446,9 @@ input::placeholder, textarea::placeholder {
   to { transform: translateX(120%); }
 }
 
-/* India -> Singapore route */
-.eec-i-route { stroke-dasharray: 1; animation-name: eec-i-route; animation-duration: 2.2s; }
-@keyframes eec-i-route {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
-}
-.eec-i-dot { animation-name: eec-i-pop; animation-duration: 0.6s; }
-
 .eec-i-progress {
   transform-origin: left;
-  animation: eec-i-draw 5.8s linear both;
+  animation: eec-i-draw 9s linear both;
 }
 
 @media (prefers-reduced-motion: reduce) {

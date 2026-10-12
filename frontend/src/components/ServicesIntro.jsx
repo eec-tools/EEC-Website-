@@ -3,12 +3,39 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { WORLD_DOTS_PATH } from "@/constants/worldDots";
 
-const TOTAL_MS = 6800; // CSS wipe-out starts at 5.8s and takes 0.9s (see .eec-intro in index.css)
+const TOTAL_MS = 10000; // CSS wipe-out starts at 9.0s and takes 0.9s (see .eec-intro in index.css)
 
 // Plays on every full page load of the homepage (including refresh), but not when someone
 // navigates back to it from another page inside the app.
 let playedInThisPageLoad = false;
+
+// Map coordinates match worldDots.js: viewBox "-0.5 -0.5 144 56", 2.5 degrees per unit.
+const project = ([lon, lat]) => [(lon + 180) / 2.5 - 0.5, (82.5 - lat) / 2.5 - 0.5];
+const INDIA = project([78, 21.5]);
+
+// Where EEC's buyers and partners are. Listed roughly west to east so the arcs fan out nicely.
+const DESTINATIONS = [
+  { name: "New York", lonLat: [-74, 40.7] },
+  { name: "Los Angeles", lonLat: [-118.2, 34] },
+  { name: "São Paulo", lonLat: [-46.6, -23.5] },
+  { name: "London", lonLat: [-0.1, 51.5], label: { dx: -1.2, dy: -1.3, anchor: "end" } },
+  { name: "Germany", lonLat: [10, 51], label: { dx: 1.2, dy: -1.3, anchor: "start" } },
+  { name: "Johannesburg", lonLat: [28, -26] },
+  { name: "Dubai", lonLat: [55.3, 25.2] },
+  { name: "Singapore", lonLat: [103.8, 1.35], label: { dx: 0, dy: 2.5, anchor: "middle" } },
+  { name: "Tokyo", lonLat: [139.7, 35.7] },
+  { name: "Sydney", lonLat: [151.2, -33.9] },
+].map((d, i) => {
+  const [x, y] = project(d.lonLat);
+  const [x0, y0] = INDIA;
+  const dist = Math.hypot(x - x0, y - y0);
+  // control point: midway, lifted upward so each route arcs over the map
+  const cx = (x + x0) / 2;
+  const cy = (y + y0) / 2 - Math.min(26, dist * 0.42);
+  return { ...d, x, y, path: `M${x0} ${y0}Q${cx} ${cy} ${x} ${y}`, delay: 1.6 + i * 0.42 };
+});
 
 const SERVICES = [
   { n: "01", title: "Supplier Background Check", tag: "For buyers" },
@@ -39,14 +66,34 @@ export default function ServicesIntro() {
     const timer = setTimeout(close, TOTAL_MS);
     const onKey = (e) => e.key === "Escape" && skip();
     window.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
       clearTimeout(timer);
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
     };
   }, [phase, skip, close]);
+
+  const isOpen = phase !== "closed";
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    // Lock page scroll without letting the layout jump. Hiding the page scrollbar widens the
+    // viewport by the scrollbar's width, so pad the body (and fixed elements, via --eec-sbw) by
+    // that amount; everything then stays exactly where it will be once the scrollbar returns.
+    const root = document.documentElement;
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+    const previous = {
+      overflow: document.body.style.overflow,
+      paddingRight: document.body.style.paddingRight,
+    };
+    root.style.setProperty("--eec-sbw", `${scrollbarWidth}px`);
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous.overflow;
+      document.body.style.paddingRight = previous.paddingRight;
+      root.style.removeProperty("--eec-sbw");
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (phase !== "leaving") return undefined;
@@ -64,38 +111,77 @@ export default function ServicesIntro() {
       aria-label="Introducing EEC's new sourcing and export support services"
       data-testid="services-intro"
     >
-      {/* ripples + India -> Singapore route, purely decorative */}
+      {/* India spreading to the world: dotted map, light wave, arcs, purely decorative */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <span className="eec-i-ring" style={{ "--d": "0s" }} />
-        <span className="eec-i-ring" style={{ "--d": "1.4s" }} />
-        <span className="eec-i-ring" style={{ "--d": "2.8s" }} />
         <svg
-          viewBox="0 0 1000 220"
-          className="absolute bottom-[4%] left-1/2 w-[130%] max-w-[1200px] -translate-x-1/2 opacity-60"
+          viewBox="-0.5 -0.5 144 56"
+          className="absolute left-[-115vw] top-[46%] w-[230%] -translate-y-1/2 sm:left-1/2 sm:w-[112%] sm:max-w-[1600px] sm:-translate-x-1/2"
         >
-          <path
-            className="eec-i-route"
-            pathLength="1"
-            d="M150 170 Q 500 -50 850 140"
-            fill="none"
-            stroke="#E7C873"
-            strokeWidth="1.5"
-            strokeDasharray="1"
-            style={{ "--d": "0.8s" }}
-          />
-          <circle className="eec-i-dot" cx="150" cy="170" r="6" fill="#E7C873" style={{ "--d": "0.8s" }} />
-          <circle className="eec-i-dot" cx="850" cy="140" r="6" fill="#E7C873" style={{ "--d": "2.8s" }} />
-          <text x="150" y="200" textAnchor="middle" fill="#fff" fontSize="14" letterSpacing="4" style={{ opacity: 0.8 }}>
+          <defs>
+            <path id="eec-world-dots" d={WORLD_DOTS_PATH} fill="none" strokeLinecap="round" strokeWidth="0.42" />
+            <mask id="eec-world-wave" maskUnits="userSpaceOnUse" x="-0.5" y="-0.5" width="144" height="56">
+              <circle className="eec-i-wave" cx={INDIA[0]} cy={INDIA[1]} r="95" fill="#fff" style={{ "--d": "1.4s" }} />
+            </mask>
+          </defs>
+
+          {/* quiet base map, then a gold copy revealed by the wave spreading out from India */}
+          <use href="#eec-world-dots" stroke="#fff" opacity="0.12" className="eec-i-fade" style={{ "--d": "0.2s" }} />
+          <use href="#eec-world-dots" stroke="#E7C873" opacity="0.78" mask="url(#eec-world-wave)" />
+
+          {/* routes from India */}
+          {DESTINATIONS.map(({ name, x, y, path, delay, label }) => (
+            <g key={name}>
+              <path
+                className="eec-i-arc"
+                pathLength="1"
+                d={path}
+                fill="none"
+                stroke="#F3DB9B"
+                strokeWidth="0.22"
+                strokeLinecap="round"
+                style={{ "--d": `${delay}s` }}
+              />
+              <circle className="eec-i-dot" cx={x} cy={y} r="0.7" fill="#E7C873" style={{ "--d": `${delay + 1.2}s` }} />
+              <circle className="eec-i-pulse" cx={x} cy={y} r="0.7" fill="none" stroke="#E7C873" strokeWidth="0.15" style={{ "--d": `${delay + 1.3}s` }} />
+              <circle className="eec-i-fade" r="0.38" fill="#fff" style={{ "--d": `${delay + 0.5}s` }}>
+                <animateMotion dur="3.2s" begin={`${delay + 0.5}s`} repeatCount="indefinite" path={path} />
+              </circle>
+              <text
+                className="eec-i-label eec-i-label-city eec-i-fade"
+                x={x + (label?.dx ?? 0)}
+                y={y + (label?.dy ?? 2.3)}
+                textAnchor={label?.anchor ?? "middle"}
+                fill="#fff"
+                fontSize="1.35"
+                letterSpacing="0.14"
+                style={{ "--d": `${delay + 1.3}s`, opacity: 0.85 }}
+              >
+                {name.toUpperCase()}
+              </text>
+            </g>
+          ))}
+
+          {/* the origin */}
+          <circle className="eec-i-pulse" cx={INDIA[0]} cy={INDIA[1]} r="0.9" fill="none" stroke="#E7C873" strokeWidth="0.2" style={{ "--d": "1s" }} />
+          <circle className="eec-i-pulse" cx={INDIA[0]} cy={INDIA[1]} r="0.9" fill="none" stroke="#E7C873" strokeWidth="0.2" style={{ "--d": "2.3s" }} />
+          <circle className="eec-i-dot" cx={INDIA[0]} cy={INDIA[1]} r="1.05" fill="#fff" style={{ "--d": "0.9s" }} />
+          <circle className="eec-i-dot" cx={INDIA[0]} cy={INDIA[1]} r="0.55" fill="#C9A23F" style={{ "--d": "1s" }} />
+          <text
+            className="eec-i-label eec-i-fade"
+            x={INDIA[0]}
+            y={INDIA[1] - 2}
+            textAnchor="middle"
+            fill="#E7C873"
+            fontSize="1.9"
+            fontWeight="600"
+            letterSpacing="0.3"
+            style={{ "--d": "1.1s" }}
+          >
             INDIA
           </text>
-          <text x="850" y="170" textAnchor="middle" fill="#fff" fontSize="14" letterSpacing="4" style={{ opacity: 0.8 }}>
-            SINGAPORE
-          </text>
-          <circle r="5" fill="#fff" className="eec-i-dot" style={{ "--d": "3s" }}>
-            <animateMotion dur="2.4s" begin="3s" fill="freeze" path="M150 170 Q 500 -50 850 140" />
-          </circle>
         </svg>
       </div>
+      <div aria-hidden="true" className="eec-i-scrim pointer-events-none absolute inset-0" />
 
       <button
         type="button"
@@ -136,9 +222,13 @@ export default function ServicesIntro() {
           </span>
         </h2>
 
+        <p className="eec-i-rise mt-5 max-w-xl text-base text-white/80 sm:text-lg" style={{ "--d": "2.6s" }}>
+          From India to buyers across the world, with sourcing and export support built for real decisions.
+        </p>
+
         <ul className="mt-10 grid gap-3 sm:grid-cols-3">
           {SERVICES.map(({ n, title, tag }, i) => (
-            <li key={n} className="eec-i-card eec-i-rise p-5" style={{ "--d": `${1.7 + i * 0.22}s` }}>
+            <li key={n} className="eec-i-card eec-i-rise p-5" style={{ "--d": `${4.8 + i * 0.25}s` }}>
               <div className="font-display text-2xl text-[#E7C873]">{n}</div>
               <div className="mt-3 font-display text-lg leading-snug">{title}</div>
               <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-white/60">{tag}</div>
@@ -146,7 +236,7 @@ export default function ServicesIntro() {
           ))}
         </ul>
 
-        <div className="eec-i-rise mt-10 flex flex-col gap-3 sm:flex-row" style={{ "--d": "2.7s" }}>
+        <div className="eec-i-rise mt-10 flex flex-col gap-3 sm:flex-row" style={{ "--d": "6s" }}>
           <Link href="/for-buyers#buyer-services" onClick={close} className="eec-btn-accent" data-testid="services-intro-buyers">
             Explore Buyer Services <ArrowUpRight size={16} />
           </Link>
