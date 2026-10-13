@@ -7,10 +7,13 @@ const logger = require("../utils/logger");
 const { sendMail } = require("./emailService");
 const {
   BUYER_SERVICES,
+  REGISTRATION_STATUSES,
   SUPPLIER_SUPPORT_TYPES,
   BUYER_FIELD_LABELS,
   SUPPLIER_FIELD_LABELS,
 } = require("../data/serviceRequests");
+
+const { triageBuyerRequest } = require("./verificationTriage");
 
 const SITE_URL = "https://eectrade.com";
 
@@ -22,6 +25,8 @@ const FORMS = {
     labels: BUYER_FIELD_LABELS,
     serviceKey: "service",
     serviceNames: BUYER_SERVICES,
+    // Other fields whose stored value is a code that should be shown as readable text.
+    valueNames: { registration_status: REGISTRATION_STATUSES },
   },
   supplier: {
     code: "ERA",
@@ -32,6 +37,11 @@ const FORMS = {
     serviceNames: SUPPLIER_SUPPORT_TYPES,
   },
 };
+
+function displayValue(form, key, value) {
+  if (key === form.serviceKey) return form.serviceNames[value] || value;
+  return form.valueNames?.[key]?.[value] || value;
+}
 
 function makeReference(code, date) {
   const yymmdd = date.toISOString().slice(2, 10).replace(/-/g, "");
@@ -50,9 +60,7 @@ function escapeHtml(value) {
 function answeredFields(form, data) {
   return Object.entries(form.labels)
     .map(([key, label]) => {
-      let value = data[key];
-      if (key === form.serviceKey) value = form.serviceNames[value] || value;
-      return [label, value];
+      return [label, displayValue(form, key, data[key])];
     })
     .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "");
 }
@@ -123,14 +131,15 @@ function customerEmail(kind, data, reference, rows) {
   };
 }
 
-function eecEmail(form, data, reference, rows, submittedAt, files) {
+function eecEmail(form, data, reference, rows, submittedAt, files, triage) {
   const service = form.serviceNames[data[form.serviceKey]];
   const fileNote = files.length
     ? `Supporting documents attached: ${files.map((f) => f.originalname).join(", ")}`
     : "No supporting documents uploaded.";
-  const intro = `New ${form.formName} from the EEC website.\nReference: ${reference}\nSubmitted: ${submittedAt}\nReply to this email to respond to the customer directly.`;
+  const triageLine = triage ? `\nVerification triage: ${triage.label}` : "";
+  const intro = `New ${form.formName} from the EEC website.\nReference: ${reference}\nSubmitted: ${submittedAt}${triageLine}\nReply to this email to respond to the customer directly.`;
   return {
-    subject: `New ${form.formName} from ${data.company_name}: ${service} (${reference})`,
+    subject: `${triage ? `[${triage.level}] ` : ""}New ${form.formName} from ${data.company_name}: ${service} (${reference})`,
     text: `${intro}\n\n${fieldsAsText(rows)}\n\n${fileNote}`,
     html: wrapHtml(
       `<p>${intro.split("\n").map(escapeHtml).join("<br>")}</p>${fieldsAsHtml(rows)}<p>${escapeHtml(fileNote)}</p>`
@@ -139,7 +148,7 @@ function eecEmail(form, data, reference, rows, submittedAt, files) {
   };
 }
 
-async function logToSheet(form, data, reference, submittedAt, files) {
+async function logToSheet(form, data, reference, submittedAt, files, triage) {
   const url = config.serviceRequestSheetWebhookUrl;
   if (!url) {
     logger.warning(`Sheet logging skipped for ${reference}: no webhook URL configured`);
@@ -152,10 +161,9 @@ async function logToSheet(form, data, reference, submittedAt, files) {
     Status: "New",
   };
   for (const [key, label] of Object.entries(form.labels)) {
-    let value = data[key] ?? "";
-    if (key === form.serviceKey) value = form.serviceNames[value] || value;
-    row[label] = value;
+    row[label] = displayValue(form, key, data[key] ?? "");
   }
+  if (triage) row["Verification triage"] = triage.label;
   if (form === FORMS.buyer) {
     row["Supporting documents"] = files.map((f) => f.originalname).join(", ");
   }
@@ -186,14 +194,17 @@ async function handleSubmission(kind, data, files = []) {
     }) + " IST";
   const rows = answeredFields(form, data);
 
-  const eec = eecEmail(form, data, reference, rows, submittedAt, files);
+  // Only buyer requests are triaged. Shown to EEC and in the sheet, never to the customer.
+  const triage = kind === "buyer" ? triageBuyerRequest(data) : null;
+
+  const eec = eecEmail(form, data, reference, rows, submittedAt, files, triage);
   const customer = customerEmail(kind, data, reference, rows);
 
   // Await everything before responding: on Vercel the function is frozen once the response is sent.
   const [notified, confirmationSent, logged] = await Promise.all([
     sendMail({ to: config.serviceRequestNotifyEmail, replyTo: data.business_email, ...eec }),
     sendMail({ to: data.business_email, replyTo: config.serviceRequestNotifyEmail, ...customer }),
-    logToSheet(form, data, reference, submittedAt, files),
+    logToSheet(form, data, reference, submittedAt, files, triage),
   ]);
 
   logger.info(

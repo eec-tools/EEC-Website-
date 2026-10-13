@@ -13,6 +13,13 @@ const SUPPLIER_SUPPORT_TYPES = {
   "paid-export-support": "Paid Export Support",
 };
 
+// How the buyer answered the company registration question. Verification itself happens
+// before a paid assignment is accepted, not at enquiry time.
+const REGISTRATION_STATUSES = {
+  provided: "Registration number provided",
+  "not-available": "Not available / need help",
+};
+
 const BUSINESS_TYPES = ["Manufacturer", "Exporter", "Trader", "Manufacturer and exporter"];
 
 // Order matters: this is the order fields appear in the EEC email.
@@ -22,6 +29,10 @@ const BUYER_FIELD_LABELS = {
   company_name: "Company name",
   company_website: "Company website",
   country: "Country",
+  registration_status: "Company registration",
+  registration_number: "Registration number",
+  registration_country: "Country of registration",
+  company_linkedin: "Company LinkedIn page",
   business_email: "Business email",
   contact_number: "Contact number",
   product_category: "Product / product category",
@@ -55,6 +66,7 @@ const SUPPLIER_FIELD_LABELS = {
 module.exports = {
   BUYER_SERVICES,
   SUPPLIER_SUPPORT_TYPES,
+  REGISTRATION_STATUSES,
   BUSINESS_TYPES,
   BUYER_FIELD_LABELS,
   SUPPLIER_FIELD_LABELS,

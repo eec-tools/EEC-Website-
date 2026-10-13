@@ -24,6 +24,10 @@ const SERVICE_OPTIONS = [
   ...BUYER_OFFERS.map((o) => ({ value: o.id, label: o.title, sub: o.facts?.join(" · ") })),
   { value: CUSTOM_SOURCING_OFFER.id, label: CUSTOM_SOURCING_OFFER.title, sub: "Scoped and priced individually" },
 ];
+const REGISTRATION_OPTIONS = [
+  { value: "provided", label: "I have a company registration number" },
+  { value: "not-available", label: "Not available / I need help", sub: "You can still submit. EEC completes the registration check before accepting a paid assignment." },
+];
 const SERVICE_IDS = SERVICE_OPTIONS.map((o) => o.value);
 
 const MAX_FILES = 3;
@@ -32,8 +36,9 @@ const ACCEPTED_FILES = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.webp";
 
 // Order used to focus the first invalid field.
 const FIELD_ORDER = [
-  "full_name", "company_name", "company_website", "country", "business_email", "contact_number",
-  "service", "product_category", "supplier_name", "supplier_website", "supplier_country",
+  "full_name", "company_name", "company_website", "country",
+  "registration_status", "registration_number", "registration_country", "company_linkedin",
+  "business_email", "contact_number", "service", "product_category", "supplier_name", "supplier_website", "supplier_country",
   "product_specifications", "destination_country", "order_quantity", "purchasing_timeline",
   "supporting_documents", "consent_accuracy_privacy", "consent_service_terms",
 ];
@@ -57,6 +62,14 @@ function validate(form, files) {
   }
   if (form.business_email.trim() && !isEmail(form.business_email)) {
     errors.business_email = "Enter a valid business email address.";
+  }
+  if (!form.registration_status) {
+    errors.registration_status = "Tell us whether you have a company registration number.";
+  } else if (form.registration_status === "provided") {
+    if (!form.registration_number.trim()) errors.registration_number = "Registration number is required.";
+    if (!form.registration_country.trim()) errors.registration_country = "Country of registration is required.";
+  } else if (!form.company_linkedin.trim()) {
+    errors.company_linkedin = "Company LinkedIn page is required if you have no registration number.";
   }
   if (!form.service) errors.service = "Select a service.";
   if (form.service === "background-check") {
@@ -90,6 +103,10 @@ export default function BuyerServiceRequest() {
     company_name: "",
     company_website: "",
     country: "",
+    registration_status: "",
+    registration_number: "",
+    registration_country: "",
+    company_linkedin: "",
     business_email: "",
     contact_number: "",
     service: SERVICE_IDS.includes(preselected) ? preselected : "",
@@ -141,6 +158,11 @@ export default function BuyerServiceRequest() {
 
     // Only send the fields that apply to the selected service.
     const payload = { ...form };
+    if (form.registration_status === "provided") {
+      payload.company_linkedin = "";
+    } else {
+      payload.registration_number = payload.registration_country = "";
+    }
     if (form.service !== "background-check") {
       payload.supplier_name = payload.supplier_website = payload.supplier_country = "";
     }
@@ -201,6 +223,16 @@ export default function BuyerServiceRequest() {
               <TextField name="company_name" label="Company name" required autoComplete="organization" value={form.company_name} onChange={set} error={errors.company_name} />
               <TextField name="company_website" label="Company website" required type="url" inputMode="url" autoComplete="url" placeholder="www.example.com" value={form.company_website} onChange={set} error={errors.company_website} />
               <TextField name="country" label="Country" required autoComplete="country-name" value={form.country} onChange={set} error={errors.country} />
+              <RadioCards name="registration_status" label="Company registration" required columns={2} options={REGISTRATION_OPTIONS} value={form.registration_status} onChange={set} error={errors.registration_status} />
+              {form.registration_status === "provided" && (
+                <>
+                  <TextField name="registration_number" label="Registration number" required hint="For example a Companies House number, CIN, EIN, ABN or trade licence number." value={form.registration_number} onChange={set} error={errors.registration_number} />
+                  <TextField name="registration_country" label="Country of registration" required value={form.registration_country} onChange={set} error={errors.registration_country} />
+                </>
+              )}
+              {form.registration_status === "not-available" && (
+                <TextField name="company_linkedin" label="Company LinkedIn page" required full type="url" inputMode="url" placeholder="linkedin.com/company/your-company" hint="Please also use your company email address below, not a personal one." value={form.company_linkedin} onChange={set} error={errors.company_linkedin} />
+              )}
               <TextField name="business_email" label="Business email" required type="email" autoComplete="email" value={form.business_email} onChange={set} error={errors.business_email} />
               <TextField name="contact_number" label="Contact number" required type="tel" autoComplete="tel" placeholder="Include country code" value={form.contact_number} onChange={set} error={errors.contact_number} />
             </FormSection>

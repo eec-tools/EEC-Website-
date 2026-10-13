@@ -2,6 +2,7 @@ const { z } = require("zod");
 const SOURCING_CATEGORIES = require("../data/sourcingCategories");
 const {
   BUYER_SERVICES,
+  REGISTRATION_STATUSES,
   SUPPLIER_SUPPORT_TYPES,
   BUSINESS_TYPES,
 } = require("../data/serviceRequests");
@@ -146,6 +147,12 @@ const buyerServiceRequestSchema = z
     company_name: text("Company name", 200),
     company_website: text("Company website", 300),
     country: text("Country", 100),
+    registration_status: z.enum(Object.keys(REGISTRATION_STATUSES), {
+      errorMap: () => ({ message: "Tell us whether you have a company registration number." }),
+    }),
+    registration_number: optionalText("Registration number", 100),
+    registration_country: optionalText("Country of registration", 100),
+    company_linkedin: optionalText("Company LinkedIn page", 300),
     business_email: formEmail,
     contact_number: text("Contact number", 40),
     service: z.enum(Object.keys(BUYER_SERVICES), {
@@ -164,6 +171,15 @@ const buyerServiceRequestSchema = z
     consent_service_terms: mustAgree("Please agree to the Service Terms."),
   })
   .superRefine((data, ctx) => {
+    if (data.registration_status === "provided") {
+      requireWhen(ctx, data, [
+        ["registration_number", "Registration number"],
+        ["registration_country", "Country of registration"],
+      ]);
+    } else {
+      // No number yet: a LinkedIn company page is the alternative signal EEC triages on.
+      requireWhen(ctx, data, [["company_linkedin", "Company LinkedIn page"]]);
+    }
     if (data.service === "background-check") {
       requireWhen(ctx, data, [
         ["supplier_name", "Supplier name"],
