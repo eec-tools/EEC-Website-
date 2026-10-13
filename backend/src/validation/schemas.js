@@ -207,7 +207,13 @@ const supplierExportApplicationSchema = z
     full_name: text("Full name", 120),
     company_name: text("Company name", 200),
     country: text("Country", 100),
-    company_website: optionalText("Company website", 300),
+    company_website: text("Company website", 300),
+    registration_status: z.enum(Object.keys(REGISTRATION_STATUSES), {
+      errorMap: () => ({ message: "Tell us whether you have a company registration number." }),
+    }),
+    registration_number: optionalText("Registration number", 100),
+    registration_country: optionalText("Country of registration", 100),
+    company_linkedin: optionalText("Company LinkedIn page", 300),
     business_email: formEmail,
     contact_number: text("Contact number", 40),
     business_type: z.enum(BUSINESS_TYPES, {
@@ -227,6 +233,14 @@ const supplierExportApplicationSchema = z
     consent_eligibility_privacy: mustAgree("Please confirm the eligibility and privacy statement."),
   })
   .superRefine((data, ctx) => {
+    if (data.registration_status === "provided") {
+      requireWhen(ctx, data, [
+        ["registration_number", "Registration number"],
+        ["registration_country", "Country of registration"],
+      ]);
+    } else {
+      requireWhen(ctx, data, [["company_linkedin", "Company LinkedIn page"]]);
+    }
     if (data.currently_exporting === "Yes") {
       requireWhen(ctx, data, [["current_export_countries", "Current export countries"]]);
     }

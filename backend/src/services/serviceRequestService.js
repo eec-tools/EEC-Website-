@@ -13,7 +13,7 @@ const {
   SUPPLIER_FIELD_LABELS,
 } = require("../data/serviceRequests");
 
-const { triageBuyerRequest } = require("./verificationTriage");
+const { triageRequest } = require("./verificationTriage");
 
 const SITE_URL = "https://eectrade.com";
 
@@ -35,6 +35,7 @@ const FORMS = {
     labels: SUPPLIER_FIELD_LABELS,
     serviceKey: "support_type",
     serviceNames: SUPPLIER_SUPPORT_TYPES,
+    valueNames: { registration_status: REGISTRATION_STATUSES },
   },
 };
 
@@ -194,8 +195,8 @@ async function handleSubmission(kind, data, files = []) {
     }) + " IST";
   const rows = answeredFields(form, data);
 
-  // Only buyer requests are triaged. Shown to EEC and in the sheet, never to the customer.
-  const triage = kind === "buyer" ? triageBuyerRequest(data) : null;
+  // Shown to EEC and in the sheet, never to the customer.
+  const triage = triageRequest(data);
 
   const eec = eecEmail(form, data, reference, rows, submittedAt, files, triage);
   const customer = customerEmail(kind, data, reference, rows);

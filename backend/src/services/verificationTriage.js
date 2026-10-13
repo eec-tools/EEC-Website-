@@ -1,4 +1,4 @@
-// Quick triage of a buyer enquiry so EEC knows how much to trust it before replying.
+// Quick triage of a buyer or supplier enquiry so EEC knows how much to trust it before replying.
 // This is NOT verification: the registry check happens before a paid assignment is accepted.
 
 const FREE_EMAIL_DOMAINS = new Set([
@@ -30,7 +30,7 @@ function domainsMatch(a, b) {
 //   Number provided : the buyer gave a registration number and country
 //   Needs help      : no number, but a business email domain plus website/LinkedIn to check
 //   Low confidence  : no number and a free email address
-function triageBuyerRequest(data) {
+function triageRequest(data) {
   const domain = emailDomain(data.business_email);
   const free = FREE_EMAIL_DOMAINS.has(domain);
   const notes = [];
@@ -45,4 +45,4 @@ function triageBuyerRequest(data) {
   return { level, notes, label: notes.length ? `${level} (${notes.join("; ")})` : level };
 }
 
-module.exports = { triageBuyerRequest, FREE_EMAIL_DOMAINS };
+module.exports = { triageRequest, FREE_EMAIL_DOMAINS };

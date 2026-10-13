@@ -25,8 +25,15 @@ const EXPORTING_OPTIONS = [
   { value: "No", label: "No" },
 ];
 
+const REGISTRATION_OPTIONS = [
+  { value: "provided", label: "I have a company registration number" },
+  { value: "not-available", label: "Not available / I need help", sub: "You can still submit. EEC completes the registration check before accepting a paid assignment." },
+];
+
 const FIELD_ORDER = [
-  "full_name", "company_name", "country", "company_website", "business_email", "contact_number",
+  "full_name", "company_name", "country", "company_website",
+  "registration_status", "registration_number", "registration_country", "company_linkedin",
+  "business_email", "contact_number",
   "business_type", "main_product", "currently_exporting", "current_export_countries",
   "target_export_countries", "main_export_challenges", "support_sought", "support_type",
   "consent_eligibility_privacy",
@@ -36,6 +43,7 @@ const REQUIRED_TEXT = {
   full_name: "Full name",
   company_name: "Company name",
   country: "Country",
+  company_website: "Company website",
   business_email: "Business email",
   contact_number: "Contact number",
   main_product: "Main product / product category",
@@ -51,6 +59,14 @@ function validate(form) {
   }
   if (form.business_email.trim() && !isEmail(form.business_email)) {
     errors.business_email = "Enter a valid business email address.";
+  }
+  if (!form.registration_status) {
+    errors.registration_status = "Tell us whether you have a company registration number.";
+  } else if (form.registration_status === "provided") {
+    if (!form.registration_number.trim()) errors.registration_number = "Registration number is required.";
+    if (!form.registration_country.trim()) errors.registration_country = "Country of registration is required.";
+  } else if (!form.company_linkedin.trim()) {
+    errors.company_linkedin = "Company LinkedIn page is required if you have no registration number.";
   }
   if (!form.business_type) errors.business_type = "Select one option.";
   if (!form.currently_exporting) errors.currently_exporting = "Select Yes or No.";
@@ -71,6 +87,10 @@ export default function ExportReadinessApplication() {
     company_name: "",
     country: "",
     company_website: "",
+    registration_status: "",
+    registration_number: "",
+    registration_country: "",
+    company_linkedin: "",
     business_email: "",
     contact_number: "",
     business_type: "",
@@ -110,6 +130,11 @@ export default function ExportReadinessApplication() {
     }
 
     const payload = { ...form };
+    if (form.registration_status === "provided") {
+      payload.company_linkedin = "";
+    } else {
+      payload.registration_number = payload.registration_country = "";
+    }
     if (form.currently_exporting !== "Yes") payload.current_export_countries = "";
 
     setSubmitting(true);
@@ -162,7 +187,17 @@ export default function ExportReadinessApplication() {
               <TextField name="full_name" label="Full name" required autoComplete="name" value={form.full_name} onChange={set} error={errors.full_name} />
               <TextField name="company_name" label="Company name" required autoComplete="organization" value={form.company_name} onChange={set} error={errors.company_name} />
               <TextField name="country" label="Country" required autoComplete="country-name" value={form.country} onChange={set} error={errors.country} />
-              <TextField name="company_website" label="Company website" optional type="url" inputMode="url" autoComplete="url" placeholder="www.example.com" value={form.company_website} onChange={set} />
+              <TextField name="company_website" label="Company website" required type="url" inputMode="url" autoComplete="url" placeholder="www.example.com" value={form.company_website} onChange={set} error={errors.company_website} />
+              <RadioCards name="registration_status" label="Company registration" required columns={2} options={REGISTRATION_OPTIONS} value={form.registration_status} onChange={set} error={errors.registration_status} />
+              {form.registration_status === "provided" && (
+                <>
+                  <TextField name="registration_number" label="Registration number" required hint="For example a GSTIN, CIN, IEC, Udyam or trade licence number." value={form.registration_number} onChange={set} error={errors.registration_number} />
+                  <TextField name="registration_country" label="Country of registration" required value={form.registration_country} onChange={set} error={errors.registration_country} />
+                </>
+              )}
+              {form.registration_status === "not-available" && (
+                <TextField name="company_linkedin" label="Company LinkedIn page" required full type="url" inputMode="url" placeholder="linkedin.com/company/your-company" hint="Please also use your company email address below, not a personal one." value={form.company_linkedin} onChange={set} error={errors.company_linkedin} />
+              )}
               <TextField name="business_email" label="Business email" required type="email" autoComplete="email" value={form.business_email} onChange={set} error={errors.business_email} />
               <TextField name="contact_number" label="Contact number" required type="tel" autoComplete="tel" placeholder="Include country code" value={form.contact_number} onChange={set} error={errors.contact_number} />
             </FormSection>
