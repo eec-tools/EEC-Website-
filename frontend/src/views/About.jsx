@@ -36,6 +36,32 @@ const ABOUT_FAQ = [
   },
 ];
 
+const CURRENT_MODEL_STEPS = [
+  { n: "01", t: "You send a request", d: "Choose a service and tell us what you need. No payment is taken on the form." },
+  { n: "02", t: "EEC reviews and confirms", d: "We check the request and confirm the scope, or send a proposal for custom work." },
+  { n: "03", t: "Agreed before work starts", d: "Fixed-fee services are paid in advance after confirmation. Custom work is priced individually." },
+  { n: "04", t: "We deliver", d: "You receive the agreed report or support within the stated timeline." },
+];
+
+const CURRENT_MODEL_OFFERS = [
+  {
+    audience: "For buyers",
+    href: "/for-buyers#buyer-services",
+    items: [
+      { t: "Supplier Background Check", d: "Independent desk-based review of one supplier in one country. Target of 3 working days." },
+      { t: "India Sourcing Feasibility Snapshot", d: "Desk-based feasibility view for one product and one destination country. Target of 5 working days." },
+      { t: "Custom Sourcing & Procurement Support", d: "Supplier identification, RFQ coordination and ongoing sourcing support, scoped and priced individually." },
+    ],
+  },
+  {
+    audience: "For suppliers",
+    href: "/for-suppliers#export-readiness",
+    items: [
+      { t: "Complimentary Diagnostic Pilot", d: "Export readiness assessment for up to 10 accepted companies, subject to eligibility review." },
+      { t: "Paid Export Support", d: "Practical export support, proposed according to your business, product and target markets." },
+    ],
+  },
+];
 
 export default function About() {
   const { user } = useAuth();
@@ -138,6 +164,43 @@ export default function About() {
                 )}
               </div>
             ))}
+          </div>
+          <div className="mt-16" data-testid="about-current-model">
+            <div className="overline mb-3">Our current model</div>
+            <h3 className="font-display text-2xl sm:text-3xl text-[#012D76] tracking-tight font-light max-w-3xl mb-4">
+              Request first, agree the scope, then we start.
+            </h3>
+            <p className="text-[#3A4759] leading-relaxed max-w-3xl mb-10">
+              Today EEC works through focused, clearly scoped services for buyers and suppliers. Each one is confirmed
+              with you before any work begins, so you know what is covered and what is not.
+            </p>
+            <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#012D76]/15 border hairline mb-10">
+              {CURRENT_MODEL_STEPS.map(({ n, t, d }) => (
+                <li key={n} className="bg-white p-6">
+                  <div className="font-display text-3xl text-[#8A6F2B]">{n}</div>
+                  <div className="font-display text-lg text-[#012D76] mt-3 mb-2">{t}</div>
+                  <p className="text-sm text-[#3A4759] leading-relaxed">{d}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {CURRENT_MODEL_OFFERS.map(({ audience, href, items }) => (
+                <div key={audience} className="border hairline p-8 bg-white">
+                  <div className="text-xs text-[#8A6F2B] tracking-[0.22em] uppercase mb-4">{audience}</div>
+                  <ul className="space-y-4">
+                    {items.map(({ t, d }) => (
+                      <li key={t}>
+                        <div className="font-medium text-[#012D76]">{t}</div>
+                        <p className="mt-1 text-sm text-[#3A4759] leading-relaxed">{d}</p>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={href} className="inline-block mt-5 text-sm text-[#012D76] hover:underline font-medium">
+                    See {audience.toLowerCase()} services
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="mt-12">
             {isAuthed ? (

@@ -24,13 +24,6 @@ const TEAM = [
     image: "/images/team/vandana-ahire.png",
     mt: 80,
   },
-  {
-    id: "shovan-karmakar",
-    name: "Shovan Karmakar",
-    role: "Supplier Acquisition Specialist",
-    image: "/images/team/shovan-karmakar.png",
-    mt: 280,
-  },
 ];
 
 export default function TeamSection() {

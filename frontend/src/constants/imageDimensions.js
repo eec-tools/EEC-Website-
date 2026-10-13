@@ -10,6 +10,5 @@ export const IMAGE_DIMENSIONS = {
   "/images/team/shirali-shetty-portrait.webp": { width: 941, height: 1672 },
   "/images/team/mohita-vadrevu.png": { width: 1536, height: 2752 },
   "/images/team/vandana-ahire.png": { width: 1536, height: 2752 },
-  "/images/team/shovan-karmakar.png": { width: 941, height: 1672 },
   "/images/EEC-logo-WBG.png": { width: 1254, height: 1254 },
 };
