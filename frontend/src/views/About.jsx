@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
 import TeamSection from "@/components/TeamSection";
 import AboutMeFounderSection from "@/components/AboutMeFounderSection";
+import FaqAccordion from "@/components/FaqAccordion";
 
 const BG = "/images/hero-about-buyers.jpg";
 
@@ -158,16 +159,10 @@ export default function About() {
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light max-w-3xl mb-12">
             Frequently asked questions about EEC sourcing consultancy
           </h2>
-          <div className="border hairline overflow-hidden bg-[#FFFFFF]">
-            {ABOUT_FAQ.map(({ q, a, link, linkText }, idx) => (
-              <div key={q} className={`grid grid-cols-1 md:grid-cols-[36%_1fr] ${idx !== ABOUT_FAQ.length - 1 ? "border-b hairline" : ""}`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">
-                  {a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}
-                </div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="about-faq" items={ABOUT_FAQ.map(({ q, a, link, linkText }) => ({
+              q,
+              a: <>{a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}</>,
+            }))} />
         </div>
       </section>
 

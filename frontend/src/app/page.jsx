@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { COMPANY } from "@/constants/company";
 import HomeServices from "@/components/HomeServices";
 import ServicesIntro from "@/components/ServicesIntro";
+import FaqAccordion from "@/components/FaqAccordion";
 
 const HERO_IMG = "/images/hero-container-ship.jpg";
 
@@ -366,16 +367,10 @@ export default function Home() {
           <h2 className="font-display text-4xl lg:text-5xl text-[#012D76] tracking-tight mb-12">
             Frequently Asked Questions About EEC Sourcing and Procurement Services
           </h2>
-          <div className="border hairline bg-[#FFFFFF] overflow-hidden">
-            {FAQ.map(({ q, a, link, linkText }, idx) => (
-              <div key={q} className={`grid grid-cols-1 md:grid-cols-[36%_1fr] ${idx !== FAQ.length - 1 ? "border-b hairline" : ""}`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">
-                  {a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}
-                </div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="home-faq" items={FAQ.map(({ q, a, link, linkText }) => ({
+              q,
+              a: <>{a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}</>,
+            }))} />
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Still have questions? Tell us what you need.</p>
             <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta">

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { CertLogosMarquee } from "@/components/CertLogoMarquee";
 import BuyerServiceOffers from "@/components/BuyerServiceOffers";
 import NewBadge from "@/components/NewBadge";
+import FaqAccordion from "@/components/FaqAccordion";
 
 const BG = "/images/hero-about-buyers.jpg";
 
@@ -241,16 +242,10 @@ export default function ForBuyers() {
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-8">
             Frequently asked questions about EEC sourcing services for buyers
           </h2>
-          <div className="border hairline bg-surface overflow-hidden">
-            {FAQ.map(({ q, a, link, linkText }, idx) => (
-              <div key={q} className={`${idx !== FAQ.length - 1 ? "border-b hairline" : ""} grid grid-cols-1 md:grid-cols-[36%_1fr]`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">
-                  {a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}
-                </div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="buyers-faq" items={FAQ.map(({ q, a, link, linkText }) => ({
+              q,
+              a: <>{a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}</>,
+            }))} />
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Ready to discuss your sourcing requirements?</p>
             <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta-buyers">

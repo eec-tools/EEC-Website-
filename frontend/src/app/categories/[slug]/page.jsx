@@ -5,6 +5,7 @@ import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { CertGrid } from "@/components/CertLogoMarquee";
 import { IMAGE_DIMENSIONS } from "@/constants/imageDimensions";
 import { fallbackCategories, FAQ, CERT_CARDS, REQS } from "@/constants/categoriesData";
+import FaqAccordion from "@/components/FaqAccordion";
 
 const GEOGRAPHY_NOTE =
   "India is EEC's primary sourcing base for this category. EEC also maintains a smaller, audited manufacturer base across Vietnam, Bangladesh, Indonesia and Thailand, used selectively where a category requires specific technical capability.";
@@ -181,14 +182,7 @@ export default async function CategoryPage(props) {
           <h2 className="font-display text-2xl sm:text-3xl text-[#012D76] tracking-tight font-light mb-8">
             Frequently asked questions about EEC sourcing categories
           </h2>
-          <div className="border hairline bg-surface overflow-hidden">
-            {FAQ.map(({ q, a }, idx) => (
-              <div key={q} className={`${idx !== FAQ.length - 1 ? "border-b hairline" : ""} grid grid-cols-1 md:grid-cols-[36%_1fr]`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">{a}</div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="category-faq" items={FAQ} />
         </div>
       </section>
 

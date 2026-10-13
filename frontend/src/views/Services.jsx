@@ -8,6 +8,7 @@ import NewBadge from "@/components/NewBadge";
 import AudienceTag from "@/components/AudienceTag";
 import { OfferCard, SupplierServiceCards } from "@/components/ServiceOfferCard";
 import { ENGAGEMENT_TIERS } from "@/constants/engagementTiers";
+import FaqAccordion from "@/components/FaqAccordion";
 import {
   BUYER_OFFERS,
   CUSTOM_SOURCING_OFFER,
@@ -258,14 +259,7 @@ export default function Services() {
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-8">
             Frequently asked questions about EEC sourcing services
           </h2>
-          <div className="border hairline bg-surface overflow-hidden">
-            {FAQ.map(({ q, a }, idx) => (
-              <div key={q} className={`${idx !== FAQ.length - 1 ? "border-b hairline" : ""} grid grid-cols-1 md:grid-cols-[36%_1fr]`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">{a}</div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="services-faq" items={FAQ} />
         </div>
       </section>
 

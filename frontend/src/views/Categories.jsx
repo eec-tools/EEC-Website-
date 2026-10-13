@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { fallbackCategories, FAQ } from "@/constants/categoriesData";
+import FaqAccordion from "@/components/FaqAccordion";
 
 export default function Categories() {
   const [categories, setCategories] = useState(fallbackCategories);
@@ -72,14 +73,7 @@ export default function Categories() {
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-8">
             Frequently asked questions about EEC sourcing categories
           </h2>
-          <div className="border hairline bg-surface overflow-hidden">
-            {FAQ.map(({ q, a }, idx) => (
-              <div key={q} className={`${idx !== FAQ.length - 1 ? "border-b hairline" : ""} grid grid-cols-1 md:grid-cols-[36%_1fr]`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">{a}</div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="categories-faq" items={FAQ} />
         </div>
       </section>
 

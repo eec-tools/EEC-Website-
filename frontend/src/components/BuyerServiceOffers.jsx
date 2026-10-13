@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import NewBadge from "@/components/NewBadge";
 import AudienceTag from "@/components/AudienceTag";
 import { BUYER_OFFERS, CUSTOM_SOURCING_OFFER, SERVICE_TERMS } from "@/constants/services";
@@ -72,53 +72,22 @@ function FixedFeeOffer({ offer, index }) {
   );
 }
 
+// Always expanded: the terms must be clearly visible, not hidden behind a toggle.
+// Forms deep-link here with /for-buyers#service-terms.
 function ServiceTerms() {
-  const [open, setOpen] = useState(false);
-
-  // Let forms deep-link straight to the terms (/for-buyers#service-terms).
-  useEffect(() => {
-    const syncWithHash = () => {
-      if (window.location.hash === "#service-terms") {
-        setOpen(true);
-        document.getElementById("service-terms")?.scrollIntoView();
-      }
-    };
-    syncWithHash();
-    window.addEventListener("hashchange", syncWithHash);
-    return () => window.removeEventListener("hashchange", syncWithHash);
-  }, []);
-
   return (
-    <div id="service-terms" className="mt-12 border hairline bg-white scroll-mt-24" data-testid="service-terms">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls="service-terms-panel"
-        className="w-full flex items-center justify-between gap-4 p-6 text-left"
-        data-testid="service-terms-toggle"
-      >
-        <span className="font-display text-xl lg:text-2xl text-[#012D76]">Service Terms</span>
-        <ChevronDown
-          size={20}
-          className={`shrink-0 text-[#8A6F2B] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        />
-      </button>
-      {open && (
-        <div id="service-terms-panel" className="border-t hairline p-6 lg:p-8">
-          <ol className="space-y-6">
-            {SERVICE_TERMS.map(({ title, body }, i) => (
-              <li key={title}>
-                <h4 className="font-medium text-[#012D76]">
-                  {i + 1}. {title}
-                </h4>
-                <p className="mt-1 text-sm text-[#3A4759] leading-relaxed">{body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
+    <div id="service-terms" className="mt-12 border hairline bg-white scroll-mt-24 p-6 lg:p-8" data-testid="service-terms">
+      <h3 className="font-display text-xl lg:text-2xl text-[#012D76]">Service Terms</h3>
+      <ol className="mt-6 space-y-6">
+        {SERVICE_TERMS.map(({ title, body }, i) => (
+          <li key={title}>
+            <h4 className="font-medium text-[#012D76]">
+              {i + 1}. {title}
+            </h4>
+            <p className="mt-1 text-sm text-[#3A4759] leading-relaxed">{body}</p>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

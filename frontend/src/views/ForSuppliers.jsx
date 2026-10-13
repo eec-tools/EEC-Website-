@@ -20,6 +20,7 @@ const BENEFITS = [
 ];
 
 import { REQS, CERT_CARDS } from "@/constants/categoriesData";
+import FaqAccordion from "@/components/FaqAccordion";
 
 const CERT_WALL = {
   Textiles: ["BSCI", "SEDEX", "GOTS", "OEKO-TEX Standard 100", "OEKO-TEX STEP", "GRS", "ISO 9001", "ISO 14001", "CE", "WRAP", "Higg Index", "SA8000"],
@@ -266,18 +267,10 @@ export default function ForSuppliers() {
           <h2 className="font-display text-3xl sm:text-4xl text-[#012D76] tracking-tight font-light mb-8">
             Frequently asked questions from suppliers about joining the EEC network
           </h2>
-          <div className="border hairline bg-surface overflow-hidden">
-            {FAQ.map(([q, a, link], idx) => (
-              <div key={q} className={`${idx !== FAQ.length - 1 ? "border-b hairline" : ""} grid grid-cols-1 md:grid-cols-[36%_1fr]`}>
-                <div className="p-5 md:p-6 font-medium text-[#012D76]">{q}</div>
-                <div className="p-5 md:p-6 text-[#3A4759] leading-relaxed">
-                  {link ? (
-                    <>{a} <Link href={link} className="text-[#012D76] hover:underline font-medium">Learn more.</Link></>
-                  ) : a}
-                </div>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion idPrefix="suppliers-faq" items={FAQ.map(([q, a, link]) => ({
+              q,
+              a: link ? <>{a} <Link href={link} className="text-[#012D76] hover:underline font-medium">Learn more.</Link></> : a,
+            }))} />
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
             <p className="text-[#3A4759] text-sm">Ready to apply? Start your factory profile now.</p>
             <Link href="/register?role=supplier" className="eec-btn-primary" data-testid="faq-cta-suppliers">
