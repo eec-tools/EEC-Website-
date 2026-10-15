@@ -247,7 +247,7 @@ export default function Services() {
           </div>
           <p className="mt-12 text-center text-xs uppercase tracking-[0.32em] text-[#6B7280]" data-testid="services-pricing-disclaimer">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A23F] align-middle mr-3"></span>
-            Pricing is tailored to the scope and requirements of each sourcing project. Please contact our team to discuss your sourcing objectives. EEC does not charge suppliers listing or activation fees at any stage.
+            Pricing is tailored to the scope and requirements of each engagement. Please contact our team for a customised proposal. EEC does not charge suppliers listing or activation fees.
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A23F] align-middle ml-3"></span>
           </p>
         </div>

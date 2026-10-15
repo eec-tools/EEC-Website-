@@ -23,7 +23,7 @@ const BENEFITS = [
 const COMPARISON = [
   ["Supplier discovery", "Marketplace browsing. No audit, no verification.", "Curated, audited bench. IEC, GST and factory assessment required."],
   ["Quality control", "Self-managed. Buyer coordinates inspection independently.", "EEC pre-shipment AQL + independent third-party inspection."],
-  ["Commercials", "Vendor-published price. Margins and layers undisclosed.", "Open-book negotiated. Every cost layer disclosed before commitment."],
+  ["Commercials", "Vendor-published price. Margins and layers undisclosed.", "Transparent product quotations and sourcing cost comparisons, with commercial terms agreed for each engagement."],
   ["Escalations", "Distributed across buyer-side and supplier-side contacts with no defined resolution path.", "Dedicated EEC commercial lead. Single point of contact."],
   ["Cost trajectory", "Price creep each renewal cycle.", "Quarterly cost-out programme tracking landed cost across shipment cycles."],
 ];
