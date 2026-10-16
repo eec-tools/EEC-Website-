@@ -27,7 +27,7 @@ module.exports = [
       "On-ground factory visit at one location",
       "Negotiated MOQ, payment terms and lead times",
       "Sample QC and third-party AQL pre-shipment inspection",
-      "Open-book landed cost and duty optimisation",
+      "Landed cost comparison and duty optimisation",
     ],
     cta: "Submit a sourcing brief",
   },

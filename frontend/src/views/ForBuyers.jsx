@@ -15,7 +15,7 @@ const COMPLIANCE_CERTS = ["BSCI", "SEDEX", "SA8000", "SMETA", "OEKO-TEX Standard
 
 const BENEFITS = [
   { icon: ShieldCheck, title: "Verified factories only", desc: "IEC registration, GST filing, financial checks and a factory assessment based on category and geography before any RFQ is deployed." },
-  { icon: FileSpreadsheet, title: "Landed cost transparency", desc: "Open-book FOB, duty, freight and destination cost modelling with transparent commercial breakdowns before supplier commitment." },
+  { icon: FileSpreadsheet, title: "Landed cost transparency", desc: "Transparent FOB, duty, freight and destination cost comparisons, with commercial terms agreed for each engagement." },
   { icon: Award, title: "Certification-ready suppliers", desc: "Every supplier in the EEC network is screened against the certification requirements of your destination market including FSSAI, BRC/BRCGS, FSSC 22000 and IFS Food for European buyers before any shortlist is shared." },
   { icon: User, title: "Single point of escalation", desc: "One dedicated commercial lead, one quality control lead and one escalation path across all suppliers and product categories." },
 ];
@@ -23,7 +23,7 @@ const BENEFITS = [
 const COMPARISON = [
   ["Supplier discovery", "Marketplace browsing. No audit, no verification.", "Curated, audited bench. IEC, GST and factory assessment required."],
   ["Quality control", "Self-managed. Buyer coordinates inspection independently.", "EEC pre-shipment AQL + independent third-party inspection."],
-  ["Commercials", "Vendor-published price. Margins and layers undisclosed.", "Transparent product quotations and sourcing cost comparisons, with commercial terms agreed for each engagement."],
+  ["Commercials", "Vendor-published price. Cost layers not itemised.", "Transparent product quotations and sourcing cost comparisons, with commercial terms agreed for each engagement."],
   ["Escalations", "Distributed across buyer-side and supplier-side contacts with no defined resolution path.", "Dedicated EEC commercial lead. Single point of contact."],
   ["Cost trajectory", "Price creep each renewal cycle.", "Quarterly cost-out programme tracking landed cost across shipment cycles."],
 ];
@@ -39,7 +39,7 @@ const FAQ = [
   { q: "What certifications does EEC consider during supplier evaluation?", a: "Compliance verification is part of our core risk-mitigation process, not an afterthought. Requirements are matched to your destination market and product category, for example, BRC/BRCGS and HACCP for EU food buyers, or IFS Food for German and French accounts.", link: "/for-buyers#certifications", linkText: "Full compliance screening breakdown" },
   { q: "What is a sourcing brief?", a: "A sourcing brief is a document that outlines product specifications, quality expectations, commercial requirements and sourcing objectives. It enables our sourcing specialists to identify manufacturers best suited to the buyer procurement needs." },
   { q: "How do I start working with EEC as a buyer?", a: "The fastest way to start is a free 20-minute discovery call with no commitment required. EEC maps your sourcing category, target landed cost, compliance requirements and timelines. After the call, EEC recommends the appropriate engagement tier and provides a scope and pricing outline within 2 working days. Buyers can also submit a sourcing brief directly through the EEC Buyer Portal, which takes under 5 minutes to complete." },
-  { q: "Why choose Elan Exports Consultancy?", a: "Buyers choose EEC for the same reason they'd hire an in-house procurement office rather than trust a broker: full cost transparency, boots-on-the-ground factory management, and zero hidden trading margins. Every landed cost is modelled open-book before you commit, and every supplier is verified independently." },
+  { q: "Why choose Elan Exports Consultancy?", a: "Buyers choose EEC for the same reason they'd hire an in-house procurement office rather than trust a broker: transparent product quotations, boots-on-the-ground factory management and sourcing cost comparisons. Landed costs are compared before you commit, and every supplier is verified independently." },
 ];
 
 export default function ForBuyers() {

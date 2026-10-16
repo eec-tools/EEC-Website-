@@ -12,7 +12,7 @@ export const ENGAGEMENT_TIERS = [
     cadence: "Per sourcing project",
     name: "Engage",
     tagline: "End-to-end sourcing with negotiated terms.",
-    features: ["Full sourcing brief deployment and RFQ to qualified bench", "Up to 10 qualified suppliers, 3 in-depth factory assessments (on-ground or documentary based on category and geography)", "On-ground factory visit at one location", "Negotiated MOQ, payment terms and lead times", "Sample QC and third-party AQL pre-shipment inspection", "Open-book landed cost and duty optimisation"],
+    features: ["Full sourcing brief deployment and RFQ to qualified bench", "Up to 10 qualified suppliers, 3 in-depth factory assessments (on-ground or documentary based on category and geography)", "On-ground factory visit at one location", "Negotiated MOQ, payment terms and lead times", "Sample QC and third-party AQL pre-shipment inspection", "Landed cost comparison and duty optimisation"],
     cta: "Request Engage proposal",
     popular: true,
   },

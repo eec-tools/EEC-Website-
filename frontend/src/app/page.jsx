@@ -69,10 +69,10 @@ const HOME_CATEGORIES = [
 ];
 
 const FAQ = [
-  { q: "What is Elan Exports Consultancy?", a: `Elan Exports Consultancy (EEC) is a Singapore-headquartered global sourcing consultancy connecting buyers with verified manufacturers worldwide, with deep specialisation across India and Southeast Asia. Built on 20 years of founder experience in international trade, EEC operates on an open-book commercial model with predictable shipments, functioning as an embedded sourcing arm for buyers rather than a transactional marketplace.` },
+  { q: "What is Elan Exports Consultancy?", a: `Elan Exports Consultancy (EEC) is a Singapore-headquartered global sourcing consultancy connecting buyers with verified manufacturers worldwide, with deep specialisation across India and Southeast Asia. Built on 20 years of founder experience in international trade, EEC operates on a transparent commercial model with predictable shipments, functioning as an embedded sourcing arm for buyers rather than a transactional marketplace.` },
   { q: "What countries does EEC source from?", a: "EEC sources from India, Asia and select global markets. India remains the primary sourcing market across food commodities, textiles, fresh produce, processed foods, hospital textiles and eco-friendly products. EEC also works with verified manufacturers in Vietnam, Bangladesh, Indonesia, Thailand and other countries based on category requirements. Every supplier in the network is verified before any RFQ is deployed to a buyer." },
   { q: "How is EEC different from a sourcing marketplace?", a: "Unlike traditional sourcing marketplaces, EEC provides personalised sourcing and procurement consultancy. Suppliers are recommended based on their capabilities, quality and suitability for buyer requirements, not commercial incentives." },
-  { q: "What is landed cost, and how does EEC model it?", a: "Landed cost is the total cost of a product at the destination warehouse, including factory price (FOB), freight, insurance, import duties, customs clearance and last-mile delivery. EEC provides open-book landed cost modelling for every sourcing project before the buyer commits to a supplier. This eliminates hidden margins and gives procurement teams an accurate, comparable basis for supplier decisions across categories and geographies." },
+  { q: "What is landed cost, and how does EEC model it?", a: "Landed cost is the total cost of a product at the destination warehouse, including factory price (FOB), freight, insurance, import duties, customs clearance and last-mile delivery. EEC provides transparent landed cost comparisons for sourcing projects before the buyer commits to a supplier. This gives procurement teams an accurate, comparable basis for supplier decisions across categories and geographies." },
   { q: "How does EEC price its services?", a: "EEC offers flexible pricing based on the nature of each engagement, including buyer consultancy fees, transaction-based arrangements and specialised export advisory services." },
 ];
 
@@ -209,7 +209,7 @@ export default function Home() {
                 <div className="absolute bottom-6 left-6 right-6 bg-[#FFFFFF]/95 backdrop-blur-md p-5 border-l-2 border-[#C9A23F]">
                   <p className="text-xs uppercase tracking-[0.18em] text-[#8A6F2B]">A buyer-first sourcing desk</p>
                   <p className="mt-2 font-display text-xl text-[#012D76] leading-tight">
-                    Vetted suppliers. Open-book cost. Supply chains you can plan around.
+                    Vetted suppliers. Transparent quotations. Supply chains you can plan around.
                   </p>
                 </div>
               </div>

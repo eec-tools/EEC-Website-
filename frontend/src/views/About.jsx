@@ -22,7 +22,7 @@ const ABOUT_FAQ = [
   },
   {
     q: "What does EEC do?",
-    a: "Elan Exports Consultancy exists to close the trust gap between global buyers and verified manufacturers, replacing opaque trading intermediaries with a transparent, accountable sourcing partner. Our mandate covers supplier identification and qualification, factory assessment, open-book landed cost modelling and shipment coordination, delivered through Scout, Engage or Embed engagement tiers, with operations centred on India and extending across Southeast Asia.",
+    a: "Elan Exports Consultancy exists to close the trust gap between global buyers and verified manufacturers, replacing opaque trading intermediaries with a transparent, accountable sourcing partner. Our mandate covers supplier identification and qualification, factory assessment, transparent landed cost modelling and shipment coordination, delivered through Scout, Engage or Embed engagement tiers, with operations centred on India and extending across Southeast Asia.",
   },
   {
     q: "Where does EEC operate?",

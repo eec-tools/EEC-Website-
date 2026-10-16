@@ -10,7 +10,7 @@ export const metadata = {
     type: "website",
     siteName: "Elan Exports Consultancy",
     title: "For Buyers | India Procurement Sourcing Consultancy | EEC",
-    description: "EEC helps institutional buyers source from verified manufacturers worldwide. Singapore Headquartered. Open-book costs. Factory-audited suppliers.",
+    description: "EEC helps institutional buyers source from verified manufacturers worldwide. Singapore Headquartered. Transparent quotations. Factory-audited suppliers.",
     url: "https://eectrade.com/for-buyers",
   },
 };
