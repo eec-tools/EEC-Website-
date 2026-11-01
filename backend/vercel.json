@@ -1,10 +1,20 @@
 {
   "functions": {
     "api/index.js": {
-      "maxDuration": 30
+      "maxDuration": 60,
+      "includeFiles": "src/social/assets/**"
     }
   },
+  "crons": [
+    {
+      "path": "/api/social/cron",
+      "schedule": "17 2 * * *"
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
   ]
 }
