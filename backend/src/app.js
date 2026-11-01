@@ -18,6 +18,8 @@ const newsletterRouter = require("./routes/newsletter");
 const adminRouter = require("./routes/admin");
 const googleAuthRouter = require("./routes/googleAuth");
 const serviceRequestsRouter = require("./routes/serviceRequests");
+const studioRouter = require("./routes/studio");
+const socialPublicRouter = require("./routes/socialPublic");
 
 function buildApp() {
   const app = express();
@@ -47,6 +49,8 @@ function buildApp() {
   api.use(adminRouter);
   api.use(googleAuthRouter);
   api.use(serviceRequestsRouter);
+  api.use(socialPublicRouter);
+  api.use(studioRouter);
 
   app.use("/api", api);
 
