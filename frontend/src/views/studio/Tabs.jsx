@@ -245,7 +245,7 @@ function CadenceEditor({ value, onSave, disabled }) {
   useEffect(() => setC(value), [value]);
   return (
     <div className="space-y-2">
-      {ACTIVE_CHANNELS.map((ch) => {
+      {Object.keys(CHANNELS).filter((k) => !CHANNELS[k].retired || ((c[k] || {}).days || []).length).map((ch) => {
         const row = c[ch] || { days: [], time: "09:30", max_per_week: 0 };
         const set = (patch) => setC({ ...c, [ch]: { ...row, ...patch } });
         return (
