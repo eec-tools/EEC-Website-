@@ -4,7 +4,7 @@
 
 const CHANNEL_RULES = {
   linkedin_shirali: { maxChars: 3000, softMax: 2000, tags: [4, 7], signOff: true, needsMedia: false },
-  linkedin_company: { maxChars: 3000, softMax: 2000, tags: [3, 6], signOff: true, needsMedia: false },
+  linkedin_company: { maxChars: 3000, softMax: 2000, tags: [4, 7], signOff: true, needsMedia: false },
   instagram: { maxChars: 2200, softMax: 1300, tags: [5, 6], signOff: false, needsMedia: true },
   facebook: { maxChars: 5000, softMax: 1000, tags: [3, 5], signOff: false, needsMedia: false },
 };

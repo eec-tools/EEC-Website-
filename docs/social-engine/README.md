@@ -1,6 +1,6 @@
 # EEC Social Engine ("God Mode")
 
-One loop for LinkedIn (Shirali's profile), Instagram and the Facebook Page:
+One loop for the EEC LinkedIn company page, Instagram and the Facebook Page:
 Claude researches, plans, writes and checks; one approver approves on **www.eectrade.com/studio**;
 Buffer publishes at the exact time; the clock syncs results; Claude learns from edits and numbers.
 Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook publishers.
@@ -62,4 +62,4 @@ After changing `src/social/seedData.js`, run `node scripts/social-build-seed.js`
 - Inbox of platform comments and DMs with drafted replies (table `social_inbox` exists; needs a Meta token or Buffer engagement API).
 - Website leads tagged with the UTM source of the post that brought them.
 - Reels generation (a reel can be posted today by putting a public .mp4 URL in the post's media).
-- EEC LinkedIn company page (cadence is off until Buffer has the page connected).
+- Shirali's personal LinkedIn (`linkedin_shirali`) is retired: hidden in Studio settings, kept only so the imported 26 Oct post still displays.

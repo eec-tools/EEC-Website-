@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Pause, Play, RefreshCw, Plus } from "lucide-react";
-import { Button, Card, Empty, ChannelBadge, StatusPill, CHANNELS, call, fmtLocal, localDateTime, ExtLink } from "./shared";
+import { Button, Card, Empty, ChannelBadge, StatusPill, CHANNELS, ACTIVE_CHANNELS, call, fmtLocal, localDateTime, ExtLink } from "./shared";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
@@ -172,7 +172,7 @@ export function LearningTab({ me, tz }) {
             <div className="flex gap-2">
               <select className="rounded border border-[#E5EBF2] px-2 py-1 text-sm" value={adding.channel} onChange={(e) => setAdding({ ...adding, channel: e.target.value })}>
                 <option value="all">All channels</option>
-                {Object.entries(CHANNELS).map(([k, c]) => (
+                {ACTIVE_CHANNELS.map((k) => [k, CHANNELS[k]]).map(([k, c]) => (
                   <option key={k} value={k}>{c.label}</option>
                 ))}
               </select>
@@ -245,7 +245,7 @@ function CadenceEditor({ value, onSave, disabled }) {
   useEffect(() => setC(value), [value]);
   return (
     <div className="space-y-2">
-      {Object.keys(CHANNELS).map((ch) => {
+      {ACTIVE_CHANNELS.map((ch) => {
         const row = c[ch] || { days: [], time: "09:30", max_per_week: 0 };
         const set = (patch) => setC({ ...c, [ch]: { ...row, ...patch } });
         return (
@@ -366,7 +366,7 @@ export function HealthTab({ me, tz, onChanged, onOpen }) {
             Load channels from Buffer
           </Button>
         ) : null}
-        {Object.keys(CHANNELS).map((ch) => (
+        {ACTIVE_CHANNELS.map((ch) => (
           <div key={ch} className="flex items-center gap-2 text-sm">
             <span className="w-44"><ChannelBadge channel={ch} /></span>
             {buffer ? (
