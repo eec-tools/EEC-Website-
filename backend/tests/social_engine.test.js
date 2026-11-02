@@ -81,7 +81,7 @@ async function fresh({ dryRun = false } = {}) {
   await store.upsert("social_config", { key: "dry_run", value: dryRun });
   await store.upsert("social_config", {
     key: "buffer_channels",
-    value: { linkedin_shirali: "ch_li", instagram: "ch_ig", facebook: "ch_fb", linkedin_company: "" },
+    value: { linkedin_company: "ch_li", instagram: "ch_ig", facebook: "ch_fb", linkedin_shirali: "" },
   });
   for (const [email, name, role] of [
     ["shirali@eectrade.com", "Shirali", "approver"],
@@ -113,9 +113,9 @@ function weekBatch(extra = {}) {
     plan: { theme: "Opportunities in Indian food sourcing" },
     experiment: "Carousel vs single image on Instagram",
     posts: [
-      { channel: "linkedin_shirali", date: "2026-11-09", kind: "text", pillar: "Food and ingredients", topic: "Spice specifications", body: liBody("spice"), sources: src, scores: goodScores },
-      { channel: "linkedin_shirali", date: "2026-11-11", kind: "text", pillar: "Agricultural commodities", topic: "Rice landed cost", body: liBody("rice"), sources: src, scores: goodScores },
-      { channel: "linkedin_shirali", date: "2026-11-13", kind: "text", pillar: "Home textiles", topic: "Towel GSM checks", body: liBody("towel"), sources: src, scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-09", kind: "text", pillar: "Food and ingredients", topic: "Spice specifications", body: liBody("spice"), sources: src, scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-11", kind: "text", pillar: "Agricultural commodities", topic: "Rice landed cost", body: liBody("rice"), sources: src, scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-13", kind: "text", pillar: "Home textiles", topic: "Towel GSM checks", body: liBody("towel"), sources: src, scores: goodScores },
       { channel: "instagram", date: "2026-11-10", kind: "carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody, slides, alt: ["a", "b", "c"], scores: goodScores },
       { channel: "facebook", date: "2026-11-10", kind: "carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody.replace("#FoodIngredients", ""), slides, alt: ["a", "b", "c"], scores: goodScores },
     ],
@@ -131,12 +131,12 @@ test("time: IST conversion, weekdays, quiet hours", () => {
   assert.equal(time.mondayOf("2026-11-08"), "2026-11-02");
   assert.equal(time.inQuietHours(new Date("2026-11-09T17:00:00Z"), "Asia/Kolkata", "22:00-07:00"), true); // 22:30 IST
   assert.equal(time.inQuietHours(new Date("2026-11-09T05:00:00Z"), "Asia/Kolkata", "22:00-07:00"), false); // 10:30 IST
-  const slotsLi = time.cadenceSlots(seed.config.find((c) => c[0] === "cadence")[1], "linkedin_shirali", "2026-11-09", "Asia/Kolkata");
+  const slotsLi = time.cadenceSlots(seed.config.find((c) => c[0] === "cadence")[1], "linkedin_company", "2026-11-09", "Asia/Kolkata");
   assert.deepEqual(slotsLi.map((s) => s.date), ["2026-11-09", "2026-11-11", "2026-11-13"]);
 });
 
 test("rules: house style is enforced", () => {
-  const ok = { channel: "linkedin_shirali", kind: "text", body: liBody("spice"), sources: src, scores: goodScores };
+  const ok = { channel: "linkedin_company", kind: "text", body: liBody("spice"), sources: src, scores: goodScores };
   assert.deepEqual(rules.lintPost(ok).filter((l) => l.level === "error"), []);
   const bad = rules.lintPost({ ...ok, body: ok.body.replace("At EEC, we help", "We're Mumbai-based and we've helped") + " — great" });
   const codes = bad.map((l) => l.code);
@@ -147,9 +147,9 @@ test("rules: house style is enforced", () => {
   assert.ok(!rules.lintPost({ ...ok, sources: [] }).some((l) => l.code === "sources"), "no figures, no source needed");
   assert.ok(rules.lintPost({ channel: "instagram", kind: "image", body: igBody, scores: goodScores }).some((l) => l.code === "media"));
   assert.ok(!rules.lintPost(ok).some((l) => l.code === "contractions"), "possessives are fine");
-  const tagged = rules.addUtm("See https://www.eectrade.com/services.", { channel: "linkedin_shirali", campaign: "wk20261109", content: "P1" });
+  const tagged = rules.addUtm("See https://www.eectrade.com/services.", { channel: "linkedin_company", campaign: "wk20261109", content: "P1" });
   assert.equal(tagged, "See https://www.eectrade.com/services?utm_source=linkedin&utm_medium=social&utm_campaign=wk20261109&utm_content=P1.");
-  assert.equal(rules.addUtm(tagged, { channel: "linkedin_shirali", campaign: "x" }), tagged, "never double-tags");
+  assert.equal(rules.addUtm(tagged, { channel: "linkedin_company", campaign: "x" }), tagged, "never double-tags");
 });
 
 test("buffer: GraphQL input is built correctly", () => {
@@ -160,7 +160,7 @@ test("buffer: GraphQL input is built correctly", () => {
   assert.match(s, /mode: customScheduled/);
   assert.match(s, /instagram: \{ type: carousel, shouldShareToFeed: true \}/);
   assert.match(s, /assets: \[\{ image: \{ url: "https:\/\/x\/1.jpg" \} \}/);
-  assert.match(lit(c.buildCreateInput({ channelId: "ch", channel: "linkedin_shirali", kind: "text", text: "t" })), /mode: shareNow/);
+  assert.match(lit(c.buildCreateInput({ channelId: "ch", channel: "linkedin_company", kind: "text", text: "t" })), /mode: shareNow/);
 });
 
 // ---------- the whole flow ----------
@@ -262,7 +262,7 @@ test("never post twice: unclear Buffer answers are not retried", async () => {
   setNow("2026-11-06T05:00:00Z");
   await fresh();
   await service.submitBatch(weekBatch());
-  const [a, b] = await store.list("social_posts", { where: { channel: "linkedin_shirali" }, order: ["slot_at", "asc"] });
+  const [a, b] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
 
   buffer.failNext(new BufferError("timeout", { kind: "network", ambiguous: true }));
   const fa = await service.approvePost(approver, a.post_id);
@@ -284,7 +284,7 @@ test("clock: posted, missed, late approval and reminders", async () => {
   setNow("2026-11-06T05:00:00Z");
   await fresh();
   await service.submitBatch(weekBatch());
-  const [mon, wed] = await store.list("social_posts", { where: { channel: "linkedin_shirali" }, order: ["slot_at", "asc"] });
+  const [mon, wed] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
   await service.approvePost(approver, mon.post_id);
 
   // Reminder: Sunday 10:00 IST, Monday's slot within 48h... the Wednesday post is waiting.
@@ -324,7 +324,7 @@ test("kill switch pulls queued posts and resumes them", async () => {
   setNow("2026-11-06T05:00:00Z");
   await fresh();
   await service.submitBatch(weekBatch());
-  const [mon, wed] = await store.list("social_posts", { where: { channel: "linkedin_shirali" }, order: ["slot_at", "asc"] });
+  const [mon, wed] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
   await service.approvePost(approver, mon.post_id);
   await assert.rejects(service.setPublishing(editor, true), /Only approver/);
   const paused = await service.setPublishing(editor, false);
@@ -342,7 +342,7 @@ test("dry run never calls Buffer", async () => {
   setNow("2026-11-06T05:00:00Z");
   await fresh({ dryRun: true });
   await service.submitBatch(weekBatch());
-  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_shirali" }, order: ["slot_at", "asc"] });
+  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
   const p = await service.approvePost(approver, mon.post_id);
   assert.equal(p.status, "scheduled");
   assert.match(p.buffer_id, /^dry-run-/);
@@ -364,7 +364,7 @@ test("connector: no approve or publish tools; context lists open slots", async (
   assert.ok(!names.some((n) => /approve|publish|schedule|post_now/.test(n)), names.join(","));
   const ctx = JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "get_context", arguments: {} } })).result.content[0].text);
   assert.equal(ctx.next_week_start, "2026-11-09");
-  assert.equal(ctx.open_slots_next_week.filter((s) => s.channel === "linkedin_shirali").length, 3);
+  assert.equal(ctx.open_slots_next_week.filter((s) => s.channel === "linkedin_company").length, 3);
   const check = JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "check_posts", arguments: weekBatch() } })).result.content[0].text);
   assert.equal(check.ok, true, JSON.stringify(check));
   assert.equal((await store.list("social_posts")).length, 0, "check_posts saves nothing");

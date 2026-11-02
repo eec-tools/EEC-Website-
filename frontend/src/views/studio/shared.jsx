@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { api, formatApiErrorDetail } from "@/lib/api";
 
 export const CHANNELS = {
-  linkedin_shirali: { label: "LinkedIn · Shirali", short: "LI", color: "#0A66C2" },
   linkedin_company: { label: "LinkedIn · EEC page", short: "LI", color: "#0A66C2" },
+  linkedin_shirali: { label: "LinkedIn · Shirali (retired)", short: "LI", color: "#0A66C2", retired: true },
   instagram: { label: "Instagram", short: "IG", color: "#C13584" },
   facebook: { label: "Facebook", short: "FB", color: "#1877F2" },
 };
@@ -107,6 +107,9 @@ export function Empty({ title, children }) {
     </Card>
   );
 }
+
+// Channels people can schedule or map. Retired channels still show on old posts.
+export const ACTIVE_CHANNELS = Object.keys(CHANNELS).filter((k) => !CHANNELS[k].retired);
 
 // Shows a post the way it will look on its channel.
 export function Preview({ post }) {
