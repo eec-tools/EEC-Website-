@@ -9,7 +9,7 @@ const { getStore } = require("../social/store");
 const { getSettings, setSetting, audit, DEFAULTS } = require("../social/settings");
 const { getBuffer } = require("../social/buffer");
 const { lintPost } = require("../social/rules");
-const { tick } = require("../social/tick");
+const { tick, quickSync } = require("../social/tick");
 const service = require("../social/service");
 const { mondayOf, addDays, zonedToUtc, localParts } = require("../social/time");
 
@@ -45,6 +45,8 @@ router.get(
   "/studio/overview",
   auth,
   asyncHandler(async (req, res) => {
+    // Check Buffer before answering so the page shows what has really happened (capped at 7 seconds).
+    await Promise.race([quickSync().catch(() => null), new Promise((r) => setTimeout(r, 7000))]);
     const store = getStore();
     const settings = await getSettings();
     const tz = settings.timezone;
@@ -62,6 +64,7 @@ router.get(
       from,
       to,
       timezone: tz,
+      synced_at: settings.last_sync || settings.last_tick || null,
       batches: batches.filter((b) => b.status !== "deleted").map((b) => ({ ...b, deleted_copy: undefined })),
       posts: posts.map(decorate),
       comments,

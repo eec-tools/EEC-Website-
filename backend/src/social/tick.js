@@ -12,7 +12,8 @@ const { inQuietHours, localParts } = require("./time");
 async function syncSent(summary) {
   const store = getStore();
   const t = service.now();
-  const due = await store.list("social_posts", { where: { status: "scheduled", slot_at: { lte: new Date(t.getTime() - 3 * 60000).toISOString() } } });
+  // Buffer publishes on the minute; check from one minute after the slot.
+  const due = await store.list("social_posts", { where: { status: "scheduled", slot_at: { lte: new Date(t.getTime() - 60000).toISOString() } } });
   for (const p of due) {
     if (service.isDryRunId(p.buffer_id)) {
       await store.update("social_posts", { post_id: p.post_id, status: "scheduled" }, {
@@ -26,7 +27,17 @@ async function syncSent(summary) {
     }
     try {
       const bp = await getBuffer().getPost(p.buffer_id);
-      if (!bp) continue;
+      if (!bp) {
+        // Deleted in Buffer by someone, so it will never be published from there.
+        await store.update("social_posts", { post_id: p.post_id, status: "scheduled" }, {
+          status: "dropped",
+          error: "This post was deleted in Buffer, so it was not published.",
+          updated_at: t.toISOString(),
+        });
+        await audit("system", "post.deleted_in_buffer", p.post_id, { buffer_id: p.buffer_id });
+        await service.refreshBatchStatus(p.batch_id);
+        continue;
+      }
       if (bp.status === "sent") {
         await store.update("social_posts", { post_id: p.post_id, status: "scheduled" }, {
           status: "posted",
@@ -208,4 +219,38 @@ async function tick({ force = false } = {}) {
   return summary;
 }
 
-module.exports = { tick };
+// A light, fast sync run whenever someone opens or refreshes the Studio, so statuses are right
+// on time even if the outside clock is late. At most one run at a time, and not more than every 20 seconds.
+let quickRunning = null;
+let lastQuick = 0;
+async function quickSync({ minGapMs = 20000 } = {}) {
+  if (quickRunning) return quickRunning;
+  if (Date.now() - lastQuick < minGapMs) return null;
+  lastQuick = Date.now();
+  quickRunning = (async () => {
+    const summary = { at: service.now().toISOString(), scheduled: [], posted: [], failed: [], missed: [], dry_run_closed: [], reminded: 0, metrics: 0, health: [], errors: [] };
+    const settings = await getSettings();
+    for (const [name, fn] of [
+      ["syncSent", () => syncSent(summary)],
+      ["scheduleApproved", () => scheduleApproved(summary, settings)],
+      ["markMissed", () => markMissed(summary, settings)],
+    ]) {
+      try {
+        await fn();
+      } catch (e) {
+        summary.errors.push(`${name}: ${e.message}`);
+      }
+    }
+    try {
+      await setSetting("last_sync", summary.at, "system");
+    } catch (e) {
+      summary.errors.push(`save sync: ${e.message}`);
+    }
+    return summary;
+  })().finally(() => {
+    quickRunning = null;
+  });
+  return quickRunning;
+}
+
+module.exports = { tick, quickSync };

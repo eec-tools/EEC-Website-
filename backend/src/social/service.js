@@ -421,6 +421,18 @@ async function unschedule(post, actor, reason) {
       await getBuffer().deletePost(post.buffer_id);
     } catch (e) {
       const denied = /not allowed|permission/i.test(e.message);
+      let gone = false;
+      if (denied) {
+        try {
+          gone = !(await getBuffer().getPost(post.buffer_id));
+        } catch (e2) {
+          gone = false;
+        }
+      }
+      if (gone) {
+        await audit(actor, "post.unscheduled", post.post_id, { reason, buffer_id: post.buffer_id, note: "already deleted in Buffer" });
+        return;
+      }
       throw new HttpError(
         502,
         denied
@@ -654,7 +666,9 @@ async function postNow(member, postId, { override_reason } = {}) {
   } else if (post.status !== "approved") {
     throw new HttpError(409, `A ${post.status} post cannot be posted now.`);
   }
-  await audit(member.email, "post.post_now", postId, { override_reason: override_reason || null });
+  await audit(member.email, "post.post_now", postId, { override_reason: override_reason || null, planned_slot: post.slot_at });
+  // Posting now: the post's time becomes now, so the sync picks it up within a minute.
+  await store.update("social_posts", { post_id: postId, status: "approved" }, { slot_at: new Date(Math.floor(now().getTime() / 1000) * 1000).toISOString() });
   const result = await schedulePost(postId, { shareNow: true });
   await refreshBatchStatus(post.batch_id);
   return result;
