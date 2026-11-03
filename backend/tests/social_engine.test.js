@@ -99,7 +99,7 @@ const goodScores = { stop: 9, useful: 9, true: 10, human: 9, ours: 9, clean: 10 
 const src = [{ title: "IREF", url: "https://example.org/iref", date: "2026-10-20", claim: "prices" }];
 const liBody = (topic) =>
   `𝗜𝗻𝗱𝗶𝗮'𝘀 ${topic} market is opening new options for buyers.\n\nCompare landed cost, specifications and supplier capability before you commit.\n\nAt EEC, we help buyers compare offers through our paid Supplier Background Check.\n\nDM "SPICE" or visit https://www.eectrade.com/services.\n\nEEC | Your India Sourcing Office\n\n#IndiaSourcing #Procurement #SupplyChain #FoodIngredients #InternationalTrade`;
-const igBody = `A clear specification makes Indian spice quotes comparable.\n\nSwipe for the four points to put in your next enquiry.\n\nComment SPICE and we will send the checklist.\n\neectrade.com\n\n#Sourcing #Procurement #Spices #SupplyChain #FoodIngredients`;
+const igBody = `A clear specification makes Indian spice quotes comparable.\n\nSwipe for the four points to put in your next enquiry.\n\nMessage us SPICE and we will send the checklist.\n\neectrade.com\n\n#Sourcing #Procurement #Spices #SupplyChain #FoodIngredients`;
 const slides = [
   { type: "cover", title: "A clear specification makes spice quotes comparable" },
   { type: "list", title: "Put these in your enquiry", items: ["Grade and origin", "Moisture limits", "Packing", "Shipment window"] },
@@ -420,4 +420,17 @@ test("start_run: says exactly which jobs are due, and nothing twice", async () =
   // Lean views: revise context carries no posts or research.
   const ctx = await call("get_context", { view: "revise" });
   assert.ok(ctx.today && !ctx.recent_posts && !ctx.research && !ctx.open_slots_next_week);
+});
+
+test("lint: platform rules (hashtag cap, hook length, engagement bait, links)", () => {
+  const ig = (body) => rules.lintPost({ channel: "instagram", kind: "image", body, slides: [{ type: "cover", title: "t" }], alt: ["a"] });
+  const codes = (l) => l.map((x) => `${x.level}:${x.code}`);
+  assert.ok(codes(ig("Short hook.\n\n#A #B #C #D #E #F")).includes("error:hashtags"), "Instagram caps hashtags at 5");
+  assert.ok(codes(ig("Short hook.\n\nComment RICE and we will send it.\n\n#A #B #C")).includes("error:engagement_bait"));
+  assert.ok(!codes(ig("Short hook.\n\nMessage us RICE and we will send it.\n\n#A #B #C")).some((c) => c.endsWith("engagement_bait")));
+  assert.ok(codes(ig(`${"x".repeat(130)}\n\n#A #B #C`)).includes("warn:hook_length"));
+  const fb = rules.lintPost({ channel: "facebook", kind: "text", body: "Hook.\n\nSee https://www.eectrade.com/services\n\n#Sourcing" });
+  assert.ok(codes(fb).includes("warn:link_in_body"));
+  const li = rules.lintPost({ channel: "linkedin_company", kind: "text", body: "Hook.\n\nAgree?\n\nEEC | Your India Sourcing Office\n\n#A #B #C" });
+  assert.ok(codes(li).includes("warn:engagement_bait"));
 });

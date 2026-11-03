@@ -12,7 +12,8 @@ Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook 
 | Studio page | `frontend/src/app/studio`, `frontend/src/views/studio` | Pending, Plan, Queue, Posted, Insights, Learning, Health and settings. Login with the normal site account. |
 | Studio API | `backend/src/routes/studio.js` | Approve, edit, send back, drop, post now, pause, comments, metrics, rules, settings, team. |
 | Core rules | `backend/src/social/service.js` | Approval, scheduling, never-post-twice, late window, kill switch, revisions. |
-| Rule check | `backend/src/social/rules.js` | House style and brand checks on every post (contractions, dashes, location, scope, hashtags, scores, sources). |
+| Rule check | `backend/src/social/rules.js` | House style, brand and platform checks on every post (contractions, dashes, location, scope, hashtags incl. Instagram's 5 cap, hook length, engagement bait, links in body, scores, sources). |
+| Platform playbook | `docs/social-engine/platform-playbook.md` | What Instagram (Mosseri), LinkedIn and Meta say they rank, with sources, and where each point is applied. Re-check every 6 months. |
 | Publisher | `backend/src/social/buffer.js` | Buffer GraphQL: create (scheduled or now), delete, status, metrics, channels. |
 | Clock | `backend/src/social/tick.js`, `.github/workflows/social-clock.yml`, `backend/vercel.json` crons | Every 15 min: sync sent posts, schedule approved, mark missed, remind. Daily: health and metrics. |
 | Slides | `backend/src/social/slides.js`, `GET /api/social/media/:post/:version/:n.jpg` | Renders carousel slides (EEC navy and gold, 1080x1350 JPEG) on request; cached forever per version. |
@@ -49,7 +50,7 @@ Generate secrets with `openssl rand -hex 32`. SMTP, Supabase and JWT variables a
 
 ```bash
 cd backend && npm install
-JWT_SECRET=t node --test tests/social_engine.test.js        # 13 end-to-end tests, in memory
+JWT_SECRET=t node --test tests/social_engine.test.js        # 14 end-to-end tests, in memory
 JWT_SECRET=dev node scripts/studio-demo.js                   # demo API with sample posts on :8000
 cd ../frontend && NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 yarn dev
 # http://localhost:3000/login  demo@eectrade.com / Demo-Pass-123!  then /studio

@@ -2,12 +2,20 @@
 // checker said. "error" blocks submission and approval (the approver can override with a
 // reason, which is logged); "warn" is shown on the Studio page.
 
+// Platform facts behind these numbers are in docs/social-engine/platform-playbook.md.
+// hookMax: characters visible before "see more" / "more" on a phone.
+// tagCap: hard platform limit (Instagram allows 5 hashtags per post since December 2025).
 const CHANNEL_RULES = {
-  linkedin_shirali: { maxChars: 3000, softMax: 2000, tags: [4, 7], signOff: true, needsMedia: false },
-  linkedin_company: { maxChars: 3000, softMax: 2000, tags: [4, 7], signOff: true, needsMedia: false },
-  instagram: { maxChars: 2200, softMax: 1300, tags: [5, 6], signOff: false, needsMedia: true },
-  facebook: { maxChars: 5000, softMax: 1000, tags: [3, 5], signOff: false, needsMedia: false },
+  linkedin_shirali: { maxChars: 3000, softMax: 2000, tags: [3, 5], signOff: true, needsMedia: false, hookMax: 200 },
+  linkedin_company: { maxChars: 3000, softMax: 2000, tags: [3, 5], signOff: true, needsMedia: false, hookMax: 200 },
+  instagram: { maxChars: 2200, softMax: 1300, tags: [3, 5], tagCap: 5, signOff: false, needsMedia: true, hookMax: 125 },
+  facebook: { maxChars: 5000, softMax: 1000, tags: [1, 3], signOff: false, needsMedia: false, hookMax: 125 },
 };
+
+// Engagement bait: asking for a comment word, a tag, a like or a share to push reach.
+// Instagram says such posts may not be recommended; LinkedIn and Facebook demote it too.
+const COMMENT_KEYWORD = /\b(?:[Cc]omment|[Tt]ype|[Dd]rop|[Rr]eply)\s+(?:with\s+)?(?:the\s+word\s+)?["“'‘]?[A-Z0-9]{2,}["”'’]?(?=[\s.,!:]|$)/;
+const BAIT = /\b(?:like|share|repost|tag)\s+(?:this|if\b|someone|a friend|a colleague|\d+|two|three)|\bagree\s*\?|\bcomment\s+below\b|\bdrop\s+an?\s+emoji\b/i;
 
 const SCORE_MIN = { stop: 8, useful: 8, true: 10, human: 8, ours: 9, clean: 10 };
 const SIGN_OFF = "EEC | Your India Sourcing Office";
@@ -53,7 +61,22 @@ function lintPost(post) {
 
   const tags = hashtags(body);
   const [lo, hi] = rules.tags;
-  if (tags.length < lo || tags.length > hi) add(tags.length > hi + 3 ? "error" : "warn", "hashtags", `${tags.length} hashtags; ${post.channel} uses ${lo} to ${hi}.`);
+  if (rules.tagCap && tags.length > rules.tagCap) add("error", "hashtags", `${tags.length} hashtags; ${post.channel} allows at most ${rules.tagCap}.`);
+  else if (tags.length < lo || tags.length > hi) add(tags.length > hi + 3 ? "error" : "warn", "hashtags", `${tags.length} hashtags; ${post.channel} uses ${lo} to ${hi}.`);
+
+  const firstLine = (body.split("\n").find((l) => l.trim()) || "").trim();
+  if (rules.hookMax && [...firstLine].length > rules.hookMax)
+    add("warn", "hook_length", `The opening line is ${[...firstLine].length} characters; only about ${rules.hookMax} show before "more" on a phone. Put the most useful point first and keep it shorter.`);
+
+  if (COMMENT_KEYWORD.test(body))
+    add(post.channel === "instagram" ? "error" : "warn", "engagement_bait", 'Asks for a comment keyword ("Comment RICE"). Platforms treat this as engagement bait and may stop recommending the post. Ask people to message us or email instead.');
+  else if (BAIT.test(body)) add("warn", "engagement_bait", "Asks for likes, shares, tags or agreement. Ask a genuine question or give one clear next step instead.");
+
+  const links = body.match(/https?:\/\/\S+/g) || [];
+  if (post.channel === "facebook" && links.length)
+    add("warn", "link_in_body", "Facebook is testing a limit of 2 link posts a month for Pages without Meta Verified. Put the link in first_comment and write eectrade.com in the text.");
+  if (post.channel.startsWith("linkedin") && links.length)
+    add("warn", "link_in_body", "LinkedIn posts with links get less engagement. Give the full value in the post and end with a message or email call to action.");
 
   if (rules.signOff && !body.includes(SIGN_OFF)) add("warn", "sign_off", `Missing the sign-off line "${SIGN_OFF}".`);
   if (post.channel !== "linkedin_shirali" && post.channel !== "linkedin_company" && UNICODE_BOLD.test(body))

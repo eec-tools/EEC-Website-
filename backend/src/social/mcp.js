@@ -134,6 +134,7 @@ async function activeRules(withExamples) {
 async function openSlots(settings, monday, livePosts) {
   const tz = settings.timezone;
   return Object.keys(settings.cadence)
+    .filter((ch) => ch !== "linkedin_shirali") // retired channel: never planned, even if days are left in the cadence
     .flatMap((ch) => cadenceSlots(settings.cadence, ch, monday, tz))
     .filter((s) => !livePosts.some((p) => p.channel === s.channel && Date.parse(p.slot_at) === Date.parse(s.slot_at)))
     .map((s) => ({ channel: s.channel, date: s.date, time: s.time }));
