@@ -62,7 +62,11 @@ export function Pill({ children, className = "" }) {
   return <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${className}`}>{children}</span>;
 }
 
-export function StatusPill({ status }) {
+export function StatusPill({ status, slotAt }) {
+  // A scheduled post whose time has passed is being published; the next check with Buffer confirms it.
+  if (status === "scheduled" && slotAt && Date.parse(slotAt) < Date.now()) {
+    return <Pill className="bg-sky-50 text-sky-800 border-sky-200">Publishing, confirming with Buffer</Pill>;
+  }
   const s = STATUS[status] || { label: status, tone: "bg-slate-100 text-slate-600 border-slate-200" };
   return <Pill className={s.tone}>{s.label}</Pill>;
 }

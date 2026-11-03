@@ -450,3 +450,30 @@ test("buffer input: Instagram carousel is a multi-image post; first comment only
   const sent = buffer.calls.find((x) => x[0] === "create" && x[1].channel === "facebook")[1];
   assert.equal(sent.firstComment, undefined, "free Buffer plan: no first comment");
 });
+
+test("sync: posted on time, deleted in Buffer, post now picked up at once", async () => {
+  const { quickSync } = require("../src/social/tick");
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const li = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  const a = await service.approvePost(approver, li[0].post_id);
+  const b = await service.approvePost(approver, li[1].post_id);
+  // Monday 09:31 IST: the first has been sent by Buffer, the second was deleted in Buffer.
+  setNow("2026-11-09T04:01:30Z");
+  buffer.posts[a.buffer_id].status = "sent";
+  buffer.posts[a.buffer_id].externalLink = "https://www.linkedin.com/feed/update/x";
+  delete buffer.posts[b.buffer_id];
+  setNow("2026-11-11T04:01:30Z");
+  await quickSync({ minGapMs: 0 });
+  assert.equal((await store.get("social_posts", a.post_id)).status, "posted");
+  assert.equal((await store.get("social_posts", b.post_id)).status, "dropped");
+  // Post now: the post's time becomes now, so the next sync sees it.
+  setNow("2026-11-11T05:00:00Z");
+  const c = await service.postNow(approver, li[2].post_id);
+  assert.ok(Date.parse((await store.get("social_posts", c.post_id)).slot_at) <= Date.parse("2026-11-11T05:00:00Z"));
+  buffer.posts[c.buffer_id].status = "sent";
+  setNow("2026-11-11T05:01:30Z");
+  await quickSync({ minGapMs: 0 });
+  assert.equal((await store.get("social_posts", c.post_id)).status, "posted");
+});
