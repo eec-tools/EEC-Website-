@@ -132,7 +132,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
         <div className="flex flex-wrap items-center gap-3">
           <ChannelBadge channel={post.channel} />
           <span className="text-sm font-semibold text-[#012D76]">{fmtLocal(post.slot_at, tz)} IST</span>
-          <StatusPill status={post.status} />
+          <StatusPill status={post.status} slotAt={post.slot_at} />
           {post.version > 1 ? <span className="text-xs text-[#6B7280]">v{post.version}</span> : null}
           {post.buffer_id && post.buffer_id.startsWith("dry-run-") ? <span className="text-xs font-semibold text-amber-700">dry run</span> : null}
         </div>

@@ -45,6 +45,19 @@ function StudioInner() {
     load();
   }, [load]);
 
+  // Keep statuses current while the page is open: every minute, and when the tab comes back into view.
+  // Paused while a post is open in the full view so nothing moves under the reader.
+  useEffect(() => {
+    if (open) return undefined;
+    const tick = () => document.visibilityState === "visible" && load();
+    const id = window.setInterval(tick, 60000);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [load, open]);
+
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => e.key === "Escape" && setOpen(null);
@@ -97,6 +110,7 @@ function StudioInner() {
           {me.dry_run ? <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Dry run: nothing is sent to Buffer</span> : null}
           {!me.publishing_enabled ? <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Publishing paused</span> : null}
           {me.publishing_enabled && !me.dry_run ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Live</span> : null}
+          {data.synced_at ? <span className="text-xs text-[#6B7280]">Checked with Buffer {fmtLocal(data.synced_at, tz)}</span> : null}
           <Button variant="outline" onClick={load}>
             <RefreshCw size={14} /> Refresh
           </Button>
