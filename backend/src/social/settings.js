@@ -20,7 +20,7 @@ async function setSetting(key, value, actor) {
 
 async function audit(actor, action, target, detail = {}) {
   try {
-    await getStore().insert("social_audit", { actor, action, target, detail, at: new Date().toISOString() });
+    await getStore().insert("social_audit", { actor, action, target, detail, at: require("./service").now().toISOString() });
   } catch (e) {
     // Auditing must never break the action itself.
     require("../utils/logger").warning(`social audit write failed: ${e.message}`);

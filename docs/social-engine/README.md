@@ -16,9 +16,9 @@ Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook 
 | Publisher | `backend/src/social/buffer.js` | Buffer GraphQL: create (scheduled or now), delete, status, metrics, channels. |
 | Clock | `backend/src/social/tick.js`, `.github/workflows/social-clock.yml`, `backend/vercel.json` crons | Every 15 min: sync sent posts, schedule approved, mark missed, remind. Daily: health and metrics. |
 | Slides | `backend/src/social/slides.js`, `GET /api/social/media/:post/:version/:n.jpg` | Renders carousel slides (EEC navy and gold, 1080x1350 JPEG) on request; cached forever per version. |
-| Claude connector | `backend/src/social/mcp.js`, `POST /api/social/mcp/<SOCIAL_AGENT_KEY>` | MCP tools for the scheduled tasks. Draft and revise only: there is no approve or publish tool. |
+| Claude connector | `backend/src/social/mcp.js`, `POST /api/social/mcp/<SOCIAL_AGENT_KEY>` | MCP tools for the scheduled task. `start_run` and `finish_job` drive the run; `get_context` has lean views per job (`plan`, `revise`, `research`); replies are compact JSON. Draft and revise only: there is no approve or publish tool. |
 | Data | `backend/sql/social_schema.sql`, `backend/sql/social_seed.sql` | Supabase tables `social_*`. Seed carries over the 23 n8n rules, settings and competitors. |
-| Prompts | `docs/social-engine/prompts/` | The four Claude scheduled tasks. |
+| Prompt | `docs/social-engine/prompts/engine.md` | The one Claude scheduled task (4 runs a day). It calls `start_run`, which says which jobs are due (revise, research, plan_week, report), so idle runs cost one call. |
 
 ## Roles
 
@@ -49,7 +49,7 @@ Generate secrets with `openssl rand -hex 32`. SMTP, Supabase and JWT variables a
 
 ```bash
 cd backend && npm install
-JWT_SECRET=t node --test tests/social_engine.test.js        # 12 end-to-end tests, in memory
+JWT_SECRET=t node --test tests/social_engine.test.js        # 13 end-to-end tests, in memory
 JWT_SECRET=dev node scripts/studio-demo.js                   # demo API with sample posts on :8000
 cd ../frontend && NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 yarn dev
 # http://localhost:3000/login  demo@eectrade.com / Demo-Pass-123!  then /studio
