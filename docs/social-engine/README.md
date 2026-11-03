@@ -12,13 +12,14 @@ Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook 
 | Studio page | `frontend/src/app/studio`, `frontend/src/views/studio` | Pending, Plan, Queue, Posted, Insights, Learning, Health and settings. Login with the normal site account. |
 | Studio API | `backend/src/routes/studio.js` | Approve, edit, send back, drop, post now, pause, comments, metrics, rules, settings, team. |
 | Core rules | `backend/src/social/service.js` | Approval, scheduling, never-post-twice, late window, kill switch, revisions. |
-| Rule check | `backend/src/social/rules.js` | House style and brand checks on every post (contractions, dashes, location, scope, hashtags, scores, sources). |
+| Rule check | `backend/src/social/rules.js` | House style, brand and platform checks on every post (contractions, dashes, location, scope, hashtags incl. Instagram's 5 cap, hook length, engagement bait, links in body, scores, sources). |
+| Platform playbook | `docs/social-engine/platform-playbook.md` | What Instagram (Mosseri), LinkedIn and Meta say they rank, with sources, and where each point is applied. Re-check every 6 months. |
 | Publisher | `backend/src/social/buffer.js` | Buffer GraphQL: create (scheduled or now), delete, status, metrics, channels. |
 | Clock | `backend/src/social/tick.js`, `.github/workflows/social-clock.yml`, `backend/vercel.json` crons | Every 15 min: sync sent posts, schedule approved, mark missed, remind. Daily: health and metrics. |
 | Slides | `backend/src/social/slides.js`, `GET /api/social/media/:post/:version/:n.jpg` | Renders carousel slides (EEC navy and gold, 1080x1350 JPEG) on request; cached forever per version. |
-| Claude connector | `backend/src/social/mcp.js`, `POST /api/social/mcp/<SOCIAL_AGENT_KEY>` | MCP tools for the scheduled tasks. Draft and revise only: there is no approve or publish tool. |
+| Claude connector | `backend/src/social/mcp.js`, `POST /api/social/mcp/<SOCIAL_AGENT_KEY>` | MCP tools for the scheduled task. `start_run` and `finish_job` drive the run; `get_context` has lean views per job (`plan`, `revise`, `research`); replies are compact JSON. Draft and revise only: there is no approve or publish tool. |
 | Data | `backend/sql/social_schema.sql`, `backend/sql/social_seed.sql` | Supabase tables `social_*`. Seed carries over the 23 n8n rules, settings and competitors. |
-| Prompts | `docs/social-engine/prompts/` | The four Claude scheduled tasks. |
+| Prompt | `docs/social-engine/prompts/engine.md` | The one Claude scheduled task (4 runs a day). It calls `start_run`, which says which jobs are due (revise, research, plan_week, report), so idle runs cost one call. |
 
 ## Roles
 
@@ -49,7 +50,7 @@ Generate secrets with `openssl rand -hex 32`. SMTP, Supabase and JWT variables a
 
 ```bash
 cd backend && npm install
-JWT_SECRET=t node --test tests/social_engine.test.js        # 12 end-to-end tests, in memory
+JWT_SECRET=t node --test tests/social_engine.test.js        # 14 end-to-end tests, in memory
 JWT_SECRET=dev node scripts/studio-demo.js                   # demo API with sample posts on :8000
 cd ../frontend && NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 yarn dev
 # http://localhost:3000/login  demo@eectrade.com / Demo-Pass-123!  then /studio

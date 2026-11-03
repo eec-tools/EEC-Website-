@@ -1,10 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { AlertTriangle, Check, MessageSquare, Pencil, Send, Trash2, Undo2, Zap, ChevronDown, ChevronUp, History } from "lucide-react";
 import { Button, Card, ChannelBadge, StatusPill, Preview, ExtLink, call, fmtLocal, localDateTime } from "./shared";
 
 const SLIDE_TYPES = ["cover", "point", "list", "stat", "cta"];
+
+// Says what really happened to the post, so a dry run is never reported as sent.
+function resultMessage(p, verb) {
+  if (!p) return verb;
+  if (p.buffer_id && p.buffer_id.startsWith("dry-run-")) return `${verb}. Dry run is on, so nothing was sent to Buffer.`;
+  if (p.status === "scheduled") return `${verb}. In the Buffer queue.`;
+  if (p.status === "approved" && p.error) return `${verb}, but not sent yet: ${p.error}`;
+  if (p.status === "approved") return `${verb}. It goes to Buffer when publishing is resumed.`;
+  if (p.status === "failed") return `${verb}, but Buffer did not accept it: ${p.error || "see the post"}`;
+  if (p.status === "missed") return `Too late to send: ${p.error || "past the late window"}`;
+  return verb;
+}
 
 function SlideEditor({ slides, onChange }) {
   const set = (i, patch) => onChange(slides.map((s, k) => (k === i ? { ...s, ...patch } : s)));
@@ -82,7 +95,8 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
         if (!reason) throw new Error("cancelled");
         body = { override_reason: reason };
       }
-      await call("post", `/studio/posts/${post.post_id}/approve`, body, { success: post.status === "pending" ? "Approved" : "Approved" });
+      const saved = await call("post", `/studio/posts/${post.post_id}/approve`, body);
+      toast.success(resultMessage(saved, "Approved"));
     });
 
   const startEdit = () => {
@@ -278,7 +292,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
                     variant="outline"
                     disabled={busy}
                     onClick={() => {
-                      if (window.confirm("Publish this post right now instead of at its time?")) run(() => call("post", `/studio/posts/${post.post_id}/post-now`, {}, { success: "Sent to Buffer" }));
+                      if (window.confirm("Publish this post right now instead of at its time?")) run(async () => toast.success(resultMessage(await call("post", `/studio/posts/${post.post_id}/post-now`, {}), "Sent")));
                     }}
                   >
                     <Zap size={14} /> Post now

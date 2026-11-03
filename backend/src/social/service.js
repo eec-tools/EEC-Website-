@@ -129,7 +129,7 @@ function toRow(p, { postId, batchId, slotAt, campaign }) {
     hook: p.hook || null,
     body: addUtm(p.body, { channel: p.channel, campaign, content: postId }),
     link: p.link ? addUtm(p.link, { channel: p.channel, campaign, content: postId }) : null,
-    first_comment: p.first_comment || null,
+    first_comment: p.first_comment ? addUtm(p.first_comment, { channel: p.channel, campaign, content: postId }) : null,
     slides: p.slides || [],
     media: p.media || [],
     alt: p.alt || [],
@@ -385,7 +385,8 @@ async function schedulePost(postId, { shareNow = false } = {}) {
       text: post.body,
       kind: post.kind,
       media: mediaUrls(post),
-      firstComment: post.first_comment,
+      // First comments need a paid Buffer plan; only sent when buffer_first_comment is switched on.
+      firstComment: (await getSettings()).buffer_first_comment === true ? post.first_comment : undefined,
       dueAt,
     });
     const [p] = await store.update("social_posts", { post_id: postId, status: "posting" }, {
@@ -419,7 +420,13 @@ async function unschedule(post, actor, reason) {
     try {
       await getBuffer().deletePost(post.buffer_id);
     } catch (e) {
-      throw new HttpError(502, `Could not remove the post from Buffer: ${e.message}. Nothing was changed.`);
+      const denied = /not allowed|permission/i.test(e.message);
+      throw new HttpError(
+        502,
+        denied
+          ? `Buffer would not let the engine remove this post (the Buffer account behind the API key has no delete permission on this channel). It is still scheduled and will go out at its time. To stop or change it, delete it in Buffer (publish.buffer.com), then try again here. Nothing was changed.`
+          : `Could not remove the post from Buffer: ${e.message}. Nothing was changed.`
+      );
     }
   }
   await audit(actor, "post.unscheduled", post.post_id, { reason, buffer_id: post.buffer_id });
@@ -519,13 +526,14 @@ async function editPost(member, postId, raw) {
   const patch = { updated_at: now().toISOString() };
   const textChanged = patchIn.body !== undefined && patchIn.body !== post.body;
   const slidesChanged = patchIn.slides !== undefined && JSON.stringify(patchIn.slides) !== JSON.stringify(post.slides);
-  if (patchIn.body !== undefined) {
+  const utm = async (text) => {
     const batch = await store.get("social_batches", post.batch_id);
-    patch.body = addUtm(patchIn.body, { channel: post.channel, campaign: `wk${String(batch ? batch.week_start : "").replace(/-/g, "")}`, content: postId });
-  }
+    return addUtm(text, { channel: post.channel, campaign: `wk${String(batch ? batch.week_start : "").replace(/-/g, "")}`, content: postId });
+  };
+  if (patchIn.body !== undefined) patch.body = await utm(patchIn.body);
   if (patchIn.slides !== undefined) patch.slides = patchIn.slides;
   if (patchIn.alt !== undefined) patch.alt = patchIn.alt;
-  if (patchIn.first_comment !== undefined) patch.first_comment = patchIn.first_comment;
+  if (patchIn.first_comment !== undefined) patch.first_comment = patchIn.first_comment ? await utm(patchIn.first_comment) : patchIn.first_comment;
   if (patchIn.media !== undefined) patch.media = patchIn.media;
 
   if (patchIn.date || patchIn.time) {

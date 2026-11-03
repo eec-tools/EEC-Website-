@@ -99,7 +99,7 @@ const goodScores = { stop: 9, useful: 9, true: 10, human: 9, ours: 9, clean: 10 
 const src = [{ title: "IREF", url: "https://example.org/iref", date: "2026-10-20", claim: "prices" }];
 const liBody = (topic) =>
   `𝗜𝗻𝗱𝗶𝗮'𝘀 ${topic} market is opening new options for buyers.\n\nCompare landed cost, specifications and supplier capability before you commit.\n\nAt EEC, we help buyers compare offers through our paid Supplier Background Check.\n\nDM "SPICE" or visit https://www.eectrade.com/services.\n\nEEC | Your India Sourcing Office\n\n#IndiaSourcing #Procurement #SupplyChain #FoodIngredients #InternationalTrade`;
-const igBody = `A clear specification makes Indian spice quotes comparable.\n\nSwipe for the four points to put in your next enquiry.\n\nComment SPICE and we will send the checklist.\n\neectrade.com\n\n#Sourcing #Procurement #Spices #SupplyChain #FoodIngredients`;
+const igBody = `A clear specification makes Indian spice quotes comparable.\n\nSwipe for the four points to put in your next enquiry.\n\nMessage us SPICE and we will send the checklist.\n\neectrade.com\n\n#Sourcing #Procurement #Spices #SupplyChain #FoodIngredients`;
 const slides = [
   { type: "cover", title: "A clear specification makes spice quotes comparable" },
   { type: "list", title: "Put these in your enquiry", items: ["Grade and origin", "Moisture limits", "Packing", "Shipment window"] },
@@ -158,7 +158,7 @@ test("buffer: GraphQL input is built correctly", () => {
   const input = c.buildCreateInput({ channelId: "ch", channel: "instagram", kind: "carousel", text: "t", media: ["https://x/1.jpg", "https://x/2.jpg"], dueAt: "2026-11-10T13:00:00Z" });
   const s = lit(input);
   assert.match(s, /mode: customScheduled/);
-  assert.match(s, /instagram: \{ type: carousel, shouldShareToFeed: true \}/);
+  assert.match(s, /instagram: \{ type: post, shouldShareToFeed: true \}/);
   assert.match(s, /assets: \[\{ image: \{ url: "https:\/\/x\/1.jpg" \} \}/);
   assert.match(lit(c.buildCreateInput({ channelId: "ch", channel: "linkedin_company", kind: "text", text: "t" })), /mode: shareNow/);
 });
@@ -368,4 +368,85 @@ test("connector: no approve or publish tools; context lists open slots", async (
   const check = JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "check_posts", arguments: weekBatch() } })).result.content[0].text);
   assert.equal(check.ok, true, JSON.stringify(check));
   assert.equal((await store.list("social_posts")).length, 0, "check_posts saves nothing");
+});
+
+test("start_run: says exactly which jobs are due, and nothing twice", async () => {
+  const call = async (name, args = {}) => JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name, arguments: args } })).result.content[0].text);
+  const jobs = async () => (await call("start_run")).jobs || [];
+
+  // Tuesday 05:00 IST: too early for research, nothing else due.
+  setNow("2026-11-02T23:30:00Z");
+  await fresh();
+  let r = await call("start_run");
+  assert.deepEqual(r.jobs || [], []);
+  assert.match(r.note, /Nothing is due/);
+
+  // Tuesday 07:12 IST: research is due until finish_job is called.
+  setNow("2026-11-03T01:42:00Z");
+  assert.deepEqual((await jobs()).map((j) => j.job), ["research"]);
+  await call("finish_job", { job: "research", summary: "3 findings" });
+  assert.deepEqual(await jobs(), []);
+
+  // Friday 07:12 IST: research and the plan for next week.
+  setNow("2026-11-06T01:42:00Z");
+  let due = await jobs();
+  assert.deepEqual(due.map((j) => j.job), ["research", "plan_week"]);
+  assert.equal(due[1].week_start, "2026-11-09");
+  assert.ok(due[1].open_slots >= 3);
+  await call("finish_job", { job: "research" });
+  await service.submitBatch(weekBatch());
+  assert.deepEqual(await jobs(), [], "plan is done once the batch exists");
+
+  // A post sent back makes revise due first.
+  const [p] = await store.list("social_posts", { order: ["slot_at", "asc"] });
+  await service.requestChanges(approver, p.post_id, "Make the opening shorter");
+  due = await jobs();
+  assert.equal(due[0].job, "revise");
+  assert.equal(due[0].sent_back, 1);
+
+  // Sunday 18:12 IST: the weekly report until it is emailed.
+  setNow("2026-11-08T12:42:00Z");
+  due = await jobs();
+  const rep = due.find((j) => j.job === "report");
+  assert.ok(rep, JSON.stringify(due));
+  assert.equal(rep.from, "2026-11-01T18:30:00.000Z");
+  await call("send_notice", { kind: "report", subject: "Weekly report", html: "<p>ok</p>" });
+  assert.ok(!(await jobs()).some((j) => j.job === "report"));
+
+  // Monday: no report catch-up because Sunday's went out.
+  setNow("2026-11-09T01:42:00Z");
+  assert.ok(!(await jobs()).some((j) => j.job === "report"));
+
+  // Lean views: revise context carries no posts or research.
+  const ctx = await call("get_context", { view: "revise" });
+  assert.ok(ctx.today && !ctx.recent_posts && !ctx.research && !ctx.open_slots_next_week);
+});
+
+test("lint: platform rules (hashtag cap, hook length, engagement bait, links)", () => {
+  const ig = (body) => rules.lintPost({ channel: "instagram", kind: "image", body, slides: [{ type: "cover", title: "t" }], alt: ["a"] });
+  const codes = (l) => l.map((x) => `${x.level}:${x.code}`);
+  assert.ok(codes(ig("Short hook.\n\n#A #B #C #D #E #F")).includes("error:hashtags"), "Instagram caps hashtags at 5");
+  assert.ok(codes(ig("Short hook.\n\nComment RICE and we will send it.\n\n#A #B #C")).includes("error:engagement_bait"));
+  assert.ok(!codes(ig("Short hook.\n\nMessage us RICE and we will send it.\n\n#A #B #C")).some((c) => c.endsWith("engagement_bait")));
+  assert.ok(codes(ig(`${"x".repeat(130)}\n\n#A #B #C`)).includes("warn:hook_length"));
+  const fb = rules.lintPost({ channel: "facebook", kind: "text", body: "Hook.\n\nSee https://www.eectrade.com/services\n\n#Sourcing" });
+  assert.ok(codes(fb).includes("warn:link_in_body"));
+  const li = rules.lintPost({ channel: "linkedin_company", kind: "text", body: "Hook.\n\nAgree?\n\nEEC | Your India Sourcing Office\n\n#A #B #C" });
+  assert.ok(codes(li).includes("warn:engagement_bait"));
+});
+
+test("buffer input: Instagram carousel is a multi-image post; first comment only when enabled", async () => {
+  const c = createBufferClient({ apiKey: "x" });
+  const ig = c.buildCreateInput({ channelId: "c", channel: "instagram", text: "t", kind: "carousel", media: ["https://a/1.jpg", "https://a/2.jpg"] });
+  assert.match(lit(ig), /type: post/);
+  assert.equal(ig.assets.length, 2);
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const batch = weekBatch();
+  batch.posts.find((p) => p.channel === "facebook").first_comment = "More at https://www.eectrade.com/services";
+  await service.submitBatch(batch);
+  const fb = (await store.list("social_posts", { where: { channel: "facebook" } }))[0];
+  await service.approvePost(approver, fb.post_id);
+  const sent = buffer.calls.find((x) => x[0] === "create" && x[1].channel === "facebook")[1];
+  assert.equal(sent.firstComment, undefined, "free Buffer plan: no first comment");
 });
