@@ -158,7 +158,7 @@ test("buffer: GraphQL input is built correctly", () => {
   const input = c.buildCreateInput({ channelId: "ch", channel: "instagram", kind: "carousel", text: "t", media: ["https://x/1.jpg", "https://x/2.jpg"], dueAt: "2026-11-10T13:00:00Z" });
   const s = lit(input);
   assert.match(s, /mode: customScheduled/);
-  assert.match(s, /instagram: \{ type: carousel, shouldShareToFeed: true \}/);
+  assert.match(s, /instagram: \{ type: post, shouldShareToFeed: true \}/);
   assert.match(s, /assets: \[\{ image: \{ url: "https:\/\/x\/1.jpg" \} \}/);
   assert.match(lit(c.buildCreateInput({ channelId: "ch", channel: "linkedin_company", kind: "text", text: "t" })), /mode: shareNow/);
 });
@@ -433,4 +433,20 @@ test("lint: platform rules (hashtag cap, hook length, engagement bait, links)", 
   assert.ok(codes(fb).includes("warn:link_in_body"));
   const li = rules.lintPost({ channel: "linkedin_company", kind: "text", body: "Hook.\n\nAgree?\n\nEEC | Your India Sourcing Office\n\n#A #B #C" });
   assert.ok(codes(li).includes("warn:engagement_bait"));
+});
+
+test("buffer input: Instagram carousel is a multi-image post; first comment only when enabled", async () => {
+  const c = createBufferClient({ apiKey: "x" });
+  const ig = c.buildCreateInput({ channelId: "c", channel: "instagram", text: "t", kind: "carousel", media: ["https://a/1.jpg", "https://a/2.jpg"] });
+  assert.match(lit(ig), /type: post/);
+  assert.equal(ig.assets.length, 2);
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const batch = weekBatch();
+  batch.posts.find((p) => p.channel === "facebook").first_comment = "More at https://www.eectrade.com/services";
+  await service.submitBatch(batch);
+  const fb = (await store.list("social_posts", { where: { channel: "facebook" } }))[0];
+  await service.approvePost(approver, fb.post_id);
+  const sent = buffer.calls.find((x) => x[0] === "create" && x[1].channel === "facebook")[1];
+  assert.equal(sent.firstComment, undefined, "free Buffer plan: no first comment");
 });

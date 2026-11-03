@@ -88,7 +88,8 @@ function createBufferClient({ apiKey, http = axios, timeoutMs = 20000 } = {}) {
       input.assets = media.map((url) => (/\.(mp4|mov)(\?|$)/i.test(url) ? { video: { url } } : { image: { url } }));
     }
     if (p.channel === "instagram") {
-      const type = p.kind === "reel" ? "reel" : p.kind === "carousel" ? "carousel" : "post";
+      // Buffer has no "carousel" type for Instagram: a post with 2 to 10 images becomes a carousel.
+      const type = p.kind === "reel" ? "reel" : "post";
       input.metadata = { instagram: { type: E(type), shouldShareToFeed: true, firstComment: p.firstComment || undefined } };
     } else if (p.channel === "facebook") {
       input.metadata = { facebook: { type: E(p.kind === "reel" ? "reel" : "post"), firstComment: p.firstComment || undefined } };

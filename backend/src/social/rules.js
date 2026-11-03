@@ -74,7 +74,7 @@ function lintPost(post) {
 
   const links = body.match(/https?:\/\/\S+/g) || [];
   if (post.channel === "facebook" && links.length)
-    add("warn", "link_in_body", "Facebook is testing a limit of 2 link posts a month for Pages without Meta Verified. Put the link in first_comment and write eectrade.com in the text.");
+    add("warn", "link_in_body", "Facebook is testing a limit of 2 link posts a month for Pages without Meta Verified. Write eectrade.com in the text instead of a full link.");
   if (post.channel.startsWith("linkedin") && links.length)
     add("warn", "link_in_body", "LinkedIn posts with links get less engagement. Give the full value in the post and end with a message or email call to action.");
 
