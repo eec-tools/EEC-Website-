@@ -107,6 +107,11 @@ function lintPost(post) {
   const hasFigure = /\d[\d,.]*\s?(%|percent|million|billion|tonnes|crore|lakh)|\$\s?\d|\b(19|20)\d{2}\b/i.test(body);
   if (hasFigure && !(post.sources || []).length) add("error", "sources", "The post states figures or dates but lists no sources.");
 
+  const claims = post.claims || [];
+  const unverified = claims.filter((c) => c.verdict === "unverifiable");
+  if (unverified.length) add("error", "fact_unverified", `The fact checker could not verify: ${unverified.map((c) => `"${c.text}"`).join("; ")}. Rewrite or remove it.`);
+  if (hasFigure && !claims.some((c) => c.verdict)) add("warn", "fact_check", "The post states figures or dates that have not been through the fact checker.");
+
   const scores = post.scores || {};
   const low = Object.entries(SCORE_MIN).filter(([k, min]) => !(Number(scores[k]) >= min));
   if (low.length) add("error", "scores", `Checker scores below the minimum: ${low.map(([k, min]) => `${k} ${scores[k] ?? "missing"} (min ${min})`).join(", ")}`);

@@ -207,6 +207,35 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
             ) : null}
             {post.external_url ? <ExtLink href={post.external_url}>Open the live post</ExtLink> : null}
 
+            {(post.claims || []).some((c) => c.verdict) ? (
+              <details open={(post.claims || []).some((c) => c.verdict && c.verdict !== "confirmed")}>
+                <summary className="cursor-pointer font-semibold text-[#012D76]">
+                  Facts checked ({post.claims.filter((c) => c.verdict === "confirmed").length} of {post.claims.length} confirmed
+                  {post.claims[0] && post.claims[0].checked_at ? `, ${fmtLocal(post.claims[0].checked_at, tz)}` : ""})
+                </summary>
+                <ul className="mt-1 space-y-1">
+                  {post.claims.map((c, k) => (
+                    <li key={k} className="text-[#3A4759]">
+                      <span
+                        className={`mr-1.5 rounded px-1.5 py-0.5 text-[11px] font-semibold ${
+                          c.verdict === "confirmed" ? "bg-emerald-50 text-emerald-800" : c.verdict === "corrected" ? "bg-amber-50 text-amber-800" : "bg-red-50 text-red-800"
+                        }`}
+                      >
+                        {c.verdict === "confirmed" ? "Confirmed" : c.verdict === "corrected" ? "Changed" : c.verdict ? "Not verified" : "Not checked"}
+                      </span>
+                      {c.text}
+                      {c.note ? <div className="text-xs text-[#6B7280]">{c.note}</div> : null}
+                      {c.source ? (
+                        <a href={c.source} target="_blank" rel="noreferrer" className="text-xs text-[#0096D6] hover:underline">
+                          {" "}
+                          Source{c.date ? ` (${c.date})` : ""}
+                        </a>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
             {(post.sources || []).length ? (
               <details>
                 <summary className="cursor-pointer font-semibold text-[#012D76]">Sources ({post.sources.length})</summary>
