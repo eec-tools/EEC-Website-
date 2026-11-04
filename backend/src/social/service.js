@@ -69,6 +69,15 @@ const slideSchema = z.object({
   source: z.string().max(120).optional(),
   cta: z.string().max(60).optional(),
 });
+// A checkable fact in a post, with the fact checker's verdict.
+const claimSchema = z.object({
+  text: z.string().max(500),
+  source: z.string().max(500).optional(),
+  date: z.string().max(40).optional(),
+  verdict: z.enum(["confirmed", "corrected", "unverifiable"]).optional(),
+  note: z.string().max(500).optional(),
+  checked_at: z.string().max(40).optional(),
+});
 const sourceSchema = z.object({ title: z.string(), url: z.string(), date: z.string().optional(), claim: z.string().optional() });
 const postInput = z.object({
   channel: z.enum(CHANNELS),
@@ -89,7 +98,7 @@ const postInput = z.object({
   media: z.array(z.string().url()).max(10).optional(),
   alt: z.array(z.string().max(500)).max(10).optional(),
   sources: z.array(sourceSchema).max(20).optional(),
-  claims: z.array(z.object({ text: z.string(), source: z.string().optional(), date: z.string().optional() })).max(20).optional(),
+  claims: z.array(claimSchema).max(20).optional(),
   verify_flags: z.string().max(2000).optional(),
   scores: z.record(z.string(), z.number()).optional(),
   tests: z.string().max(300).optional(),
@@ -749,6 +758,7 @@ const revisionSchema = z.object({
   slides: z.array(slideSchema).max(10).optional(),
   alt: z.array(z.string().max(500)).max(10).optional(),
   sources: z.array(sourceSchema).max(20).optional(),
+  claims: z.array(claimSchema).max(20).optional(),
   scores: z.record(z.string(), z.number()).optional(),
   note: z.string().max(1000),
 });
@@ -770,6 +780,7 @@ async function submitRevision(raw, actor = "claude") {
     slides: input.slides || post.slides,
     alt: input.alt || post.alt,
     sources: input.sources || post.sources,
+    claims: input.claims || post.claims,
     scores: input.scores || post.scores,
   };
   const lint = lintPost(next);
@@ -779,6 +790,7 @@ async function submitRevision(raw, actor = "claude") {
     slides: next.slides,
     alt: next.alt,
     sources: next.sources,
+    claims: next.claims,
     scores: next.scores,
     lint,
     version: post.version + 1,
@@ -808,7 +820,62 @@ async function submitRevision(raw, actor = "claude") {
   return { ok: true, post_id: saved.post_id, version: saved.version };
 }
 
+// The fact checker's result for a post. Stores the verdicts on the post's claims; anything not
+// confirmed becomes a comment on the post and an email to the approvers. Never changes the text.
+const factCheckSchema = z.object({
+  post_id: z.string(),
+  checks: z.array(claimSchema.extend({ corrected_text: z.string().max(500).optional() })).min(1).max(20),
+});
+async function recordFactCheck(raw, actor = "claude") {
+  const input = parse(factCheckSchema, raw);
+  const store = getStore();
+  const post = await getPostOr404(input.post_id);
+  if (!["pending", "changes_requested", "approved", "scheduled"].includes(post.status)) {
+    return { ok: false, message: `Post is ${post.status}; only posts that have not gone out are checked.` };
+  }
+  const at = now().toISOString();
+  const claims = input.checks.map((c) => ({
+    text: c.text,
+    source: c.source,
+    date: c.date,
+    verdict: c.verdict || "unverifiable",
+    note: [c.corrected_text ? `Correct: ${c.corrected_text}` : "", c.note || ""].filter(Boolean).join(" ").slice(0, 500) || undefined,
+    checked_at: at,
+  }));
+  await store.update("social_posts", { post_id: post.post_id }, { claims, updated_at: at });
+  const problems = claims.filter((c) => c.verdict !== "confirmed");
+  await audit(actor, "post.fact_checked", post.post_id, { checked: claims.length, problems: problems.length });
+  if (!problems.length) return { ok: true, confirmed: claims.length };
+
+  const settings = await getSettings();
+  const live = ["approved", "scheduled"].includes(post.status);
+  const lines = problems.map((c) => `- ${c.verdict === "corrected" ? "Changed" : "Could not verify"}: "${c.text}"${c.note ? ` (${c.note})` : ""}${c.source ? ` Source: ${c.source}` : ""}`);
+  const body = `Fact check before posting found ${problems.length} problem${problems.length > 1 ? "s" : ""}:\n${lines.join("\n")}${live ? "\nThis post is already approved. Edit it (it then needs approval again) or drop it before it goes out." : ""}`;
+  await store.insert("social_comments", {
+    comment_id: `C-${hex(10)}`,
+    post_id: post.post_id,
+    batch_id: post.batch_id,
+    author_email: "fact-checker@eec-social",
+    author_name: "Fact checker",
+    kind: "comment",
+    body: body.slice(0, 4000),
+    resolved: false,
+    processed_at: at, // the engine's own note: not something to learn from
+    created_at: at,
+  });
+  await notify.send(
+    await notify.approverEmails(),
+    `EEC Social: check a fact before ${notify.whenLocal(post.slot_at, settings.timezone)}`,
+    notify.wrap(
+      "A fact needs your attention",
+      `${notify.postTable([post], settings.timezone)}<ul>${problems.map((c) => `<li><b>${c.verdict === "corrected" ? "Changed" : "Could not verify"}:</b> ${notify.esc(c.text)}${c.note ? `<br>${notify.esc(c.note)}` : ""}</li>`).join("")}</ul><p><a href="${notify.studioUrl(live ? "?tab=queue" : "?tab=pending")}">Open the post</a></p>`
+    )
+  );
+  return { ok: true, confirmed: claims.length - problems.length, problems: problems.length, approver_told: true };
+}
+
 module.exports = {
+  recordFactCheck,
   memberFor,
   requireRole,
   checkPosts,

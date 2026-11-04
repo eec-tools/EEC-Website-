@@ -19,6 +19,15 @@ const S = {
   obj: (properties, required = [], description) => ({ type: "object", properties, required, description }),
 };
 
+const CLAIM = S.obj({
+  text: S.str("The fact as written in the post"),
+  source: S.str("URL that states it"),
+  date: S.str("Source date YYYY-MM-DD"),
+  verdict: { type: "string", enum: ["confirmed", "corrected", "unverifiable"] },
+  note: S.str("Short note, e.g. what was corrected"),
+  checked_at: S.str("ISO time of the check"),
+});
+
 const POST_SCHEMA = S.obj(
   {
     channel: { type: "string", enum: ["linkedin_shirali", "linkedin_company", "instagram", "facebook"] },
@@ -53,7 +62,7 @@ const POST_SCHEMA = S.obj(
     media: S.arr(S.str(""), "Public image or video URLs, only when not using slides (reels need an .mp4)"),
     alt: S.arr(S.str(""), "Alt text per image, same order as slides/media"),
     sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str(""), claim: S.str("") }, ["title", "url"]), "Every fact and figure needs a source"),
-    claims: S.arr(S.obj({ text: S.str(""), source: S.str(""), date: S.str("") }), ""),
+    claims: S.arr(CLAIM, "Every checkable fact (figure, date, rule, name, event) with the fact checker's verdict"),
     verify_flags: S.str("Anything a human should double-check, or None"),
     scores: S.obj({ stop: S.num(""), useful: S.num(""), true: S.num(""), human: S.num(""), ours: S.num(""), clean: S.num("") }, [], "The independent checker's scores out of 10. Minimums: stop 8, useful 8, true 10, human 8, ours 9, clean 10"),
     tests: S.str("The experiment this post tests, if any"),
@@ -225,6 +234,16 @@ async function startRun() {
   const comments = (await store.list("social_comments", { where: { kind: "comment", processed_at: { is: null } } })).length;
   if (sentBack || edits || comments) jobs.push({ job: "revise", sent_back: sentBack, approver_edits: edits, comments });
 
+  // Facts in posts going out in the next 36 hours are checked again (they were written up to 9 days earlier).
+  const soon = await store.list("social_posts", {
+    where: { status: { in: ["pending", "approved", "scheduled"] }, slot_at: { gt: t.toISOString(), lte: new Date(t.getTime() + 36 * 3600000).toISOString() } },
+    order: ["slot_at", "asc"],
+  });
+  const fresh = (p) => (p.claims || []).some((c) => c.checked_at && Date.parse(c.checked_at) > t.getTime() - 30 * 3600000);
+  const hasFacts = (p) => (p.claims || []).length || (p.sources || []).length || (p.verify_flags && p.verify_flags !== "None");
+  const recheck = soon.filter((p) => hasFacts(p) && !fresh(p)).slice(0, 10).map((p) => p.post_id);
+  if (recheck.length) jobs.push({ job: "recheck", post_ids: recheck });
+
   const midnight = zonedToUtc(today, "00:00", tz).toISOString();
   const researchedToday = await store.list("social_audit", { where: { action: "job.research", at: { gte: midnight } }, limit: 1 });
   if (!researchedToday.length && lp.hour >= 6) jobs.push({ job: "research" });
@@ -322,7 +341,7 @@ async function getReportData({ from, to }) {
 
 const TOOLS = {
   start_run: {
-    description: "Call first on every scheduled run. Returns the jobs due now (revise, research, plan_week, report) in the order to do them, or a note that nothing is due.",
+    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, research, plan_week, report) in the order to do them, or a note that nothing is due.",
     inputSchema: S.obj({}),
     run: () => startRun(),
   },
@@ -394,6 +413,7 @@ const TOOLS = {
         slides: POST_SCHEMA.properties.slides,
         alt: POST_SCHEMA.properties.alt,
         sources: POST_SCHEMA.properties.sources,
+        claims: POST_SCHEMA.properties.claims,
         scores: POST_SCHEMA.properties.scores,
         note: S.str("One line: who asked for what and what changed"),
       },
@@ -486,9 +506,23 @@ const TOOLS = {
     inputSchema: S.obj({ from: S.str("ISO date-time; default 7 days ago"), to: S.str("ISO date-time; default now") }),
     run: (a) => getReportData(a || {}),
   },
+  record_fact_check: {
+    description: "Save the fact checker's verdicts for a post that has not gone out yet. Anything not confirmed is added as a comment on the post and emailed to the approvers; the post text is never changed.",
+    inputSchema: S.obj(
+      {
+        post_id: S.str(""),
+        checks: S.arr(
+          S.obj({ text: S.str(""), verdict: { type: "string", enum: ["confirmed", "corrected", "unverifiable"] }, corrected_text: S.str("Accurate wording, when corrected"), source: S.str("URL"), date: S.str("Source date"), note: S.str("") }, ["text", "verdict"]),
+          ""
+        ),
+      },
+      ["post_id", "checks"]
+    ),
+    run: (a) => service.recordFactCheck(a, "claude"),
+  },
   finish_job: {
     description: "Call after each job from start_run, even when it found nothing, so the next run does not repeat it. summary: one line on what was done.",
-    inputSchema: S.obj({ job: { type: "string", enum: ["revise", "research", "plan_week", "report"] }, summary: S.str("") }, ["job"]),
+    inputSchema: S.obj({ job: { type: "string", enum: ["revise", "recheck", "research", "plan_week", "report"] }, summary: S.str("") }, ["job"]),
     run: async ({ job, summary = "" }) => {
       await audit("claude", `job.${job}`, null, { summary: String(summary).slice(0, 500) });
       return { ok: true };

@@ -477,3 +477,38 @@ test("sync: posted on time, deleted in Buffer, post now picked up at once", asyn
   await quickSync({ minGapMs: 0 });
   assert.equal((await store.get("social_posts", c.post_id)).status, "posted");
 });
+
+test("fact checker: recheck before posting, verdicts saved, approver told, unverifiable blocks", async () => {
+  const call = async (name, args = {}) => JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name, arguments: args } })).result.content[0].text);
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  await service.approvePost(approver, mon.post_id);
+
+  // Sunday 20:00 IST: Monday's post goes out within 36 hours and has sources, so it is due a recheck.
+  setNow("2026-11-08T14:30:00Z");
+  const due = (await call("start_run")).jobs.find((j) => j.job === "recheck");
+  assert.ok(due && due.post_ids.includes(mon.post_id), JSON.stringify(due));
+
+  sentMail.length = 0;
+  const r = await call("record_fact_check", {
+    post_id: mon.post_id,
+    checks: [
+      { text: "Indian rice is about 10% more competitive", verdict: "confirmed", source: "https://example.org/iref", date: "2026-10-20" },
+      { text: "Duty falls to zero on 1 January", verdict: "corrected", corrected_text: "Duty falls to zero on 1 April", source: "https://example.org/gov" },
+    ],
+  });
+  assert.equal(r.problems, 1);
+  const p = await store.get("social_posts", mon.post_id);
+  assert.equal(p.status, "scheduled", "the post itself is untouched");
+  assert.equal(p.claims.length, 2);
+  const notes = await store.list("social_comments", { where: { post_id: mon.post_id } });
+  assert.ok(notes.some((c) => c.author_name === "Fact checker" && c.processed_at), "comment saved, not fed back to the learner");
+  assert.ok(sentMail.some((m) => /check a fact/.test(m.subject)));
+  assert.ok(!(await call("start_run")).jobs.some((j) => j.job === "recheck"), "checked recently: not due again");
+
+  // An unverifiable fact is a blocking error in the post check.
+  const lint = rules.lintPost({ ...p, claims: [{ text: "x", verdict: "unverifiable" }] });
+  assert.ok(lint.some((l) => l.level === "error" && l.code === "fact_unverified"));
+});

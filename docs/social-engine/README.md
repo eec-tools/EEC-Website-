@@ -21,6 +21,17 @@ Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook 
 | Data | `backend/sql/social_schema.sql`, `backend/sql/social_seed.sql` | Supabase tables `social_*`. Seed carries over the 23 n8n rules, settings and competitors. |
 | Prompt | `docs/social-engine/prompts/engine.md` | The one Claude scheduled task (4 runs a day). It calls `start_run`, which says which jobs are due (revise, research, plan_week, report), so idle runs cost one call. |
 
+## Agents inside each run
+
+The scheduled task starts separate agents for checks, so the work is never graded by the agent that wrote it:
+
+| Agent | When | Gets only | Returns |
+| --- | --- | --- | --- |
+| Fact checker | Friday plan (every fact of the week), revisions that change a fact, and the **recheck** job for posts going out in the next 36 hours | The facts as written, their sources, the posting date | confirmed / corrected / unverifiable per fact, with source. Saved on the post (Studio shows "Facts checked"); anything not confirmed is commented on the post and emailed to the approver. An unverifiable fact blocks approval. |
+| Quality checker | Friday plan | Guidelines, platform rules, writing rules, tone reference, finished posts | Scores (stop, useful, true, human, ours, clean), findings, one lesson |
+
+Research, revisions, learning and the weekly report are done by the main run itself (cheaper, and one finding shapes the next). On Mondays the research job also scans competitors' public sites.
+
 ## Roles
 
 `social_members`: exactly one **approver** (plus an optional backup approver), **editors** (edit, send back, pause, settings), **viewers** (view and comment). A site admin who is not a member gets editor access.
@@ -50,7 +61,7 @@ Generate secrets with `openssl rand -hex 32`. SMTP, Supabase and JWT variables a
 
 ```bash
 cd backend && npm install
-JWT_SECRET=t node --test tests/social_engine.test.js        # 14 end-to-end tests, in memory
+JWT_SECRET=t node --test tests/social_engine.test.js        # 17 end-to-end tests, in memory
 JWT_SECRET=dev node scripts/studio-demo.js                   # demo API with sample posts on :8000
 cd ../frontend && NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 yarn dev
 # http://localhost:3000/login  demo@eectrade.com / Demo-Pass-123!  then /studio
