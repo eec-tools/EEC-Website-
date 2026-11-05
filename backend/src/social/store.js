@@ -23,6 +23,10 @@ const KEYS = {
   social_inbox: "id",
   social_competitors: "name",
   social_audit: "id",
+  social_competitor_people: "id",
+  social_competitor_posts: "id",
+  social_enquiries: "id",
+  social_engagers: "id",
 };
 
 // ---------- Supabase ----------

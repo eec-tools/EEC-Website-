@@ -26,7 +26,10 @@ const OUT_OF_SCOPE = /\b(furniture|timber|wooden decor|wood decor|pharmaceutical
 const BAD_LOCATION = /\b(mumbai[- ]based|india[- ]headquartered|singapore[- ]registered|headquartered in mumbai|headquartered in india)\b/gi;
 const ABSOLUTE = /\b(all (?:our |of our )?suppliers (?:are|hold|have)|fully certified suppliers|100% (?:verified|compliant|guaranteed))\b/gi;
 const GUARANTEE = /\bguarantee(?:d|s)?\b/gi;
-// Mathematical bold / sans-serif bold letters used for LinkedIn hooks.
+const { FORMAT_KEYS } = require("./formats");
+// Words that make a post read as advertising rather than a serious B2B note.
+const HYPE = /\b(game[- ]?changer|unlock|secret|hack|skyrocket|supercharge|revolutioni[sz]e|don't miss|must[- ]have|mind[- ]blowing|insane|crushing it|10x)\b/i;
+// Mathematical bold / sans-serif bold letters (no longer used for hooks).
 const UNICODE_BOLD = /[\u{1D400}-\u{1D7FF}]/u;
 
 function hashtags(text) {
@@ -79,13 +82,23 @@ function lintPost(post) {
     add("warn", "link_in_body", "LinkedIn posts with links get less engagement. Give the full value in the post and end with a message or email call to action.");
 
   if (rules.signOff && !body.includes(SIGN_OFF)) add("warn", "sign_off", `Missing the sign-off line "${SIGN_OFF}".`);
-  if (post.channel !== "linkedin_shirali" && post.channel !== "linkedin_company" && UNICODE_BOLD.test(body))
-    add("warn", "unicode_bold", "Bold Unicode text is for LinkedIn only; screen readers cannot read it.");
+  if (UNICODE_BOLD.test(body))
+    add("warn", "unicode_bold", "Bold Unicode letters look like advertising and screen readers cannot read them. Use a plain first line.");
+  const hype = body.match(HYPE);
+  if (hype) add("warn", "hype", `"${hype[0]}" reads as hype. Keep the tone serious and specific.`);
+  if (/!/.test(body.replace(/https?:\/\/\S+/g, ""))) add("warn", "exclamation", "No exclamation marks: keep the tone measured.");
+  if (/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(body)) add("warn", "emoji", "No emojis: keep the tone professional.");
+  if (post.format && !FORMAT_KEYS.includes(post.format)) add("error", "format", `Unknown format "${post.format}".`);
 
   const imageCount = (post.slides || []).length || (post.media || []).length;
   if (rules.needsMedia && !imageCount) add("error", "media", "Instagram posts need at least one image, a carousel or a reel.");
   if (post.kind === "carousel") {
     if (imageCount < 2 || imageCount > 10) add("error", "carousel_size", `A carousel needs 2 to 10 slides; this one has ${imageCount}.`);
+  }
+  if (post.kind === "document") {
+    if (!String(post.channel).startsWith("linkedin")) add("error", "document_channel", "Document (PDF) posts are for LinkedIn only.");
+    if (imageCount < 3 || imageCount > 12) add("error", "document_size", `A document needs 3 to 12 pages; this one has ${imageCount}.`);
+    if (!(post.slides || []).length) add("error", "document_slides", "A document is built from slides; add the pages as slides.");
   }
   if (post.kind === "reel" && !(post.media || []).some((m) => /\.(mp4|mov)(\?|$)/i.test(m.url || m))) add("error", "reel_video", "A reel needs a public video URL (.mp4 or .mov).");
   if ((post.kind === "image" || post.kind === "carousel") && imageCount) {
@@ -98,7 +111,8 @@ function lintPost(post) {
     if (words(s.title) > 14) add("error", "slide_title", `Slide ${i + 1}: title has ${words(s.title)} words (max 14).`);
     if (words(s.body) > 45) add("error", "slide_body", `Slide ${i + 1}: body has ${words(s.body)} words (max 45).`);
     if ((s.items || []).length > 5) add("error", "slide_items", `Slide ${i + 1}: more than 5 list items.`);
-    const slideText = [s.kicker, s.title, s.body, s.cta, ...(s.items || []), s.value, s.label].filter(Boolean).join(" ");
+    if (s.type === "compare" && (!(s.rows || []).length || (s.rows || []).length > 7)) add("error", "slide_rows", `Slide ${i + 1}: a comparison needs 1 to 7 rows.`);
+    const slideText = [s.kicker, s.title, s.body, s.cta, ...(s.items || []), s.value, s.label, ...(s.columns || []), ...(s.rows || []).flatMap((r) => [r.label, typeof r.a === "string" ? r.a : "", typeof r.b === "string" ? r.b : ""])].filter(Boolean).join(" ");
     if (CONTRACTION.test(slideText)) add("error", "slide_contractions", `Slide ${i + 1}: contains a contraction.`);
     CONTRACTION.lastIndex = 0;
     if (/[–—]/.test(slideText)) add("error", "slide_dashes", `Slide ${i + 1}: contains an em or en dash.`);

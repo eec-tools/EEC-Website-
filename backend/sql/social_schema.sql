@@ -45,7 +45,10 @@ create table if not exists social_posts (
   batch_id         text not null references social_batches(batch_id) on delete cascade,
   channel          text not null check (channel in ('linkedin_shirali', 'linkedin_company', 'instagram', 'facebook')),
   slot_at          timestamptz not null,               -- publish time (UTC)
-  kind             text not null check (kind in ('text', 'image', 'carousel', 'reel')),
+  kind             text not null check (kind in ('text', 'image', 'carousel', 'reel', 'document')),
+  format           text,                               -- one of the 10 rotation formats
+  segment          text,                               -- the reader the post is written for
+  change_request   jsonb,                              -- open "Request a change" (note, state, ready_by)
   audience         text,                               -- buyer | supplier | both
   market           text,
   pillar           text,
@@ -211,3 +214,78 @@ create table if not exists social_audit (
   detail jsonb not null default '{}'::jsonb
 );
 create index if not exists social_audit_at_idx on social_audit(at desc);
+
+-- Added November 2026 (also in migrations/2026-11-05-studio-feedback.sql for existing databases).
+-- Competitors: companies (existing table), people and their best posts.
+alter table social_competitors add column if not exists linkedin_url text;
+alter table social_competitors add column if not exists added_by text;
+alter table social_competitors add column if not exists updated_at timestamptz default now();
+
+create table if not exists social_competitor_people (
+  id           bigserial primary key,
+  name         text not null,
+  role         text,
+  company      text,
+  linkedin_url text,
+  topics       text,
+  notes        text,
+  active       boolean not null default true,
+  added_by     text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+create table if not exists social_competitor_posts (
+  id           bigserial primary key,
+  url          text,
+  author       text not null,
+  author_type  text check (author_type in ('company', 'person')),
+  posted_on    date,
+  format       text,
+  hook         text,
+  body         text,
+  reactions    text,           -- what the team saw: "140 reactions, 22 comments"
+  why_it_works text,           -- written by the engine
+  noted_at     timestamptz,
+  added_by     text,
+  created_at   timestamptz not null default now()
+);
+
+-- Insights: enquiries and the people who engaged with a post.
+create table if not exists social_enquiries (
+  id           bigserial primary key,
+  received_at  timestamptz not null default now(),
+  channel      text,           -- linkedin | instagram | facebook | email | website | other
+  keyword      text,
+  post_id      text references social_posts(post_id) on delete set null,
+  company      text,
+  contact_name text,
+  country      text,
+  audience     text check (audience in ('buyer', 'supplier', 'other')),
+  product      text,
+  status       text not null default 'new' check (status in ('new', 'qualified', 'quoted', 'won', 'lost')),
+  notes        text,
+  added_by     text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+create index if not exists social_enquiries_post_idx on social_enquiries(post_id);
+
+create table if not exists social_engagers (
+  id            bigserial primary key,
+  post_id       text not null references social_posts(post_id) on delete cascade,
+  name          text not null,
+  headline      text,
+  action        text,          -- reaction | comment | share | message
+  type          text check (type in ('buyer', 'supplier', 'other')),
+  role          text,
+  seniority     text,
+  company       text,
+  follow_up     boolean,
+  note          text,
+  classified_at timestamptz,
+  added_by      text,
+  created_at    timestamptz not null default now()
+);
+create index if not exists social_engagers_post_idx on social_engagers(post_id);
+

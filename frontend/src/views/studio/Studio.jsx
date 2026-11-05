@@ -2,12 +2,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CheckCheck, RefreshCw, X } from "lucide-react";
+import { CheckCheck, RefreshCw, Undo2, X } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { api } from "@/lib/api";
 import PostCard from "./PostCard";
 import { PlanTab, InsightsTab, LearningTab, HealthTab } from "./Tabs";
-import { Button, Card, Empty, call, fmtLocal } from "./shared";
+import { CompetitorsTab, ActivityTab } from "./MoreTabs";
+import { RequestChangeBox } from "./RequestChange";
+import { Button, Card, Empty, call, fmtLocal, localDateTime } from "./shared";
 
 const TABS = [
   ["pending", "Waiting for approval"],
@@ -15,7 +17,9 @@ const TABS = [
   ["queue", "Queue"],
   ["posted", "Posted"],
   ["insights", "Insights"],
+  ["competitors", "Competitors"],
   ["learning", "Learning"],
+  ["activity", "Activity"],
   ["health", "Health and settings"],
 ];
 
@@ -28,10 +32,13 @@ function StudioInner() {
   const [data, setData] = useState(null);
   const [open, setOpen] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [dayChange, setDayChange] = useState(null);
 
-  const load = useCallback(async () => {
+  // quiet: right after a button press, skip the Buffer check so the page refreshes at once.
+  const load = useCallback(async (opts) => {
+    const quiet = Boolean(opts && opts.quiet);
     try {
-      const [{ data: m }, { data: o }] = await Promise.all([api.get("/studio/me"), api.get("/studio/overview")]);
+      const [{ data: m }, { data: o }] = await Promise.all([api.get("/studio/me"), api.get(`/studio/overview${quiet ? "?sync=0" : ""}`)]);
       setMe(m);
       setData(o);
       setDenied(null);
@@ -93,6 +100,16 @@ function StudioInner() {
   const waitingByBatch = {};
   for (const p of waiting) (waitingByBatch[p.batch_id] = waitingByBatch[p.batch_id] || []).push(p);
 
+  const canEdit = ["approver", "editor"].includes(me.member.role);
+  // The queue, one group per posting day (including days in batches already approved).
+  const queueDays = Object.entries(
+    queue.reduce((o, p) => {
+      const d = localDateTime(p.slot_at, tz).date;
+      (o[d] = o[d] || []).push(p);
+      return o;
+    }, {})
+  ).sort(([a], [b]) => (a < b ? -1 : 1));
+
   const card = (p, compact) => <PostCard key={`${p.post_id}-${p.version}-${p.status}`} post={p} me={me} tz={tz} comments={commentsFor[p.post_id] || []} onChanged={load} compact={compact} />;
 
   return (
@@ -111,7 +128,7 @@ function StudioInner() {
           {!me.publishing_enabled ? <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Publishing paused</span> : null}
           {me.publishing_enabled && !me.dry_run ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Live</span> : null}
           {data.synced_at ? <span className="text-xs text-[#6B7280]">Checked with Buffer {fmtLocal(data.synced_at, tz)}</span> : null}
-          <Button variant="outline" onClick={load}>
+          <Button variant="outline" onClick={() => load()}>
             <RefreshCw size={14} /> Refresh
           </Button>
         </div>
@@ -137,7 +154,8 @@ function StudioInner() {
           <div className="space-y-8">
             {Object.entries(waitingByBatch).map(([batchId, posts]) => {
               const b = batches[batchId] || {};
-              const approvable = posts.filter((p) => !(p.lint || []).some((l) => l.level === "error"));
+              // Posts with a change in progress wait for the change, so Approve all leaves them out.
+              const approvable = posts.filter((p) => !(p.lint || []).some((l) => l.level === "error") && p.status !== "changes_requested");
               return (
                 <section key={batchId} className="space-y-3">
                   <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -179,10 +197,49 @@ function StudioInner() {
       ) : null}
 
       {tab === "plan" ? <PlanTab data={data} tz={tz} onOpen={setOpen} /> : null}
-      {tab === "queue" ? (queue.length ? <div className="space-y-3">{queue.map((p) => card(p, true))}</div> : <Empty title="Nothing approved yet" />) : null}
+      {tab === "queue" ? (
+        queue.length ? (
+          <div className="space-y-6">
+            {queueDays.map(([day, posts]) => {
+              const open = posts.filter((p) => ["approved", "scheduled", "failed"].includes(p.status) && !(p.status === "scheduled" && Date.parse(p.slot_at) <= Date.now()));
+              return (
+                <section key={day} className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-sm font-semibold text-[#012D76]">
+                      {fmtLocal(posts[0].slot_at, tz, { hour: undefined, minute: undefined })} · {posts.length} post{posts.length === 1 ? "" : "s"}
+                    </h2>
+                    {canEdit && open.length ? (
+                      <Button variant="outline" onClick={() => setDayChange(dayChange === day ? null : day)}>
+                        <Undo2 size={14} /> Request a change for this day
+                      </Button>
+                    ) : null}
+                  </div>
+                  {dayChange === day ? (
+                    <RequestChangeBox
+                      posts={open}
+                      me={me}
+                      tz={tz}
+                      onCancel={() => setDayChange(null)}
+                      onDone={() => {
+                        setDayChange(null);
+                        load({ quiet: true });
+                      }}
+                    />
+                  ) : null}
+                  {posts.map((p) => card(p, true))}
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <Empty title="Nothing approved yet" />
+        )
+      ) : null}
       {tab === "posted" ? (posted.length ? <div className="space-y-3">{posted.map((p) => card(p, true))}</div> : <Empty title="Nothing posted in this period" />) : null}
-      {tab === "insights" ? <InsightsTab /> : null}
+      {tab === "insights" ? <InsightsTab me={me} tz={tz} /> : null}
       {tab === "learning" ? <LearningTab me={me} tz={tz} /> : null}
+      {tab === "competitors" ? <CompetitorsTab me={me} /> : null}
+      {tab === "activity" ? <ActivityTab tz={tz} /> : null}
       {tab === "health" ? <HealthTab me={me} tz={tz} onChanged={load} onOpen={setOpen} /> : null}
 
       {open ? (
@@ -199,8 +256,8 @@ function StudioInner() {
               me={me}
               tz={tz}
               comments={commentsFor[open.post_id] || []}
-              onChanged={async () => {
-                await load();
+              onChanged={async (opts) => {
+                await load(opts);
               }}
             />
           </div>

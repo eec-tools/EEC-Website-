@@ -1,4 +1,4 @@
-// The clock. Called every 15 minutes (GitHub Actions) and once a day (Vercel cron).
+// The clock. Called every few minutes (cron-job.org or GitHub Actions) and once a day (Vercel cron).
 // Every step is idempotent, so extra calls are harmless.
 
 const logger = require("../utils/logger");
@@ -7,7 +7,7 @@ const { getSettings, setSetting, audit } = require("./settings");
 const { getBuffer } = require("./buffer");
 const service = require("./service");
 const notify = require("./notify");
-const { inQuietHours, localParts } = require("./time");
+const { localParts, zonedToUtc } = require("./time");
 
 async function syncSent(summary) {
   const store = getStore();
@@ -102,36 +102,58 @@ async function markMissed(summary, settings) {
   summary.missed = summary.missed.map((m) => m.post_id);
 }
 
+// One digest email at each reminder time (09:30 and 18:30 local by default), only while posts are
+// waiting for approval. Each time is sent once, and only within 3 hours of it (a late clock does
+// not send a stale reminder).
+function timeLeft(ms) {
+  const h = Math.round(ms / 3600000);
+  if (ms < 3600000) return `${Math.max(1, Math.round(ms / 60000))} minutes`;
+  if (h < 36) return `${h} hour${h === 1 ? "" : "s"}`;
+  return `${Math.round(h / 24)} days`;
+}
+
 async function remind(summary, settings) {
   const r = settings.reminders || {};
-  if (!r.enabled) return;
+  if (r.enabled === false) return;
+  const tz = settings.timezone;
+  const times = (Array.isArray(r.times) && r.times.length ? r.times : ["09:30", "18:30"]).slice().sort();
   const t = service.now();
-  if (inQuietHours(t, settings.timezone, r.quiet_hours)) return;
+  const today = localParts(t, tz).date;
+  let slot = null;
+  for (const hm of times) {
+    const at = zonedToUtc(today, hm, tz).getTime();
+    if (at <= t.getTime() && t.getTime() - at < 3 * 3600000) slot = `${today} ${hm}`;
+  }
+  if (!slot || settings.last_reminder_slot === slot) return;
+  await setSetting("last_reminder_slot", slot, "system");
+
   const store = getStore();
-  const horizon = new Date(t.getTime() + (Number(r.start_hours_before) || 48) * 3600000).toISOString();
+  const lateMs = (Number(settings.late_window_hours) || 6) * 3600000;
   const waiting = await store.list("social_posts", {
-    where: { status: "pending", slot_at: { gt: t.toISOString(), lte: horizon } },
+    where: { status: "pending", slot_at: { gt: new Date(t.getTime() - lateMs).toISOString() } },
     order: ["slot_at", "asc"],
   });
-  const intervalMs = (Number(r.interval_hours) || 2) * 3600000;
-  const due = waiting.filter((p) => {
-    const since = p.last_reminder_at ? Date.parse(p.last_reminder_at) : Date.parse(p.updated_at || p.created_at || 0);
-    return t.getTime() - since >= intervalMs;
-  });
-  if (!due.length) return;
+  if (!waiting.length) return;
+  const row = (p) => {
+    const until = Date.parse(p.slot_at) - t.getTime();
+    const when = until > 0 ? `goes out in ${timeLeft(until)}` : `<b style="color:#a63a2e">past its time: approve within ${timeLeft(Date.parse(p.slot_at) + lateMs - t.getTime())} or it is skipped</b>`;
+    const changed = p.change_request && p.change_request.state === "done" ? " · changed on your request" : "";
+    return `<tr><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee;white-space:nowrap">${notify.esc(notify.whenLocal(p.slot_at, tz))}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${notify.esc(notify.CHANNEL_NAMES[p.channel] || p.channel)}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${notify.esc(p.topic)}${changed}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${when}</td></tr>`;
+  };
+  const first = Date.parse(waiting[0].slot_at) - t.getTime();
   const sent = await notify.send(
     await notify.approverEmails(),
-    `EEC Social: ${waiting.length} post(s) waiting for your approval`,
+    `EEC Social: ${waiting.length} post${waiting.length === 1 ? "" : "s"} waiting for your approval (${first > 0 ? `first goes out in ${timeLeft(first)}` : "one is already past its time"})`,
     notify.wrap(
-      "Posts are waiting for your approval",
-      `<p>The earliest goes out ${notify.esc(notify.whenLocal(waiting[0].slot_at, settings.timezone))} IST. Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p>${notify.postTable(waiting, settings.timezone)}<p><a href="${notify.studioUrl("?tab=pending")}">Approve now</a></p>`
+      "Posts waiting for your approval",
+      `<table style="border-collapse:collapse;font-size:14px"><tr><th align="left" style="padding:6px 10px">When (IST)</th><th align="left" style="padding:6px 10px">Channel</th><th align="left" style="padding:6px 10px">Topic</th><th align="left" style="padding:6px 10px">Time left</th></tr>${waiting.map(row).join("")}</table><p>Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p><p><a href="${notify.studioUrl("?tab=pending")}">Open the Studio</a></p>`
     )
   );
   if (sent) {
-    for (const p of due) {
+    for (const p of waiting) {
       await store.update("social_posts", { post_id: p.post_id }, { last_reminder_at: t.toISOString(), reminder_count: (p.reminder_count || 0) + 1 });
     }
-    summary.reminded = due.length;
+    summary.reminded = waiting.length;
   }
 }
 

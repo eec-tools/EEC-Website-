@@ -11,6 +11,7 @@ const { getBuffer } = require("../social/buffer");
 const { lintPost } = require("../social/rules");
 const { tick, quickSync } = require("../social/tick");
 const service = require("../social/service");
+const data = require("../social/studioData");
 const { mondayOf, addDays, zonedToUtc, localParts } = require("../social/time");
 
 const router = express.Router();
@@ -23,7 +24,14 @@ const member = asyncHandler(async (req, res, next) => {
 const auth = [requireAuth, member];
 
 function decorate(p) {
-  return { ...p, image_urls: service.mediaUrls(p), lint: lintPost(p) };
+  const slides = p.slides || [];
+  return {
+    ...p,
+    // Always the slide images for the page; a document post also links its PDF.
+    image_urls: slides.length ? slides.map((_, i) => service.slideUrl(p, i + 1)) : service.mediaUrls(p),
+    document_url: p.kind === "document" && slides.length ? service.documentUrl(p) : null,
+    lint: lintPost(p),
+  };
 }
 
 router.get(
@@ -36,6 +44,9 @@ router.get(
       timezone: settings.timezone,
       publishing_enabled: settings.publishing_enabled,
       dry_run: settings.dry_run,
+      late_window_hours: settings.late_window_hours,
+      // When a change requested now would be ready (next scheduled run plus a margin).
+      change_ready_by: service.changeReadyBy(settings).toISOString(),
     });
   })
 );
@@ -46,7 +57,8 @@ router.get(
   auth,
   asyncHandler(async (req, res) => {
     // Check Buffer before answering so the page shows what has really happened (capped at 7 seconds).
-    await Promise.race([quickSync().catch(() => null), new Promise((r) => setTimeout(r, 7000))]);
+    // Skipped right after a button press (sync=0) so the page refreshes at once.
+    if (req.query.sync !== "0") await Promise.race([quickSync().catch(() => null), new Promise((r) => setTimeout(r, 7000))]);
     const store = getStore();
     const settings = await getSettings();
     const tz = settings.timezone;
@@ -85,13 +97,32 @@ const act = (fn) =>
     const result = await fn(req);
     res.json(result && result.post_id ? decorate(result) : result || { ok: true });
   });
+const plain = (fn) => asyncHandler(async (req, res) => res.json((await fn(req)) || { ok: true }));
 
-router.post("/studio/posts/:id/approve", auth, act((req) => service.approvePost(req.member, req.params.id, req.body || {})));
-router.post("/studio/batches/:id/approve", auth, act((req) => service.approveBatch(req.member, req.params.id, req.body || {})));
+router.post("/studio/posts/:id/approve", auth, act((req) => service.approvePost(req.member, req.params.id, { ...(req.body || {}), background: true })));
+router.post("/studio/batches/:id/approve", auth, act((req) => service.approveBatch(req.member, req.params.id, { ...(req.body || {}), background: true })));
 router.post("/studio/posts/:id/unapprove", auth, act((req) => service.unapprovePost(req.member, req.params.id)));
 router.patch("/studio/posts/:id", auth, act((req) => service.editPost(req.member, req.params.id, req.body || {})));
 router.post("/studio/posts/:id/drop", auth, act((req) => service.dropPost(req.member, req.params.id, req.body || {})));
-router.post("/studio/posts/:id/request-changes", auth, act((req) => service.requestChanges(req.member, req.params.id, (req.body || {}).note)));
+router.post("/studio/posts/:id/request-changes", auth, act((req) => service.requestChange(req.member, req.params.id, req.body || {})));
+router.post("/studio/posts/:id/request-change", auth, act((req) => service.requestChange(req.member, req.params.id, req.body || {})));
+router.post("/studio/posts/:id/cancel-change", auth, act((req) => service.cancelChange(req.member, req.params.id)));
+router.post("/studio/posts/:id/retry-change", auth, act((req) => service.retryChange(req.member, req.params.id, req.body || {})));
+
+// Competitors (companies, people, best posts), enquiries, engagers, run log.
+router.get("/studio/competitors", auth, plain(() => data.listCompetitors()));
+router.post("/studio/competitors/:list", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body)));
+router.patch("/studio/competitors/:list/:id", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body, req.params.id)));
+router.delete("/studio/competitors/:list/:id", auth, plain((req) => data.removeCompetitor(req.member, req.params.list, req.params.id)));
+router.get("/studio/enquiries", auth, plain((req) => data.listEnquiries({ days: req.query.days })));
+router.post("/studio/enquiries", auth, plain((req) => data.saveEnquiry(req.member, req.body)));
+router.patch("/studio/enquiries/:id", auth, plain((req) => data.saveEnquiry(req.member, req.body, req.params.id)));
+router.delete("/studio/enquiries/:id", auth, plain((req) => data.removeEnquiry(req.member, req.params.id)));
+router.get("/studio/posts/:id/engagers", auth, plain((req) => data.listEngagers(req.params.id)));
+router.post("/studio/engagers", auth, plain((req) => data.addEngagers(req.member, req.body || {})));
+router.patch("/studio/engagers/:id", auth, plain((req) => data.updateEngager(req.member, req.params.id, req.body)));
+router.delete("/studio/engagers/:id", auth, plain((req) => data.removeEngager(req.member, req.params.id)));
+router.get("/studio/activity", auth, plain((req) => data.listActivity({ days: req.query.days })));
 router.post("/studio/posts/:id/post-now", auth, act((req) => service.postNow(req.member, req.params.id, req.body || {})));
 router.post("/studio/batches/:id/delete", auth, act((req) => service.deleteBatch(req.member, req.params.id)));
 router.post("/studio/comments", auth, act((req) => service.addComment(req.member, req.body || {})));
@@ -160,7 +191,15 @@ router.get(
       }
       return out;
     };
-    res.json({ weeks, by_channel: group("channel"), by_pillar: group("pillar"), by_series: group("series"), posts: posts.filter((p) => p.status === "posted").map(decorate) });
+    const extra = await data.insightsExtra(posts);
+    res.json({
+      weeks,
+      by_channel: group("channel"),
+      by_pillar: group("pillar"),
+      by_series: group("series"),
+      ...extra,
+      posts: posts.filter((p) => p.status === "posted").map(decorate),
+    });
   })
 );
 

@@ -14,7 +14,7 @@ export const CHANNELS = {
 
 export const STATUS = {
   pending: { label: "Waiting for approval", tone: "bg-amber-50 text-amber-800 border-amber-200" },
-  changes_requested: { label: "Sent back to writer", tone: "bg-orange-50 text-orange-800 border-orange-200" },
+  changes_requested: { label: "Change requested", tone: "bg-orange-50 text-orange-800 border-orange-200" },
   approved: { label: "Approved", tone: "bg-sky-50 text-sky-800 border-sky-200" },
   scheduled: { label: "Scheduled", tone: "bg-emerald-50 text-emerald-800 border-emerald-200" },
   posting: { label: "Sending", tone: "bg-sky-50 text-sky-800 border-sky-200" },
@@ -62,10 +62,40 @@ export function Pill({ children, className = "" }) {
   return <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${className}`}>{children}</span>;
 }
 
-export function StatusPill({ status, slotAt }) {
+export const FORMATS = {
+  document: "Document carousel (PDF)",
+  comparison: "Comparison infographic",
+  number: "One-number infographic",
+  market_update: "Market update",
+  buyer_question: "A buyer asked us",
+  checklist: "Specification checklist",
+  calendar: "Season and trade fair calendar",
+  service: "Service walkthrough",
+  photo: "Photos from the field",
+  video: "Short explainer video",
+};
+
+export const SEGMENTS = {
+  importer_distributor: "Importers and distributors",
+  retail_chain: "Retail and supermarket chains",
+  small_store: "Small and independent stores",
+  private_label: "Private-label brands and procurement",
+  manufacturer: "Manufacturers and exporters",
+};
+
+export function StatusPill({ status, slotAt, post }) {
   // A scheduled post whose time has passed is being published; the next check with Buffer confirms it.
   if (status === "scheduled" && slotAt && Date.parse(slotAt) < Date.now()) {
     return <Pill className="bg-sky-50 text-sky-800 border-sky-200">Publishing, confirming with Buffer</Pill>;
+  }
+  if (status === "approved" && post && !post.buffer_id && !post.error) {
+    return <Pill className="bg-sky-50 text-sky-800 border-sky-200">Approved, sending to Buffer</Pill>;
+  }
+  if (status === "pending" && post && post.change_request && post.change_request.state === "done") {
+    return <Pill className="bg-emerald-50 text-emerald-800 border-emerald-200">Changed on your request</Pill>;
+  }
+  if (status === "changes_requested" && post && post.change_request && post.change_request.state === "failed") {
+    return <Pill className="bg-red-50 text-red-800 border-red-200">Change could not be made</Pill>;
   }
   const s = STATUS[status] || { label: status, tone: "bg-slate-100 text-slate-600 border-slate-200" };
   return <Pill className={s.tone}>{s.label}</Pill>;
@@ -172,6 +202,14 @@ export function Preview({ post }) {
         ) : null}
       </div>
       {post.channel !== "instagram" ? media : null}
+      {post.document_url ? (
+        <div className="flex items-center justify-between border-t border-[#EFF4F9] px-3 py-2 text-xs text-[#3A4759]">
+          <span>LinkedIn document · {images.length} pages</span>
+          <a href={post.document_url} target="_blank" rel="noreferrer" className="font-semibold text-[#0096D6] hover:underline">
+            Open the PDF
+          </a>
+        </div>
+      ) : null}
       {post.first_comment ? <div className="border-t border-[#EFF4F9] px-3 py-2 text-xs text-[#3A4759]">First comment: {post.first_comment}</div> : null}
     </div>
   );
