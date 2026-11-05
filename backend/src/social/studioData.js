@@ -6,6 +6,10 @@ const { getStore } = require("./store");
 const { audit } = require("./settings");
 const service = require("./service");
 const { FORMATS, FORMAT_KEYS } = require("./formats");
+const { isMissingSchema } = require("./dbCheck");
+
+// A table from a database update that has not been run yet reads as empty, so the rest of the page works.
+const orEmpty = (promise) => promise.catch((e) => { if (isMissingSchema(e)) return null; throw e; });
 
 function parse(schema, input) {
   const r = schema.safeParse(input || {});
@@ -63,10 +67,10 @@ async function listCompetitors() {
   const store = getStore();
   const [companies, people, posts] = await Promise.all([
     store.list("social_competitors", { order: ["name", "asc"] }),
-    store.list("social_competitor_people", { order: ["name", "asc"] }),
-    store.list("social_competitor_posts", { order: ["created_at", "desc"], limit: 200 }),
+    orEmpty(store.list("social_competitor_people", { order: ["name", "asc"] })),
+    orEmpty(store.list("social_competitor_posts", { order: ["created_at", "desc"], limit: 200 })),
   ]);
-  return { companies, people, posts };
+  return { companies, people: people || [], posts: posts || [], db_update_needed: people === null || posts === null };
 }
 
 async function saveCompetitor(member, list, raw, id) {
@@ -140,7 +144,7 @@ async function postForKeyword(keyword) {
 
 async function listEnquiries({ days = 90 } = {}) {
   const since = new Date(Date.now() - Math.min(Number(days) || 90, 730) * 86400000).toISOString();
-  return getStore().list("social_enquiries", { where: { received_at: { gte: since } }, order: ["received_at", "desc"], limit: 500 });
+  return (await orEmpty(getStore().list("social_enquiries", { where: { received_at: { gte: since } }, order: ["received_at", "desc"], limit: 500 }))) || [];
 }
 
 async function saveEnquiry(member, raw, id) {
@@ -199,7 +203,7 @@ async function addEngagers(member, { post_id, text, action }) {
 }
 
 async function listEngagers(postId) {
-  return getStore().list("social_engagers", { where: { post_id: postId }, order: ["created_at", "asc"] });
+  return (await orEmpty(getStore().list("social_engagers", { where: { post_id: postId }, order: ["created_at", "asc"] }))) || [];
 }
 
 async function updateEngager(member, id, raw) {
@@ -237,12 +241,22 @@ async function listActivity({ days = 30 } = {}) {
 }
 
 // ---------------- format and enquiry results ----------------
+// Rows for many posts, 100 ids per request so the request URL stays short.
+async function listIn(table, ids) {
+  const out = [];
+  for (let i = 0; i < ids.length; i += 100) out.push(...(await getStore().list(table, { where: { post_id: { in: ids.slice(i, i + 100) } } })));
+  return out;
+}
+
 async function insightsExtra(posts) {
   const store = getStore();
   const ids = posts.map((p) => p.post_id);
-  const [enquiries, engagers] = ids.length
-    ? await Promise.all([store.list("social_enquiries", { where: { post_id: { in: ids } } }), store.list("social_engagers", { where: { post_id: { in: ids } } })])
+  let [enquiries, engagers] = ids.length
+    ? await Promise.all([orEmpty(listIn("social_enquiries", ids)), orEmpty(listIn("social_engagers", ids))])
     : [[], []];
+  const dbUpdateNeeded = enquiries === null || engagers === null;
+  enquiries = enquiries || [];
+  engagers = engagers || [];
   const per = {};
   for (const p of posts) per[p.post_id] = { enquiries: 0, buyer: 0, supplier: 0, other: 0, unsorted: 0, people: 0 };
   for (const e of enquiries) if (per[e.post_id]) per[e.post_id].enquiries += 1;
@@ -266,7 +280,7 @@ async function insightsExtra(posts) {
     const k = o.impressions / 1000;
     o.per_1000 = k > 0 ? { reactions: +(o.reactions / k).toFixed(1), comments: +(o.comments / k).toFixed(1), saves: +(o.saves / k).toFixed(1), enquiries: +(o.enquiries / k).toFixed(2) } : null;
   }
-  return { per_post: per, by_format: byFormat, formats: FORMAT_KEYS.map((k) => ({ key: k, label: FORMATS[k].label })) };
+  return { per_post: per, by_format: byFormat, formats: FORMAT_KEYS.map((k) => ({ key: k, label: FORMATS[k].label })), db_update_needed: dbUpdateNeeded };
 }
 
 module.exports = {

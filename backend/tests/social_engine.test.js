@@ -727,3 +727,41 @@ test("competitors, enquiries, engagers and the run log", async () => {
   assert.equal(ctx.competitor_posts.length, 1);
   assert.ok(ctx.formats.document);
 });
+
+test("database update not run yet: reads stay working and writes say what to run", async () => {
+  const { isMissingSchema, MESSAGE } = require("../src/social/dbCheck");
+  const { errorHandler } = require("../src/middleware/errorHandler");
+  const data = require("../src/social/studioData");
+  const store = createMemoryStore();
+  setStore(store);
+  // Simulate Supabase without the new tables.
+  const missing = new Set(["social_competitor_people", "social_competitor_posts", "social_enquiries", "social_engagers"]);
+  const real = store.list.bind(store);
+  store.list = async (table, opts) => {
+    if (missing.has(table)) {
+      const e = new Error(`Could not find the table 'public.${table}' in the schema cache`);
+      e.code = "PGRST205";
+      throw e;
+    }
+    return real(table, opts);
+  };
+  await store.insert("social_competitors", { name: "QIMA", active: true });
+  const c = await data.listCompetitors();
+  assert.equal(c.companies.length, 1);
+  assert.deepEqual(c.people, []);
+  assert.equal(c.db_update_needed, true);
+  const extra = await data.insightsExtra([{ post_id: "P1", status: "posted", format: "checklist", metrics: { impressions: 100 } }]);
+  assert.equal(extra.db_update_needed, true);
+  assert.equal(extra.by_format.checklist.posts, 1);
+  assert.deepEqual(await data.listEnquiries(), []);
+
+  const err = new Error('relation "social_engagers" does not exist');
+  err.code = "42P01";
+  assert.ok(isMissingSchema(err));
+  assert.ok(!isMissingSchema(new Error("Buffer is down")));
+  let status, body;
+  const res = { status: (s) => ((status = s), res), json: (b) => ((body = b), res) };
+  errorHandler(err, { method: "POST", originalUrl: "/api/studio/engagers" }, res, () => {});
+  assert.equal(status, 503);
+  assert.equal(body.detail, MESSAGE);
+});

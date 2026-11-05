@@ -220,6 +220,7 @@ create index if not exists social_audit_at_idx on social_audit(at desc);
 alter table social_competitors add column if not exists linkedin_url text;
 alter table social_competitors add column if not exists added_by text;
 alter table social_competitors add column if not exists updated_at timestamptz default now();
+alter table social_competitors add column if not exists created_at timestamptz default now();
 
 create table if not exists social_competitor_people (
   id           bigserial primary key,

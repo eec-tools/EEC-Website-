@@ -134,6 +134,24 @@ function StudioInner() {
         </div>
       </div>
 
+      {(me.db_update_needed || []).length ? (
+        <div role="alert" className="mb-6 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+          <div className="font-semibold">The database update for the new features has not been run yet.</div>
+          <div className="mt-1">
+            Competitors, enquiries, who engaged, Request a change and post formats need it. Run <code className="rounded bg-white px-1">{me.db_migration}</code> once in Supabase (SQL editor), then reload this page.
+            Everything else works as before.
+          </div>
+          <details className="mt-1 text-xs text-red-800">
+            <summary className="cursor-pointer">What is missing</summary>
+            <ul className="mt-1 list-disc pl-5">
+              {me.db_update_needed.map((m) => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      ) : null}
+
       <nav className="mb-6 flex gap-1 overflow-x-auto border-b border-[#E5EBF2]" aria-label="Studio sections">
         {TABS.map(([key, label]) => (
           <button

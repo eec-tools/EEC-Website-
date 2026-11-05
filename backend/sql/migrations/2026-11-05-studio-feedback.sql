@@ -12,6 +12,7 @@ alter table social_posts add column if not exists change_request jsonb;
 alter table social_competitors add column if not exists linkedin_url text;
 alter table social_competitors add column if not exists added_by text;
 alter table social_competitors add column if not exists updated_at timestamptz default now();
+alter table social_competitors add column if not exists created_at timestamptz default now();
 
 create table if not exists social_competitor_people (
   id           bigserial primary key,
@@ -90,3 +91,6 @@ on conflict (key) do update set value = excluded.value, updated_by = excluded.up
 insert into social_config (key, value, updated_by)
 values ('engine_runs', '["08:12","09:12","10:12","11:12","12:12","13:12","14:12","15:12","16:12","17:12","18:12","19:12","20:12"]'::jsonb, 'migration 2026-11-05')
 on conflict (key) do update set value = excluded.value, updated_by = excluded.updated_by, updated_at = now();
+
+-- Tell Supabase's API about the new tables and columns straight away.
+notify pgrst, 'reload schema';

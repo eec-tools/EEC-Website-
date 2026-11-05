@@ -13,6 +13,7 @@ const { tick, quickSync } = require("../social/tick");
 const service = require("../social/service");
 const data = require("../social/studioData");
 const { mondayOf, addDays, zonedToUtc, localParts } = require("../social/time");
+const { missingSchema, MIGRATION } = require("../social/dbCheck");
 
 const router = express.Router();
 
@@ -47,6 +48,9 @@ router.get(
       late_window_hours: settings.late_window_hours,
       // When a change requested now would be ready (next scheduled run plus a margin).
       change_ready_by: service.changeReadyBy(settings).toISOString(),
+      // Tables or columns the database still lacks (the page shows a banner while any are missing).
+      db_update_needed: await missingSchema().catch(() => []),
+      db_migration: MIGRATION,
     });
   })
 );
