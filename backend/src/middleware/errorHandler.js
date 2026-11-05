@@ -23,6 +23,12 @@ function errorHandler(err, req, res, next) {
     const detail = err.issues.map((i) => i.message).join(" ");
     return res.status(422).json({ detail: detail || "Invalid request" });
   }
+  // A table or column the code needs is not in the database yet: say which update to run.
+  const dbCheck = require("../social/dbCheck");
+  if (dbCheck.isMissingSchema(err)) {
+    logger.error(`Database update needed (${req.method} ${req.originalUrl}): ${err.message}`);
+    return res.status(503).json({ detail: dbCheck.MESSAGE, missing: err.message });
+  }
   logger.error(`Unhandled error: ${err.stack || err}`);
   return res.status(500).json({ detail: "Internal server error" });
 }

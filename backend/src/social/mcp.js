@@ -291,7 +291,13 @@ async function startRun() {
     }
   }
 
-  return { now: `${lp.weekday} ${today} ${lp.time} ${tz}`, jobs, ...(jobs.length ? {} : { note: "Nothing is due. Stop now." }) };
+  const missing = await require("./dbCheck").missingSchema().catch(() => []);
+  return {
+    now: `${lp.weekday} ${today} ${lp.time} ${tz}`,
+    jobs,
+    ...(missing.length ? { database_update_needed: missing } : {}),
+    ...(jobs.length ? {} : { note: "Nothing is due. Stop now." }),
+  };
 }
 
 async function getWorkQueue() {
@@ -689,7 +695,9 @@ async function handleRpc(msg) {
         const result = await tool.run((params && params.arguments) || {});
         return reply({ content: [{ type: "text", text: JSON.stringify(compact(result)) }], isError: Boolean(result && result.ok === false) });
       } catch (e) {
-        return reply({ content: [{ type: "text", text: `Error: ${e.message}` }], isError: true });
+        const db = require("./dbCheck");
+        const text = db.isMissingSchema(e) ? `Error: ${db.MESSAGE} (${e.message}) Send one notice about this and skip the job.` : `Error: ${e.message}`;
+        return reply({ content: [{ type: "text", text }], isError: true });
       }
     }
     default:
