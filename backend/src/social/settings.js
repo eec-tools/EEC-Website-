@@ -12,7 +12,7 @@ async function getSettings() {
 }
 
 async function setSetting(key, value, actor) {
-  if (!(key in DEFAULTS) && !["last_daily_run", "last_tick", "last_tick_summary"].includes(key)) {
+  if (!(key in DEFAULTS) && !["last_daily_run", "last_tick", "last_tick_summary", "last_sync", "last_reminder_slot"].includes(key)) {
     throw new Error(`Unknown setting "${key}"`);
   }
   await getStore().upsert("social_config", { key, value, updated_by: actor, updated_at: new Date().toISOString() });

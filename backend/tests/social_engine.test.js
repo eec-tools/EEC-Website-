@@ -299,7 +299,7 @@ test("clock: posted, missed, late approval and reminders", async () => {
   assert.ok(s1.reminded >= 1);
   assert.ok(sentMail.some((m) => /waiting for your approval/.test(m.subject)));
 
-  // Quiet hours: no reminder at 23:30 IST.
+  // 23:30 IST: no reminder (more than 3 hours after the 18:30 one), and never the same one twice.
   setNow("2026-11-09T18:00:00Z");
   sentMail.length = 0;
   const s2 = await tick();
@@ -511,4 +511,219 @@ test("fact checker: recheck before posting, verdicts saved, approver told, unver
   // An unverifiable fact is a blocking error in the post check.
   const lint = rules.lintPost({ ...p, claims: [{ text: "x", verdict: "unverifiable" }] });
   assert.ok(lint.some((l) => l.level === "error" && l.code === "fact_unverified"));
+});
+
+// ---------- Studio feedback (November 2026) ----------
+const { settle } = require("../src/social/defer");
+const studioData = require("../src/social/studioData");
+const { buildPdf } = require("../src/social/pdf");
+const rpc = async (name, args = {}) => JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name, arguments: args } })).result.content[0].text);
+
+test("request a change: only that post is held, pulled from Buffer, changed, then approved by hand", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const [mon, wed] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  await service.approvePost(approver, mon.post_id);
+  await service.approvePost(approver, wed.post_id);
+  const before = await store.get("social_posts", mon.post_id);
+  assert.equal(before.status, "scheduled");
+
+  await assert.rejects(service.requestChange(viewer, mon.post_id, { note: "shorter caption" }), /Only approver or editor/);
+  const r = await service.requestChange(editor, mon.post_id, { note: "Shorter caption, warmer ending" });
+  assert.equal(r.held.length, 1, "only this post");
+  assert.ok(Date.parse(r.ready_by) > Date.parse("2026-11-06T05:00:00Z"));
+  assert.ok(buffer.calls.some((c) => c[0] === "delete" && c[1] === before.buffer_id), "pulled out of Buffer");
+  const held = await store.get("social_posts", mon.post_id);
+  assert.equal(held.status, "changes_requested");
+  assert.equal(held.change_request.state, "open");
+  assert.equal((await store.get("social_posts", wed.post_id)).status, "scheduled", "everything else posts as normal");
+  await assert.rejects(service.approvePost(approver, mon.post_id), /A change was requested/);
+
+  // The writer picks it up at the next run.
+  const queue = await rpc("get_work_queue");
+  assert.equal(queue.sent_back[0].request.note, "Shorter caption, warmer ending");
+  const rev = await rpc("submit_revision", { post_id: mon.post_id, from_version: 1, body: liBody("spice").replace("Compare landed cost, specifications and supplier capability before you commit.\n\n", ""), scores: goodScores, note: "Shortened the caption" });
+  assert.equal(rev.ok, true, JSON.stringify(rev));
+  const done = await store.get("social_posts", mon.post_id);
+  assert.equal(done.status, "pending");
+  assert.equal(done.change_request.state, "done", "Changed on your request. Check it, then approve it.");
+
+  // Nothing posts until the approver taps Approve this post.
+  const ok = await service.approvePost(approver, mon.post_id);
+  assert.equal(ok.status, "scheduled");
+  assert.equal((await store.get("social_posts", mon.post_id)).change_request, null);
+});
+
+test("request a change on shared slides holds the whole day; failure, request again, post it as it was, cancel", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const ig = (await store.list("social_posts", { where: { channel: "instagram" } }))[0];
+  const fb = (await store.list("social_posts", { where: { channel: "facebook" } }))[0];
+  await service.approvePost(approver, fb.post_id);
+
+  const r = await service.requestChange(editor, ig.post_id, { note: "Fewer slides", visuals: true });
+  assert.deepEqual(r.held.map((h) => h.channel).sort(), ["facebook", "instagram"], "both posts sharing the slides wait");
+  assert.equal((await store.get("social_posts", fb.post_id)).status, "changes_requested");
+
+  // The writer cannot do it.
+  await rpc("fail_change", { post_id: ig.post_id, reason: "Needs photos the library does not have yet" });
+  const failed = await store.get("social_posts", ig.post_id);
+  assert.equal(failed.change_request.state, "failed");
+  assert.equal((await store.get("social_posts", fb.post_id)).change_request.state, "failed", "same request, same result");
+  assert.ok(!(await rpc("start_run")).jobs.some((j) => j.job === "revise"), "a failed request is not retried on its own");
+  assert.ok(sentMail.some((m) => /could not be made/.test(m.subject)));
+
+  await service.retryChange(editor, ig.post_id, { note: "Fewer slides, keep the cover" });
+  assert.equal((await store.get("social_posts", ig.post_id)).change_request.state, "open");
+  assert.ok((await rpc("start_run")).jobs.some((j) => j.job === "revise"));
+
+  // Post it as it was (approver only), and cancel on the other.
+  await rpc("fail_change", { post_id: ig.post_id, reason: "Still no photos" });
+  const kept = await service.approvePost(approver, ig.post_id, { keep_original: true });
+  assert.equal(kept.status, "scheduled");
+  await service.cancelChange(editor, fb.post_id);
+  const fbNow = await store.get("social_posts", fb.post_id);
+  assert.equal(fbNow.status, "pending", "back to waiting for approval");
+  assert.equal(fbNow.change_request, null);
+});
+
+test("a held post not approved in time is marked missed, never posted", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  await service.requestChange(editor, mon.post_id, { note: "Different example" });
+  setNow("2026-11-09T11:00:00Z"); // 09:30 IST slot + 7 hours
+  await tick();
+  assert.equal((await store.get("social_posts", mon.post_id)).status, "missed");
+});
+
+test("approve answers at once and Buffer follows in the background", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  const r = await service.approvePost(approver, mon.post_id, { background: true });
+  assert.equal(r.status, "approved");
+  assert.equal(r.sending, true);
+  await settle();
+  assert.equal((await store.get("social_posts", mon.post_id)).status, "scheduled");
+});
+
+test("reminders: one digest at 09:30 and one at 18:30, each once", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await service.submitBatch(weekBatch());
+  const digests = () => sentMail.filter((m) => /waiting for your approval/.test(m.subject)).length;
+  setNow("2026-11-07T04:05:00Z"); // 09:35 IST
+  sentMail.length = 0;
+  await tick();
+  await tick();
+  assert.equal(digests(), 1, "once for the morning");
+  setNow("2026-11-07T08:00:00Z"); // 13:30 IST: nothing
+  await tick();
+  assert.equal(digests(), 1);
+  setNow("2026-11-07T13:10:00Z"); // 18:40 IST
+  await tick();
+  assert.equal(digests(), 2, "evening digest");
+  assert.match(sentMail.find((m) => /waiting for your approval/.test(m.subject)).subject, /first goes out in/);
+});
+
+test("LinkedIn document posts: PDF built from the slides and sent as a document", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const doc = {
+    channel: "linkedin_company",
+    date: "2026-11-09",
+    kind: "document",
+    format: "document",
+    segment: "importer_distributor",
+    pillar: "Food and ingredients",
+    topic: "Five details that make spice quotes comparable",
+    body: "Spice quotes are only comparable when they quote the same specification.\n\nThe five details are in the document.\n\nMessage the EEC page with SPICE or email partners@eectrade.com.\n\nEEC | Your India Sourcing Office\n\n#IndiaSourcing #Spices #Procurement",
+    slides: [
+      { type: "cover", title: "Five details that make spice quotes comparable" },
+      { type: "compare", title: "What FOB includes and landed cost adds", columns: ["FOB", "Landed"], rows: [{ label: "Product cost", a: true, b: true }, { label: "Ocean freight", a: false, b: true }] },
+      { type: "question", title: "Can a small store order a mixed container?", body: "Often, yes. Ask each supplier for minimum orders per product." },
+      { type: "cta", title: "Sourcing spices from India?", cta: "Message us SPICE" },
+    ],
+    scores: goodScores,
+  };
+  const res = await service.submitBatch({ week_start: "2026-11-09", kind: "fast_lane", posts: [doc] });
+  assert.equal(res.ok, true, JSON.stringify(res));
+  const p = await store.get("social_posts", res.posts[0].post_id);
+  assert.equal(p.format, "document");
+  assert.equal(p.segment, "importer_distributor");
+  assert.deepEqual(service.mediaUrls(p), [service.documentUrl(p)]);
+  await service.approvePost(approver, p.post_id);
+  const sent = buffer.calls.find((c) => c[0] === "create")[1];
+  assert.equal(sent.document.url, service.documentUrl(p));
+  assert.equal(sent.document.thumbnailUrl, service.slideUrl(p, 1));
+  assert.deepEqual(sent.media, []);
+  const input = createBufferClient({ apiKey: "x" }).buildCreateInput({ channelId: "c", channel: "linkedin_company", text: "t", kind: "document", document: sent.document });
+  assert.equal(input.assets[0].document.title, "Five details that make spice quotes comparable");
+
+  // The renderer draws the new slide types and the PDF wraps them.
+  const { renderSlide } = require("../src/social/slides");
+  const pages = [];
+  for (let i = 0; i < doc.slides.length; i++) pages.push(await renderSlide(doc.slides, i));
+  const pdf = buildPdf(pages, { title: doc.topic });
+  assert.equal(pdf.slice(0, 5).toString(), "%PDF-");
+  assert.match(pdf.slice(-6).toString(), /%%EOF/);
+  // Documents are LinkedIn only.
+  assert.ok(rules.lintPost({ ...p, channel: "instagram" }).some((l) => l.code === "document_channel"));
+});
+
+test("tone checks: bold Unicode, hype, exclamation marks", () => {
+  const codes = rules.lintPost({ channel: "linkedin_company", kind: "text", body: liBody("spice").replace("before you commit.", "before you commit. Unlock savings now!") }).map((l) => l.code);
+  for (const c of ["unicode_bold", "hype", "exclamation"]) assert.ok(codes.includes(c), c);
+});
+
+test("competitors, enquiries, engagers and the run log", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  await assert.rejects(studioData.saveCompetitor(viewer, "companies", { name: "QIMA" }), /Only approver or editor/);
+  await studioData.saveCompetitor(editor, "companies", { name: "QIMA", linkedin_url: "https://www.linkedin.com/company/qima" });
+  await studioData.saveCompetitor(editor, "people", { name: "A. Sourcing Head", company: "Example Ltd" });
+  const post = await studioData.saveCompetitor(editor, "posts", { author: "QIMA", author_type: "company", format: "Document", body: "Eight audit findings..." });
+  let all = await studioData.listCompetitors();
+  assert.equal(all.companies.length, 1);
+  assert.equal(all.people.length, 1);
+
+  // A posted EEC post with keyword SHRIMP, and an engager list pasted from the notifications.
+  await service.submitBatch(weekBatch());
+  const [mon] = await store.list("social_posts", { where: { channel: "linkedin_company" }, order: ["slot_at", "asc"] });
+  await store.update("social_posts", { post_id: mon.post_id }, { status: "posted", body: `${mon.body}\nMessage the EEC page with SHRIMP.` });
+  const enq = await studioData.saveEnquiry(editor, { channel: "linkedin", keyword: "shrimp", company: "Example Foods LLC", country: "UAE", audience: "buyer" });
+  assert.equal(enq.post_id, mon.post_id, "keyword links the enquiry to its post");
+  const people = await studioData.addEngagers(editor, { post_id: mon.post_id, text: "Asha Rao - Procurement Manager at Example Foods\nRavi K | Export Manager, Spice Mills\n" });
+  assert.equal(people.length, 2);
+  assert.equal(people[1].headline, "Export Manager, Spice Mills");
+
+  // The notes job: the engine notes the competitor post and sorts the people.
+  const run = await rpc("start_run");
+  const notes = run.jobs.find((j) => j.job === "notes");
+  assert.ok(notes && notes.competitor_posts === 1 && notes.engagers === 2, JSON.stringify(run));
+  const q = await rpc("get_notes_queue");
+  assert.equal(q.competitor_posts[0].id, post.id);
+  await rpc("save_competitor_note", { id: post.id, why_it_works: "One concrete finding per page, ends with a checklist." });
+  await rpc("classify_engagers", { items: [{ id: people[0].id, type: "buyer", role: "Procurement Manager", company: "Example Foods", follow_up: true }, { id: people[1].id, type: "supplier" }] });
+  await rpc("finish_job", { job: "notes", summary: "1 note, 2 people sorted", sources: [{ title: "QIMA post", url: "https://www.linkedin.com/posts/x", used_for: "competitor note" }, { url: "not a url" }] });
+  assert.ok(!(await rpc("start_run")).jobs.some((j) => j.job === "notes"));
+
+  const activity = await studioData.listActivity();
+  assert.equal(activity[0].job, "notes");
+  assert.equal(activity[0].sources.length, 1, "only real links are kept");
+
+  const extra = await studioData.insightsExtra(await store.list("social_posts"));
+  assert.equal(extra.per_post[mon.post_id].enquiries, 1);
+  assert.equal(extra.per_post[mon.post_id].buyer, 1);
+  assert.equal(extra.by_format["not set"].enquiries, 1);
+  all = await studioData.listCompetitors();
+  assert.ok(all.posts[0].why_it_works);
+  const ctx = await rpc("get_context", { view: "plan" });
+  assert.equal(ctx.competitor_posts.length, 1);
+  assert.ok(ctx.formats.document);
 });

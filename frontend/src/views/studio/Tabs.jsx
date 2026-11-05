@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Pause, Play, RefreshCw, Plus } from "lucide-react";
 import { Button, Card, Empty, ChannelBadge, StatusPill, CHANNELS, ACTIVE_CHANNELS, call, fmtLocal, localDateTime, ExtLink } from "./shared";
+import { FormatTable, EnquiriesPanel } from "./MoreTabs";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
@@ -69,7 +70,7 @@ export function PlanTab({ data, tz, onOpen }) {
 }
 
 // ---------------- Insights ----------------
-export function InsightsTab() {
+export function InsightsTab({ me, tz }) {
   const [weeks, setWeeks] = useState(8);
   const [data, setData] = useState(null);
   useEffect(() => {
@@ -109,8 +110,10 @@ export function InsightsTab() {
             <option key={w} value={w}>{w} weeks</option>
           ))}
         </select>
-        <span className="text-xs text-[#6B7280]">Instagram and Facebook numbers come from Buffer daily. LinkedIn personal posts need results entered on the Posted tab.</span>
+        <span className="text-xs text-[#6B7280]">Numbers come from Buffer daily. Who engaged is added on each post in the Posted tab; LinkedIn does not share names or job titles with apps.</span>
       </div>
+      <EnquiriesPanel me={me} tz={tz} postsById={Object.fromEntries((data.posts || []).map((p) => [p.post_id, p]))} />
+      <FormatTable data={data} />
       {table("By channel", data.by_channel)}
       {table("By pillar", data.by_pillar)}
       {Object.keys(data.by_series).filter((k) => k !== "other").length ? table("By series", data.by_series) : null}

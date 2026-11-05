@@ -74,7 +74,7 @@ function createBufferClient({ apiKey, http = axios, timeoutMs = 20000 } = {}) {
     return d.channels || [];
   }
 
-  // post: { channelId, channel (EEC channel key), text, kind, media:[url], firstComment, dueAt (Date|null => share now) }
+  // post: { channelId, channel (EEC channel key), text, kind, media:[url], document:{url,title,thumbnailUrl}, firstComment, dueAt (Date|null => share now) }
   function buildCreateInput(p) {
     const input = {
       text: p.text,
@@ -87,6 +87,8 @@ function createBufferClient({ apiKey, http = axios, timeoutMs = 20000 } = {}) {
     if (media.length) {
       input.assets = media.map((url) => (/\.(mp4|mov)(\?|$)/i.test(url) ? { video: { url } } : { image: { url } }));
     }
+    // LinkedIn document post (PDF carousel): one document asset with a title and a cover thumbnail.
+    if (p.document) input.assets = [{ document: { url: p.document.url, title: p.document.title, thumbnailUrl: p.document.thumbnailUrl } }];
     if (p.channel === "instagram") {
       // Buffer has no "carousel" type for Instagram: a post with 2 to 10 images becomes a carousel.
       const type = p.kind === "reel" ? "reel" : "post";

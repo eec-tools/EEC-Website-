@@ -9,6 +9,10 @@
 //   list  { title, items: [..] }
 //   stat  { value, label, source? }
 //   cta   { title, body?, cta }
+//   compare  { kicker?, title, columns: [a, b], rows: [{ label, a, b }] }   a/b: true, false or short text
+//   question { kicker?, title (the question), body (the answer) }
+//
+// Every slide carries the EEC emblem and company name in the footer.
 
 const fs = require("fs");
 const path = require("path");
@@ -24,6 +28,12 @@ const GOLD = "#B8952A";
 const GOLD_SOFT = "#E3CC8A";
 const WHITE = "#FFFFFF";
 const MUTED = "#C9D1E6";
+
+let emblem = null;
+function emblemUri() {
+  if (!emblem) emblem = `data:image/png;base64,${fs.readFileSync(path.join(__dirname, "assets", "eec-emblem.png")).toString("base64")}`;
+  return emblem;
+}
 
 let fonts = null;
 function loadFonts() {
@@ -61,8 +71,17 @@ function frame(content, { index, total }) {
       h(
         "div",
         { alignItems: "center" },
-        h("div", { fontSize: 34, fontWeight: 800, color: GOLD, letterSpacing: 4 }, "EEC"),
-        h("div", { fontSize: 24, color: MUTED, marginLeft: 20 }, "eectrade.com")
+        h(
+          "div",
+          { width: 76, height: 76, borderRadius: 38, backgroundColor: WHITE, alignItems: "center", justifyContent: "center" },
+          { type: "img", props: { src: emblemUri(), width: 70, height: 70 } }
+        ),
+        h(
+          "div",
+          { flexDirection: "column", marginLeft: 20 },
+          h("div", { fontSize: 26, fontWeight: 800, color: WHITE, letterSpacing: 1 }, "Elan Exports Consultancy"),
+          h("div", { fontSize: 22, color: MUTED, marginTop: 4 }, "eectrade.com")
+        )
       ),
       total > 1 ? h("div", { fontSize: 24, color: MUTED }, `${index + 1} / ${total}`) : null
     )
@@ -96,6 +115,46 @@ function slideContent(s) {
       h("div", { fontSize: sizeFor(s.value, [[6, 200], [10, 150], [999, 110]]), fontWeight: 800, color: GOLD, lineHeight: 1 }, s.value),
       h("div", { fontSize: 44, fontWeight: 600, marginTop: 40, lineHeight: 1.25 }, s.label),
       s.source ? h("div", { fontSize: 24, color: MUTED, marginTop: 48 }, `Source: ${s.source}`) : null,
+    ];
+  }
+  if (type === "compare") {
+    const cols = (s.columns || ["", ""]).slice(0, 2);
+    const cell = (v) =>
+      h(
+        "div",
+        { width: 170, justifyContent: "center", alignItems: "center" },
+        v === true
+          ? h("div", { width: 30, height: 30, borderRadius: 15, backgroundColor: GOLD })
+          : v === false || v == null || v === ""
+            ? h("div", { width: 30, height: 4, backgroundColor: "#5B6A90" })
+            : h("div", { fontSize: 26, color: GOLD_SOFT, textAlign: "center" }, String(v))
+      );
+    return [
+      s.kicker ? h("div", { fontSize: 28, fontWeight: 600, color: GOLD, letterSpacing: 3, textTransform: "uppercase", marginBottom: 24 }, s.kicker) : null,
+      h("div", { fontSize: sizeFor(s.title, [[50, 58], [90, 50], [999, 44]]), fontWeight: 800, lineHeight: 1.12, marginBottom: 40 }, s.title),
+      h(
+        "div",
+        { borderBottom: `2px solid ${NAVY_2}`, paddingBottom: 14 },
+        h("div", { flexGrow: 1 }),
+        ...cols.map((c) => h("div", { width: 170, justifyContent: "center", fontSize: 24, color: MUTED, fontWeight: 600, textAlign: "center" }, c))
+      ),
+      ...(s.rows || []).slice(0, 7).map((r) =>
+        h(
+          "div",
+          { alignItems: "center", paddingTop: 16, paddingBottom: 16, borderBottom: `1px solid ${NAVY_2}` },
+          h("div", { flexGrow: 1, flexShrink: 1, fontSize: sizeFor(r.label, [[40, 31], [80, 27], [999, 24]]), lineHeight: 1.3, paddingRight: 16 }, r.label),
+          cell(r.a),
+          cell(r.b)
+        )
+      ),
+    ];
+  }
+  if (type === "question") {
+    return [
+      h("div", { fontSize: 30, fontWeight: 600, color: GOLD, letterSpacing: 3, textTransform: "uppercase", marginBottom: 36 }, s.kicker || "A buyer asked us"),
+      h("div", { fontSize: sizeFor(s.title, [[60, 66], [110, 56], [999, 48]]), fontWeight: 800, lineHeight: 1.15 }, `\u201c${s.title}\u201d`),
+      h("div", { width: 90, height: 4, backgroundColor: GOLD, marginTop: 48, marginBottom: 40 }),
+      s.body ? h("div", { fontSize: sizeFor(s.body, [[160, 38], [260, 33], [999, 29]]), color: GOLD_SOFT, lineHeight: 1.45 }, s.body) : null,
     ];
   }
   if (type === "cta") {

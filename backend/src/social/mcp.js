@@ -10,6 +10,7 @@ const { getSettings, audit } = require("./settings");
 const service = require("./service");
 const notify = require("./notify");
 const { mondayOf, addDays, localParts, cadenceSlots, zonedToUtc } = require("./time");
+const { FORMATS, FORMAT_KEYS, SEGMENTS, SEGMENT_KEYS } = require("./formats");
 
 const S = {
   str: (description) => ({ type: "string", description }),
@@ -33,7 +34,9 @@ const POST_SCHEMA = S.obj(
     channel: { type: "string", enum: ["linkedin_shirali", "linkedin_company", "instagram", "facebook"] },
     date: S.str("Local posting date YYYY-MM-DD (must be a cadence day for the channel)"),
     time: S.str("Optional local time HH:MM; defaults to the channel's cadence time"),
-    kind: { type: "string", enum: ["text", "image", "carousel", "reel"] },
+    kind: { type: "string", enum: ["text", "image", "carousel", "reel", "document"], description: "document = LinkedIn PDF carousel built from the slides (LinkedIn only, 3 to 12 pages)" },
+    format: { type: "string", enum: FORMAT_KEYS, description: "One of the 10 rotation formats" },
+    segment: { type: "string", enum: SEGMENT_KEYS, description: "The reader this post is written for" },
     audience: { type: "string", enum: ["buyer", "supplier", "both"] },
     market: S.str("Target market, e.g. UK, EU, GCC"),
     pillar: S.str("One of: Food and ingredients, Agricultural commodities, Seafood, Apparel, Home textiles (or a cross-category pillar named in the plan)"),
@@ -46,11 +49,13 @@ const POST_SCHEMA = S.obj(
     first_comment: S.str("Optional first comment (Instagram, Facebook)"),
     slides: S.arr(
       S.obj({
-        type: { type: "string", enum: ["cover", "point", "list", "stat", "cta"] },
-        kicker: S.str("cover only, max 60 chars"),
+        type: { type: "string", enum: ["cover", "point", "list", "stat", "cta", "compare", "question"] },
+        kicker: S.str("cover, compare and question; max 60 chars"),
+        columns: S.arr(S.str(""), "compare only: the two column headings, e.g. [\"FOB\", \"Landed\"]"),
+        rows: S.arr(S.obj({ label: S.str(""), a: { type: ["boolean", "string"] }, b: { type: ["boolean", "string"] } }), "compare only: up to 7 rows; a/b true (dot), false (dash) or short text"),
         number: S.str("point only"),
-        title: S.str("max 14 words"),
-        body: S.str("max 45 words"),
+        title: S.str("max 14 words (question: the buyer's question)"),
+        body: S.str("max 45 words (question: the answer)"),
         items: S.arr(S.str(""), "list only, max 5"),
         value: S.str("stat only, e.g. 10%"),
         label: S.str("stat only"),
@@ -199,6 +204,8 @@ async function getContext({ view = "plan" } = {}) {
       channel: p.channel,
       date: localParts(new Date(p.slot_at), tz).date,
       status: p.status,
+      format: p.format,
+      segment: p.segment,
       pillar: p.pillar,
       series: p.series,
       topic: p.topic,
@@ -215,6 +222,16 @@ async function getContext({ view = "plan" } = {}) {
       source_date: r.source_date,
     })),
     open_experiments: (await store.list("social_learning", { where: { kind: "experiment", status: "open" }, order: ["created_at", "desc"], limit: 5 })).map((l) => ({ id: l.id, title: l.title, measure: l.measure })),
+    formats: Object.fromEntries(Object.entries(FORMATS).map(([k, f]) => [k, f.label])),
+    // Last formats used per channel, newest first, so the rotation never repeats one twice in a row.
+    format_history: Object.fromEntries(
+      ["linkedin_company", "instagram", "facebook"].map((ch) => [ch, shown.filter((p) => p.channel === ch).slice(0, 12).map((p) => p.format || "not set")])
+    ),
+    segments: Object.fromEntries(Object.entries(SEGMENTS).map(([k, v]) => [k, v.label])),
+    segment_history: shown.filter((p) => p.channel === "linkedin_company").slice(0, 12).map((p) => p.segment || "not set"),
+    competitor_posts: (await store.list("social_competitor_posts", { order: ["created_at", "desc"], limit: 12 }).catch(() => []))
+      .filter((c) => c.why_it_works)
+      .map((c) => ({ author: c.author, format: c.format, hook: clip(c.hook, 160), why_it_works: c.why_it_works })),
     recent_results: (await store.list("social_learning", { where: { kind: "result" }, order: ["created_at", "desc"], limit: 5 })).map((l) => ({ title: l.title, evidence: l.evidence })),
   });
 }
@@ -229,7 +246,7 @@ async function startRun() {
   const today = lp.date;
   const jobs = [];
 
-  const sentBack = (await store.list("social_posts", { where: { status: "changes_requested" } })).length;
+  const sentBack = (await store.list("social_posts", { where: { status: "changes_requested" } })).filter((p) => !(p.change_request && p.change_request.state === "failed")).length;
   const edits = (await store.list("social_post_versions", { where: { change_kind: "approver_edit", processed_at: { is: null } } })).length;
   const comments = (await store.list("social_comments", { where: { kind: "comment", processed_at: { is: null } } })).length;
   if (sentBack || edits || comments) jobs.push({ job: "revise", sent_back: sentBack, approver_edits: edits, comments });
@@ -243,6 +260,11 @@ async function startRun() {
   const hasFacts = (p) => (p.claims || []).length || (p.sources || []).length || (p.verify_flags && p.verify_flags !== "None");
   const recheck = soon.filter((p) => hasFacts(p) && !fresh(p)).slice(0, 10).map((p) => p.post_id);
   if (recheck.length) jobs.push({ job: "recheck", post_ids: recheck });
+
+  // Competitor posts the team saved, and people who engaged, that the engine has not looked at yet.
+  const unnoted = (await store.list("social_competitor_posts", { where: { why_it_works: { is: null } }, limit: 20 }).catch(() => [])).length;
+  const unsorted = (await store.list("social_engagers", { where: { classified_at: { is: null } }, limit: 200 }).catch(() => [])).length;
+  if (unnoted || unsorted) jobs.push({ job: "notes", competitor_posts: unnoted, engagers: unsorted });
 
   const midnight = zonedToUtc(today, "00:00", tz).toISOString();
   const researchedToday = await store.list("social_audit", { where: { action: "job.research", at: { gte: midnight } }, limit: 1 });
@@ -274,11 +296,20 @@ async function startRun() {
 
 async function getWorkQueue() {
   const store = getStore();
-  const sentBack = await store.list("social_posts", { where: { status: "changes_requested" }, order: ["slot_at", "asc"] });
+  const sentBack = (await store.list("social_posts", { where: { status: "changes_requested" }, order: ["slot_at", "asc"] })).filter((p) => !(p.change_request && p.change_request.state === "failed"));
   const out = { sent_back: [], approver_edits: [], comments: [], missed_or_failed: [] };
   for (const p of sentBack) {
     const requests = await store.list("social_comments", { where: { post_id: p.post_id, kind: "change_request", resolved: false }, order: ["created_at", "asc"] });
-    out.sent_back.push({ ...trimPost(p, true), alt: p.alt, scores: p.scores, change_requests: requests.map((c) => ({ by: c.author_name || c.author_email, at: c.created_at, request: c.body })) });
+    const cr = p.change_request || null;
+    out.sent_back.push({
+      ...trimPost(p, true),
+      kind: p.kind,
+      format: p.format,
+      alt: p.alt,
+      scores: p.scores,
+      change_requests: requests.map((c) => ({ by: c.author_name || c.author_email, at: c.created_at, request: c.body })),
+      request: cr ? { note: cr.note, visuals: cr.visuals, shared_with: (cr.posts || []).filter((x) => x !== p.post_id), ready_by: cr.ready_by } : undefined,
+    });
   }
   const edits = await store.list("social_post_versions", { where: { change_kind: "approver_edit", processed_at: { is: null } }, order: ["created_at", "asc"] });
   for (const v of edits) {
@@ -335,8 +366,28 @@ async function getReportData({ from, to }) {
     rules_changed: await store.list("social_preferences", { where: { updated_at: { gte: start.toISOString() } } }),
     learning_log: await store.list("social_learning", { where: { created_at: { gte: start.toISOString() } }, order: ["created_at", "asc"] }),
     open_experiments: await store.list("social_learning", { where: { kind: "experiment", status: "open" } }),
+    ...(await reportExtras(start, end)),
     studio_url: notify.studioUrl(),
   };
+}
+
+// Results by format, who engaged, and enquiries in the period (for the weekly report).
+async function reportExtras(start, end) {
+  const store = getStore();
+  try {
+    const since = new Date(end.getTime() - 56 * 86400000).toISOString();
+    const recent = await store.list("social_posts", { where: { slot_at: { gte: since, lt: end.toISOString() } } });
+    const { by_format, per_post } = await require("./studioData").insightsExtra(recent);
+    const enquiries = await store.list("social_enquiries", { where: { received_at: { gte: start.toISOString(), lt: end.toISOString() } }, order: ["received_at", "asc"] });
+    const engaged = Object.values(per_post).reduce((o, x) => ({ buyer: o.buyer + x.buyer, supplier: o.supplier + x.supplier, other: o.other + x.other, unsorted: o.unsorted + x.unsorted }), { buyer: 0, supplier: 0, other: 0, unsorted: 0 });
+    return {
+      results_by_format_last_8_weeks: by_format,
+      engaged_people_last_8_weeks: engaged,
+      enquiries: enquiries.map((e) => ({ at: e.received_at, channel: e.channel, keyword: e.keyword, post_id: e.post_id, company: e.company, country: e.country, audience: e.audience, product: e.product, status: e.status })),
+    };
+  } catch (e) {
+    return {}; // tables not created yet
+  }
 }
 
 const TOOLS = {
@@ -522,10 +573,79 @@ const TOOLS = {
   },
   finish_job: {
     description: "Call after each job from start_run, even when it found nothing, so the next run does not repeat it. summary: one line on what was done.",
-    inputSchema: S.obj({ job: { type: "string", enum: ["revise", "recheck", "research", "plan_week", "report"] }, summary: S.str("") }, ["job"]),
-    run: async ({ job, summary = "" }) => {
-      await audit("claude", `job.${job}`, null, { summary: String(summary).slice(0, 500) });
+    inputSchema: S.obj(
+      {
+        job: { type: "string", enum: ["revise", "recheck", "notes", "research", "plan_week", "report"] },
+        summary: S.str("One line on what was done"),
+        sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("Source date"), used_for: S.str("Which post, finding or check it was used for") }, ["url"]), "Every source opened or used in this job (shown on the Studio Activity tab)"),
+      },
+      ["job"]
+    ),
+    run: async ({ job, summary = "", sources = [] }) => {
+      const clean = (Array.isArray(sources) ? sources : [])
+        .filter((x) => x && /^https?:\/\//.test(String(x.url || "")))
+        .slice(0, 40)
+        .map((x) => ({ title: String(x.title || "").slice(0, 200), url: String(x.url).slice(0, 500), date: String(x.date || "").slice(0, 40), used_for: String(x.used_for || "").slice(0, 200) }));
+      await audit("claude", `job.${job}`, null, { summary: String(summary).slice(0, 500), sources: clean });
       return { ok: true };
+    },
+  },
+  fail_change: {
+    description: "Use when a requested change cannot be made (for example it needs photos that do not exist, or it would break the guidelines). The post stays held; the people involved are told why and can request again or post it as it was.",
+    inputSchema: S.obj({ post_id: S.str(""), reason: S.str("Plain words, for the team") }, ["post_id", "reason"]),
+    run: (a) => service.failChange(a.post_id, a.reason, "claude"),
+  },
+  get_notes_queue: {
+    description: "The notes job: competitor posts the team saved that need a note on why they work, and people who engaged with EEC posts that need sorting.",
+    inputSchema: S.obj({}),
+    run: async () => {
+      const store = getStore();
+      const posts = await store.list("social_competitor_posts", { where: { why_it_works: { is: null } }, order: ["created_at", "asc"], limit: 20 });
+      const people = await store.list("social_engagers", { where: { classified_at: { is: null } }, order: ["created_at", "asc"], limit: 200 });
+      const topics = {};
+      for (const g of people) if (!topics[g.post_id]) topics[g.post_id] = ((await store.get("social_posts", g.post_id)) || {}).topic;
+      return compact({
+        competitor_posts: posts.map((p) => ({ id: p.id, author: p.author, author_type: p.author_type, format: p.format, hook: p.hook, body: clip(p.body, 3000), reactions: p.reactions, url: p.url })),
+        engagers: people.map((g) => ({ id: g.id, name: g.name, headline: g.headline, action: g.action, post_topic: topics[g.post_id] })),
+      });
+    },
+  },
+  save_competitor_note: {
+    description: "Save why a competitor post works: hook, format, structure, audience, what EEC can learn. In your own words, 2 to 4 sentences; never copy their wording.",
+    inputSchema: S.obj({ id: S.num(""), why_it_works: S.str(""), format: S.str("Format, if the team left it empty") }, ["id", "why_it_works"]),
+    run: async ({ id, why_it_works, format }) => {
+      const patch = { why_it_works: String(why_it_works).slice(0, 1200), noted_at: service.now().toISOString() };
+      if (format) patch.format = String(format).slice(0, 60);
+      const [row] = await getStore().update("social_competitor_posts", { id: Number(id) }, patch);
+      return row ? { ok: true } : { ok: false, message: "Not found" };
+    },
+  },
+  classify_engagers: {
+    description: "Sort people who engaged into buyer, supplier or other from their headline. type buyer = buys or sources for a retailer, importer, distributor or brand; supplier = makes or exports products; other = everyone else. follow_up true only for a likely buyer worth a message.",
+    inputSchema: S.obj(
+      {
+        items: S.arr(
+          S.obj({ id: S.num(""), type: { type: "string", enum: ["buyer", "supplier", "other"] }, role: S.str(""), seniority: S.str("e.g. owner, director, manager, staff"), company: S.str(""), follow_up: { type: "boolean" }, note: S.str("Why, in a few words") }, ["id", "type"]),
+          ""
+        ),
+      },
+      ["items"]
+    ),
+    run: async ({ items }) => {
+      let n = 0;
+      for (const it of (items || []).slice(0, 200)) {
+        const [row] = await getStore().update("social_engagers", { id: Number(it.id) }, {
+          type: it.type,
+          role: it.role ? String(it.role).slice(0, 120) : null,
+          seniority: it.seniority ? String(it.seniority).slice(0, 60) : null,
+          company: it.company ? String(it.company).slice(0, 160) : null,
+          follow_up: Boolean(it.follow_up),
+          note: it.note ? String(it.note).slice(0, 300) : null,
+          classified_at: service.now().toISOString(),
+        });
+        if (row) n += 1;
+      }
+      return { ok: true, sorted: n };
     },
   },
   send_notice: {

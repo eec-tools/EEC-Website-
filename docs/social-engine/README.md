@@ -9,13 +9,14 @@ Replaces the n8n LinkedIn approval chain and the one-off n8n Instagram/Facebook 
 
 | Piece | Where | What it does |
 | --- | --- | --- |
-| Studio page | `frontend/src/app/studio`, `frontend/src/views/studio` | Pending, Plan, Queue, Posted, Insights, Learning, Health and settings. Login with the normal site account. |
+| Studio page | `frontend/src/app/studio`, `frontend/src/views/studio` | Waiting for approval, Plan, Queue (by day), Posted, Insights (enquiries, results by format, who engaged), Competitors, Learning, Activity (every run and its sources), Health and settings. Login with the normal site account. |
+| Request a change | `RequestChange.jsx`, `service.requestChange` | A button on every post (and every queue day) that has not gone out. Only that post waits (or the whole day when the slides change); it is pulled from Buffer, the next scheduled run makes the change, and nothing posts until someone approves the result. Shows when it will be ready and warns when the post's time comes first. Free route only (no API calls). |
 | Studio API | `backend/src/routes/studio.js` | Approve, edit, send back, drop, post now, pause, comments, metrics, rules, settings, team. |
 | Core rules | `backend/src/social/service.js` | Approval, scheduling, never-post-twice, late window, kill switch, revisions. |
 | Rule check | `backend/src/social/rules.js` | House style, brand and platform checks on every post (contractions, dashes, location, scope, hashtags incl. Instagram's 5 cap, hook length, engagement bait, links in body, scores, sources). |
 | Platform playbook | `docs/social-engine/platform-playbook.md` | What Instagram (Mosseri), LinkedIn and Meta say they rank, with sources, and where each point is applied. Re-check every 6 months. |
 | Publisher | `backend/src/social/buffer.js` | Buffer GraphQL: create (scheduled or now), delete, status, metrics, channels. |
-| Clock | `backend/src/social/tick.js`, `.github/workflows/social-clock.yml`, `backend/vercel.json` crons | Every 15 min: sync sent posts, schedule approved, mark missed, remind. Daily: health and metrics. |
+| Clock | `backend/src/social/tick.js`, `.github/workflows/social-clock.yml`, `backend/vercel.json` crons | Every few minutes: sync sent posts, schedule approved, mark missed. Reminder digests at 09:30 and 18:30 IST. Daily: health and metrics. Opening the Studio also checks Buffer. |
 | Slides | `backend/src/social/slides.js`, `GET /api/social/media/:post/:version/:n.jpg` | Renders carousel slides (EEC navy and gold, 1080x1350 JPEG) on request; cached forever per version. |
 | Claude connector | `backend/src/social/mcp.js`, `POST /api/social/mcp/<SOCIAL_AGENT_KEY>` | MCP tools for the scheduled task. `start_run` and `finish_job` drive the run; `get_context` has lean views per job (`plan`, `revise`, `research`); replies are compact JSON. Draft and revise only: there is no approve or publish tool. |
 | Data | `backend/sql/social_schema.sql`, `backend/sql/social_seed.sql` | Supabase tables `social_*`. Seed carries over the 23 n8n rules, settings and competitors. |
@@ -61,7 +62,7 @@ Generate secrets with `openssl rand -hex 32`. SMTP, Supabase and JWT variables a
 
 ```bash
 cd backend && npm install
-JWT_SECRET=t node --test tests/social_engine.test.js        # 17 end-to-end tests, in memory
+JWT_SECRET=t node --test tests/social_engine.test.js        # 25 end-to-end tests, in memory
 JWT_SECRET=dev node scripts/studio-demo.js                   # demo API with sample posts on :8000
 cd ../frontend && NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 yarn dev
 # http://localhost:3000/login  demo@eectrade.com / Demo-Pass-123!  then /studio
@@ -75,3 +76,8 @@ After changing `src/social/seedData.js`, run `node scripts/social-build-seed.js`
 - Website leads tagged with the UTM source of the post that brought them.
 - Reels generation (a reel can be posted today by putting a public .mp4 URL in the post's media).
 - Shirali's personal LinkedIn (`linkedin_shirali`) is retired: hidden in Studio settings, kept only so the imported 26 Oct post still displays.
+
+## Database changes
+
+New installs: run `backend/sql/social_schema.sql` then `backend/sql/social_seed.sql`.
+Existing databases: run each file in `backend/sql/migrations/` once, in date order, before deploying the code that needs it.

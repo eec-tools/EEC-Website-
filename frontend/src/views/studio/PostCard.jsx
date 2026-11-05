@@ -2,14 +2,17 @@
 
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Check, MessageSquare, Pencil, Send, Trash2, Undo2, Zap, ChevronDown, ChevronUp, History } from "lucide-react";
-import { Button, Card, ChannelBadge, StatusPill, Preview, ExtLink, call, fmtLocal, localDateTime } from "./shared";
+import { AlertTriangle, Check, MessageSquare, Pencil, Trash2, Undo2, Zap, ChevronDown, ChevronUp, History } from "lucide-react";
+import { Button, Card, ChannelBadge, StatusPill, Preview, ExtLink, call, fmtLocal, localDateTime, FORMATS, SEGMENTS } from "./shared";
+import { RequestChangeBox, ChangeStatus } from "./RequestChange";
+import EngagerLog from "./EngagerLog";
 
-const SLIDE_TYPES = ["cover", "point", "list", "stat", "cta"];
+const SLIDE_TYPES = ["cover", "point", "list", "stat", "cta", "compare", "question"];
 
 // Says what really happened to the post, so a dry run is never reported as sent.
 function resultMessage(p, verb) {
   if (!p) return verb;
+  if (p.sending) return `${verb}. Sending to Buffer now; the card updates in a few seconds.`;
   if (p.buffer_id && p.buffer_id.startsWith("dry-run-")) return `${verb}. Dry run is on, so nothing was sent to Buffer.`;
   if (p.status === "scheduled") return `${verb}. In the Buffer queue.`;
   if (p.status === "approved" && p.error) return `${verb}, but not sent yet: ${p.error}`;
@@ -64,8 +67,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
   const [draft, setDraft] = useState(null);
   const [showDetail, setShowDetail] = useState(!compact);
   const [comment, setComment] = useState("");
-  const [sendBack, setSendBack] = useState("");
-  const [showSendBack, setShowSendBack] = useState(false);
+  const [showChange, setShowChange] = useState(false);
   const [versions, setVersions] = useState(null);
   const [metrics, setMetrics] = useState({});
 
@@ -74,12 +76,17 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
   const waiting = ["pending", "changes_requested"].includes(post.status);
   const live = ["approved", "scheduled"].includes(post.status);
   const editable = ["pending", "changes_requested", "approved", "scheduled", "failed"].includes(post.status);
+  const cr = post.change_request;
+  const changeOpen = Boolean(cr && post.status === "changes_requested");
+  const changeDone = Boolean(cr && cr.state === "done" && post.status === "pending");
+  const due = Date.parse(post.slot_at) <= Date.now() && post.status === "scheduled";
+  const requestable = ["pending", "approved", "scheduled", "failed"].includes(post.status) && !due && !changeOpen;
 
   const run = async (fn) => {
     setBusy(true);
     try {
       await fn();
-      onChanged && onChanged();
+      onChanged && onChanged({ quiet: true });
     } catch {
       /* toast already shown */
     } finally {
@@ -87,16 +94,18 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
     }
   };
 
-  const approve = () =>
+  // Approve answers at once; the post goes to Buffer in the background and the card updates itself.
+  const approve = (extra = {}) =>
     run(async () => {
-      let body = {};
+      let body = extra && extra.keep_original ? { keep_original: true } : {};
       if (errors.length) {
         const reason = window.prompt(`This post breaks a rule:\n\n${errors.map((e) => `• ${e.message}`).join("\n")}\n\nTo approve anyway, give a reason (it is logged):`);
         if (!reason) throw new Error("cancelled");
-        body = { override_reason: reason };
+        body = { ...body, override_reason: reason };
       }
       const saved = await call("post", `/studio/posts/${post.post_id}/approve`, body);
-      toast.success(resultMessage(saved, "Approved"));
+      toast.success(resultMessage(saved, extra && extra.keep_original ? "Approved as it was" : "Approved"));
+      if (saved && saved.sending && onChanged) [4000, 10000].forEach((ms) => setTimeout(() => onChanged({ quiet: true }), ms));
     });
 
   const startEdit = () => {
@@ -132,7 +141,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
         <div className="flex flex-wrap items-center gap-3">
           <ChannelBadge channel={post.channel} />
           <span className="text-sm font-semibold text-[#012D76]">{fmtLocal(post.slot_at, tz)} IST</span>
-          <StatusPill status={post.status} slotAt={post.slot_at} />
+          <StatusPill status={post.status} slotAt={post.slot_at} post={post} />
           {post.version > 1 ? <span className="text-xs text-[#6B7280]">v{post.version}</span> : null}
           {post.buffer_id && post.buffer_id.startsWith("dry-run-") ? <span className="text-xs font-semibold text-amber-700">dry run</span> : null}
         </div>
@@ -144,7 +153,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
       <div className="px-4 pt-3">
         <div className="text-[15px] font-semibold text-[#012D76]">{post.topic}</div>
         <div className="mt-0.5 text-xs text-[#6B7280]">
-          {[post.pillar, post.series, post.audience && `for ${post.audience}s`, post.market].filter(Boolean).join(" · ")}
+          {[FORMATS[post.format], SEGMENTS[post.segment] ? `for ${SEGMENTS[post.segment].toLowerCase()}` : post.audience && `for ${post.audience}s`, post.pillar, post.series, post.market].filter(Boolean).join(" · ")}
         </div>
       </div>
 
@@ -294,9 +303,13 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
               </div>
             ) : null}
 
+            {post.status === "posted" ? <EngagerLog post={post} me={me} /> : null}
+
+            {!editing ? <ChangeStatus post={post} me={me} tz={tz} busy={busy} onChanged={() => onChanged && onChanged({ quiet: true })} onApprove={approve} /> : null}
+
             {!editing ? (
               <div className="flex flex-wrap gap-2 border-t border-[#EFF4F9] pt-3">
-                {isApprover && waiting ? (
+                {isApprover && waiting && !changeOpen && !changeDone ? (
                   <Button disabled={busy} onClick={approve} data-testid="approve">
                     <Check size={15} /> Approve
                   </Button>
@@ -306,9 +319,9 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
                     <Pencil size={14} /> Edit
                   </Button>
                 ) : null}
-                {canEdit && editable ? (
-                  <Button variant="outline" disabled={busy} onClick={() => setShowSendBack(!showSendBack)}>
-                    <Undo2 size={14} /> Send back
+                {canEdit && requestable ? (
+                  <Button variant="outline" disabled={busy} onClick={() => setShowChange(!showChange)}>
+                    <Undo2 size={14} /> Request a change
                   </Button>
                 ) : null}
                 {isApprover && live ? (
@@ -316,7 +329,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
                     Unapprove
                   </Button>
                 ) : null}
-                {isApprover && (waiting || post.status === "approved" || post.status === "scheduled") ? (
+                {isApprover && !changeOpen && (waiting || post.status === "approved" || post.status === "scheduled") ? (
                   <Button
                     variant="outline"
                     disabled={busy}
@@ -345,23 +358,7 @@ export default function PostCard({ post, me, tz, comments = [], onChanged, compa
               </div>
             ) : null}
 
-            {showSendBack ? (
-              <div className="space-y-2 rounded-md border border-orange-200 bg-orange-50 p-3">
-                <textarea className="w-full rounded border border-orange-200 p-2 text-sm" rows={3} placeholder="What should the writer change? It revises the post and sends it back to you." value={sendBack} onChange={(e) => setSendBack(e.target.value)} />
-                <Button
-                  disabled={busy || sendBack.trim().length < 3}
-                  onClick={() =>
-                    run(async () => {
-                      await call("post", `/studio/posts/${post.post_id}/request-changes`, { note: sendBack }, { success: "Sent back to the writer" });
-                      setSendBack("");
-                      setShowSendBack(false);
-                    })
-                  }
-                >
-                  <Send size={14} /> Send back
-                </Button>
-              </div>
-            ) : null}
+            {showChange ? <RequestChangeBox posts={[post]} me={me} tz={tz} onCancel={() => setShowChange(false)} onDone={() => run(async () => setShowChange(false))} /> : null}
 
             <div className="flex gap-2">
               <input className="flex-1 rounded-md border border-[#E5EBF2] px-3 py-1.5 text-sm" placeholder="Comment for the team" value={comment} onChange={(e) => setComment(e.target.value)} />

@@ -18,6 +18,8 @@ const { getBuffer, BufferError } = require("./buffer");
 const { lintPost, hasErrors, addUtm, ideaKey } = require("./rules");
 const { zonedToUtc, weekdayOf, addDays, mondayOf, localParts } = require("./time");
 const notify = require("./notify");
+const { defer } = require("./defer");
+const { FORMAT_KEYS, SEGMENT_KEYS } = require("./formats");
 
 const LIVE = ["pending", "changes_requested", "approved", "scheduled", "posting", "posted"];
 const EDITABLE = ["pending", "changes_requested", "approved", "scheduled", "failed"];
@@ -35,12 +37,30 @@ function publicBase() {
   return (process.env.SOCIAL_PUBLIC_BASE_URL || "https://eec-website-backend.vercel.app").replace(/\/$/, "");
 }
 
+function slideUrl(post, n) {
+  return `${publicBase()}/api/social/media/${post.post_id}/${post.version}/${n}.jpg`;
+}
+function documentUrl(post) {
+  return `${publicBase()}/api/social/media/${post.post_id}/${post.version}/document.pdf`;
+}
+
 // Slides become image URLs served (and cached) by GET /api/social/media/...
 function mediaUrls(post) {
+  if (post.kind === "document" && (post.slides || []).length) return [documentUrl(post)];
   if ((post.slides || []).length) {
     return post.slides.map((_, i) => `${publicBase()}/api/social/media/${post.post_id}/${post.version}/${i + 1}.jpg`);
   }
   return (post.media || []).map((m) => (typeof m === "string" ? m : m.url)).filter(Boolean);
+}
+
+// Draws every slide (and document) once in the background, so it is cached before Buffer asks for it.
+function warmMedia(posts) {
+  if (!process.env.VERCEL || typeof fetch !== "function") return;
+  const urls = posts.flatMap((p) => ((p.slides || []).length ? [...p.slides.map((_, i) => slideUrl(p, i + 1)), ...(p.kind === "document" ? [documentUrl(p)] : [])] : []));
+  if (!urls.length) return;
+  defer(async () => {
+    for (const u of urls) await fetch(u).then((r) => r.arrayBuffer()).catch(() => null);
+  }, "warm slide images");
 }
 
 // ---------------- roles ----------------
@@ -57,8 +77,11 @@ function requireRole(member, roles) {
 }
 
 // ---------------- validation ----------------
+const compareCell = z.union([z.boolean(), z.string().max(40)]).optional();
 const slideSchema = z.object({
-  type: z.enum(["cover", "point", "list", "stat", "cta"]),
+  type: z.enum(["cover", "point", "list", "stat", "cta", "compare", "question"]),
+  columns: z.array(z.string().max(30)).max(2).optional(),
+  rows: z.array(z.object({ label: z.string().max(120), a: compareCell, b: compareCell })).max(7).optional(),
   kicker: z.string().max(60).optional(),
   number: z.union([z.string(), z.number()]).optional(),
   title: z.string().max(140).optional(),
@@ -83,7 +106,9 @@ const postInput = z.object({
   channel: z.enum(CHANNELS),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  kind: z.enum(["text", "image", "carousel", "reel"]),
+  kind: z.enum(["text", "image", "carousel", "reel", "document"]),
+  format: z.enum(FORMAT_KEYS).optional(),
+  segment: z.enum(SEGMENT_KEYS).optional(),
   audience: z.enum(["buyer", "supplier", "both"]).optional(),
   market: z.string().max(80).optional(),
   pillar: z.string().max(80),
@@ -129,6 +154,9 @@ function toRow(p, { postId, batchId, slotAt, campaign }) {
     channel: p.channel,
     slot_at: slotAt,
     kind: p.kind,
+    // Only written when set, so posts still save before the November 2026 migration has run.
+    ...(p.format ? { format: p.format } : {}),
+    ...(p.segment ? { segment: p.segment } : {}),
     audience: p.audience || null,
     market: p.market || null,
     pillar: p.pillar,
@@ -299,6 +327,7 @@ async function submitBatch(raw, actor = "claude") {
     saved.push(row);
   }
   await audit(actor, "batch.submitted", batchId, { posts: saved.length, replaced: [...replaceIds] });
+  warmMedia(saved);
 
   const approvers = await notify.approverEmails();
   await notify.send(
@@ -393,7 +422,8 @@ async function schedulePost(postId, { shareNow = false } = {}) {
       channel: post.channel,
       text: post.body,
       kind: post.kind,
-      media: mediaUrls(post),
+      media: post.kind === "document" ? [] : mediaUrls(post),
+      document: post.kind === "document" ? { url: documentUrl(post), title: (post.topic || "EEC").slice(0, 100), thumbnailUrl: slideUrl(post, 1) } : undefined,
       // First comments need a paid Buffer plan; only sent when buffer_first_comment is switched on.
       firstComment: (await getSettings()).buffer_first_comment === true ? post.first_comment : undefined,
       dueAt,
@@ -466,11 +496,18 @@ async function getPostOr404(postId) {
   return post;
 }
 
-async function approvePost(member, postId, { override_reason } = {}) {
+// background: answer as soon as the approval is saved; Buffer is called after the response
+// (Approve felt slow because it waited for Buffer to fetch every slide).
+// keep_original: approve the post as it is and drop an open change request ("Post it as it was").
+async function approvePost(member, postId, { override_reason, background = false, keep_original = false } = {}) {
   requireRole(member, ["approver"]);
   const store = getStore();
   const post = await getPostOr404(postId);
   if (!["pending", "changes_requested"].includes(post.status)) throw new HttpError(409, `This post is ${post.status}, not waiting for approval.`);
+  const cr = post.change_request;
+  if (cr && ["open", "failed"].includes(cr.state) && !keep_original) {
+    throw new HttpError(409, "A change was requested for this post. Wait for it, cancel the request, or choose Post it as it was.");
+  }
   const lint = lintPost(post);
   if (hasErrors(lint) && !(override_reason && override_reason.trim().length >= 5)) {
     throw new HttpError(409, `This post breaks a rule: ${lint.filter((l) => l.level === "error").map((l) => l.message).join(" ")} Edit it, or approve with a reason.`);
@@ -481,10 +518,19 @@ async function approvePost(member, postId, { override_reason } = {}) {
     approved_at: now().toISOString(),
     lint,
     error: null,
+    ...(cr ? { change_request: null } : {}),
     updated_at: now().toISOString(),
   });
   if (!p) throw new HttpError(409, "The post changed while you were looking at it. Refresh and check it again.");
-  await audit(member.email, "post.approved", postId, { version: post.version, override_reason: override_reason || null });
+  await audit(member.email, "post.approved", postId, { version: post.version, override_reason: override_reason || null, kept_original: Boolean(keep_original && cr) });
+  if (cr) await store.update("social_comments", { post_id: postId, kind: "change_request", resolved: false }, { resolved: true });
+  if (background) {
+    defer(async () => {
+      await schedulePost(postId);
+      await refreshBatchStatus(post.batch_id);
+    }, `schedule ${postId}`);
+    return { ...p, sending: true };
+  }
   const result = await schedulePost(postId);
   await refreshBatchStatus(post.batch_id);
   return result;
@@ -497,7 +543,7 @@ async function approveBatch(member, batchId, opts = {}) {
   const skipped = [];
   for (const p of posts) {
     try {
-      approved.push(await approvePost(member, p.post_id, opts));
+      approved.push(await approvePost(member, p.post_id, { ...opts, keep_original: false }));
     } catch (e) {
       skipped.push({ post_id: p.post_id, reason: e.message });
     }
@@ -597,6 +643,7 @@ async function editPost(member, postId, raw) {
     to_version: saved.version,
     returned_to_pending: wasApproved,
   });
+  if (slidesChanged) warmMedia([saved]);
   await refreshBatchStatus(post.batch_id);
   return saved;
 }
@@ -618,36 +665,174 @@ async function dropPost(member, postId, { reason } = {}) {
   return p;
 }
 
-async function requestChanges(member, postId, note) {
-  requireRole(member, ["approver", "editor"]);
-  if (!note || note.trim().length < 3) throw new HttpError(422, "Say what should change.");
+// ---------------- Request a change ----------------
+// When the next scheduled run will have the change ready: the next run time plus a margin.
+function changeReadyBy(settings, from = now()) {
+  const tz = settings.timezone;
+  const runs = (Array.isArray(settings.engine_runs) && settings.engine_runs.length ? settings.engine_runs : ["07:12", "11:12", "15:12", "19:12"]).slice().sort();
+  const today = localParts(from, tz).date;
+  for (let d = 0; d < 3; d++) {
+    const date = addDays(today, d);
+    for (const t of runs) {
+      const at = zonedToUtc(date, t, tz);
+      if (at.getTime() > from.getTime() + 60000) return new Date(at.getTime() + 25 * 60000);
+    }
+  }
+  return new Date(from.getTime() + 24 * 3600000);
+}
+
+// The posts a request holds: just this one, or with slides/images, every post that day sharing them.
+async function changeTargets(post, visuals) {
+  if (!visuals) return [post];
+  const settings = await getSettings();
+  const day = localParts(new Date(post.slot_at), settings.timezone).date;
   const store = getStore();
+  const sameDay = await store.list("social_posts", {
+    where: { status: { in: EDITABLE }, slot_at: { gte: zonedToUtc(day, "00:00", settings.timezone).toISOString(), lt: zonedToUtc(addDays(day, 1), "00:00", settings.timezone).toISOString() } },
+  });
+  const shares = (p) => p.post_id === post.post_id || (p.idea_key && p.idea_key === post.idea_key && (p.slides || []).length && (post.slides || []).length);
+  return sameDay.filter(shares);
+}
+
+const changeSchema = z.object({
+  note: z.string().trim().min(3, "Say what should change.").max(1000),
+  visuals: z.boolean().default(false),
+  post_ids: z.array(z.string()).max(12).optional(),
+});
+
+// Holds the post(s), pulls them out of Buffer, and queues the request for the next scheduled run.
+// Everything else keeps posting as normal.
+async function requestChange(member, postId, raw) {
+  requireRole(member, ["approver", "editor"]);
+  const input = parse(changeSchema, typeof raw === "string" ? { note: raw } : raw || {});
+  const store = getStore();
+  const settings = await getSettings();
+  const first = await getPostOr404(postId);
+  let targets = await changeTargets(first, input.visuals);
+  if (input.post_ids && input.post_ids.length) {
+    for (const id of input.post_ids) if (!targets.some((t) => t.post_id === id)) targets.push(await getPostOr404(id));
+  }
+  for (const t of targets) {
+    if (!EDITABLE.includes(t.status)) throw new HttpError(409, `${t.channel} post on ${notify.whenLocal(t.slot_at, settings.timezone)} is ${t.status}; it cannot be changed.`);
+    assertNotSent(t);
+  }
+  const readyBy = changeReadyBy(settings);
+  const group = `R-${hex(8)}`;
+  const held = [];
+  for (const t of targets) {
+    if (["approved", "scheduled"].includes(t.status)) await unschedule(t, member.email, "change requested");
+    const request = {
+      id: group,
+      note: input.note,
+      visuals: input.visuals,
+      by: member.email,
+      by_name: member.name,
+      at: now().toISOString(),
+      ready_by: readyBy.toISOString(),
+      state: "open",
+      was: t.status,
+      posts: targets.map((x) => x.post_id),
+    };
+    const [p] = await store.update("social_posts", { post_id: t.post_id, version: t.version }, {
+      status: "changes_requested",
+      buffer_id: null,
+      approved_by: null,
+      approved_at: null,
+      error: null,
+      change_request: request,
+      updated_at: now().toISOString(),
+    });
+    if (!p) throw new HttpError(409, "The post changed. Refresh and try again.");
+    await store.insert("social_comments", {
+      comment_id: `C-${hex(10)}`,
+      post_id: t.post_id,
+      batch_id: t.batch_id,
+      author_email: member.email,
+      author_name: member.name,
+      kind: "change_request",
+      body: input.note,
+      resolved: false,
+      created_at: now().toISOString(),
+    });
+    await audit(member.email, "post.change_requested", t.post_id, { note: input.note, visuals: input.visuals, group, ready_by: request.ready_by });
+    await refreshBatchStatus(t.batch_id);
+    held.push(p);
+  }
+  const lateMs = (Number(settings.late_window_hours) || 6) * 3600000;
+  return {
+    ok: true,
+    ready_by: readyBy.toISOString(),
+    held: held.map((p) => ({ post_id: p.post_id, channel: p.channel, slot_at: p.slot_at, after_time: Date.parse(p.slot_at) < readyBy.getTime(), skip_after: new Date(Date.parse(p.slot_at) + lateMs).toISOString() })),
+  };
+}
+
+async function postsInRequest(post) {
+  const ids = (post.change_request && post.change_request.posts) || [post.post_id];
+  const out = [];
+  for (const id of ids) {
+    const p = await getStore().get("social_posts", id);
+    if (p && p.change_request && post.change_request && p.change_request.id === post.change_request.id) out.push(p);
+  }
+  return out.length ? out : [post];
+}
+
+// Cancel request: the post goes back to waiting for approval as it was (it needs approving again).
+async function cancelChange(member, postId) {
+  requireRole(member, ["approver", "editor"]);
   const post = await getPostOr404(postId);
-  if (!EDITABLE.includes(post.status)) throw new HttpError(409, `A ${post.status} post cannot be sent back.`);
-  assertNotSent(post);
-  if (["approved", "scheduled"].includes(post.status)) await unschedule(post, member.email, "changes requested");
-  const [p] = await store.update("social_posts", { post_id: postId, version: post.version }, {
-    status: "changes_requested",
-    buffer_id: null,
-    approved_by: null,
-    approved_at: null,
-    updated_at: now().toISOString(),
-  });
-  if (!p) throw new HttpError(409, "The post changed. Refresh and try again.");
-  await store.insert("social_comments", {
-    comment_id: `C-${hex(10)}`,
-    post_id: postId,
-    batch_id: post.batch_id,
-    author_email: member.email,
-    author_name: member.name,
-    kind: "change_request",
-    body: note.trim(),
-    resolved: false,
-    created_at: now().toISOString(),
-  });
-  await audit(member.email, "post.changes_requested", postId, { note });
-  await refreshBatchStatus(post.batch_id);
-  return p;
+  if (!post.change_request || post.status !== "changes_requested") throw new HttpError(409, "There is no open change request on this post.");
+  const store = getStore();
+  for (const p of await postsInRequest(post)) {
+    if (p.status !== "changes_requested") continue;
+    await store.update("social_posts", { post_id: p.post_id, status: "changes_requested" }, { status: "pending", change_request: null, error: null, updated_at: now().toISOString() });
+    await store.update("social_comments", { post_id: p.post_id, kind: "change_request", resolved: false }, { resolved: true });
+    await audit(member.email, "post.change_cancelled", p.post_id, { group: post.change_request.id });
+    await refreshBatchStatus(p.batch_id);
+  }
+  return getPostOr404(postId);
+}
+
+// Request again, after a change could not be made.
+async function retryChange(member, postId, raw = {}) {
+  requireRole(member, ["approver", "editor"]);
+  const post = await getPostOr404(postId);
+  const cr = post.change_request;
+  if (!cr || cr.state !== "failed") throw new HttpError(409, "Only a failed change can be requested again.");
+  const settings = await getSettings();
+  const readyBy = changeReadyBy(settings);
+  const note = raw.note && String(raw.note).trim().length >= 3 ? String(raw.note).trim().slice(0, 1000) : cr.note;
+  for (const p of await postsInRequest(post)) {
+    await getStore().update("social_posts", { post_id: p.post_id }, {
+      change_request: { ...p.change_request, note, state: "open", error: null, ready_by: readyBy.toISOString(), at: now().toISOString() },
+      updated_at: now().toISOString(),
+    });
+    await audit(member.email, "post.change_requested_again", p.post_id, { note });
+  }
+  return { ok: true, ready_by: readyBy.toISOString() };
+}
+
+// The writer could not make the change (called by the scheduled task).
+async function failChange(postId, reason, actor = "claude") {
+  const post = await getPostOr404(postId);
+  if (!post.change_request || post.status !== "changes_requested") return { ok: false, message: "This post has no open change request." };
+  const settings = await getSettings();
+  for (const p of await postsInRequest(post)) {
+    await getStore().update("social_posts", { post_id: p.post_id }, {
+      change_request: { ...p.change_request, state: "failed", error: String(reason || "No reason given").slice(0, 600), failed_at: now().toISOString() },
+      updated_at: now().toISOString(),
+    });
+    await audit(actor, "post.change_failed", p.post_id, { reason });
+  }
+  await notify.send(
+    [...new Set([...(await notify.approverEmails()), post.change_request.by].filter(Boolean))],
+    `EEC Social: a requested change could not be made (${notify.whenLocal(post.slot_at, settings.timezone)})`,
+    notify.wrap("A requested change could not be made", `<p><b>Request:</b> ${notify.esc(post.change_request.note)}</p><p><b>Why:</b> ${notify.esc(reason)}</p>${notify.postTable([post], settings.timezone)}<p><a href="${notify.studioUrl("?tab=pending")}">Request again, or post it as it was</a></p>`)
+  );
+  return { ok: true };
+}
+
+async function requestChanges(member, postId, note) {
+  return requestChange(member, postId, { note });
 }
 
 async function postNow(member, postId, { override_reason } = {}) {
@@ -795,6 +980,7 @@ async function submitRevision(raw, actor = "claude") {
     lint,
     version: post.version + 1,
     status: "pending",
+    ...(post.change_request ? { change_request: { ...post.change_request, state: "done", done_at: now().toISOString(), writer_note: input.note } } : {}),
     updated_at: now().toISOString(),
   });
   if (!saved) return { ok: false, message: "The post changed during the revision. Read it again." };
@@ -810,6 +996,7 @@ async function submitRevision(raw, actor = "claude") {
   });
   await store.update("social_comments", { post_id: post.post_id, kind: "change_request", resolved: false }, { resolved: true });
   await audit(actor, "post.revised", post.post_id, { version: saved.version, note: input.note });
+  warmMedia([saved]);
   await refreshBatchStatus(post.batch_id);
   const settings = await getSettings();
   await notify.send(
@@ -875,6 +1062,13 @@ async function recordFactCheck(raw, actor = "claude") {
 }
 
 module.exports = {
+  requestChange,
+  cancelChange,
+  retryChange,
+  failChange,
+  changeReadyBy,
+  slideUrl,
+  documentUrl,
   recordFactCheck,
   memberFor,
   requireRole,
