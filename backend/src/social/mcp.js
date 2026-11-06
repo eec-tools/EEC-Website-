@@ -737,7 +737,7 @@ const TOOLS = {
         competitor: S.str("Name exactly as in the queue"),
         kind: { type: "string", enum: ["company", "person"] },
         id: S.str("Person id from the queue (people only)"),
-        profile: S.obj({ url: S.str("Website"), linkedin_url: S.str(""), category: S.str(""), focus: S.str("What they post about now"), role: S.str("People: current role"), company: S.str("People: current company"), topics: S.str("People: topics they are known for") }),
+        profile: S.obj({ url: S.str("Website"), linkedin_url: S.str("LinkedIn page"), instagram_url: S.str("Instagram profile"), facebook_url: S.str("Facebook page"), category: S.str(""), focus: S.str("What they post about now"), role: S.str("People: current role"), company: S.str("People: current company"), topics: S.str("People: topics they are known for") }),
         summary: S.str("1 to 2 sentences: what they are doing or saying now"),
         posts: S.arr(
           S.obj(

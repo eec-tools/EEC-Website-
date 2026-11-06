@@ -17,7 +17,7 @@ What each run can do (the server returns the jobs in this order):
 
 ---
 
-Use the "EEC Social" connector. Web search for competitors, research and plan_week; Google Drive for report.
+Use the "EEC Social" connector. Bright Data for competitors' social pages; web search for competitors, research and plan_week; Google Drive for report.
 
 1. Call start_run. If jobs is empty, stop now: no other tool calls, no message. If the connector has no start_run tool, the server update is not live yet: stop.
 2. Do each job in jobs, in order, using its playbook below. Call get_context at most once per job, with the view named there. After each job call finish_job {job, summary in one line, sources: every URL you opened or used, with title, date and what it was used for}, even if it found nothing. The sources show on the Studio Activity tab. If a job fails, finish_job with the reason and send_notice (kind "notice"), then go on to the next job.
@@ -61,9 +61,10 @@ AGENTS (separate agents you start with the Agent tool; give each ONLY what is li
 - engagers: classify_engagers in one call: type buyer (buys or sources for a retailer, importer, distributor or brand), supplier (makes or exports products) or other; role, seniority, company from the headline; follow_up true only for a likely buyer worth a message, with a short note why.
 
 ## competitors  (get_competitor_queue)
-- For each competitor: at most 3 web searches and 3 page fetches. Public pages only: their website, blog, news and insights pages, press releases, trade press, event listings, YouTube, and public search results. Never log in, never fetch linkedin.com or instagram.com pages; LinkedIn posts count only if a public search result shows them (use the result's link).
-- Look at the last 30 days: what they post about, formats, hooks, offers, events, new services or markets. Skip links in known_post_urls.
-- save_competitor_findings once per competitor, even when nothing changed: profile (only facts you saw), a 1 to 2 sentence summary, up to 5 posts (public link, your own summary and why it works; never their full text), up to 3 learnings with links as evidence. A learning must be useful to EEC within the guidelines (never copy a claim, a service EEC does not offer, or a flashy style). Mark each learning social (how to post) or business (what to say or offer). Skip anything already in learnings_so_far.
+- Social pages through the Bright Data connector (if its tools are not available, skip this step and say so in finish_job): for each competitor, read their recent posts on LinkedIn (linkedin_url; for a person, their LinkedIn profile), Instagram (instagram_url) and Facebook (facebook_url). If a link is missing, find it once with Bright Data search_engine and save it in profile. Call search_scrapers once per platform per run ("linkedin posts", "instagram posts", "facebook posts") and reuse the dataset_id; run_scraper on the profile or page link for posts from the last 30 days, at most 10 per platform. Posts only: never collect comments, followers or private people's data. Cost limit per run: at most 3 run_scraper calls per competitor.
+- Their website, blog, news and trade press: at most 2 searches and 2 page fetches per competitor.
+- Look at the last 30 days: what they post about, formats, hooks, offers, events, new services or markets, and which posts got the most reactions and comments. Skip links in known_post_urls.
+- save_competitor_findings once per competitor, even when nothing changed: profile (only facts you saw, including social links), a 1 to 2 sentence summary, up to 5 posts (their best recent ones; put visible reactions and comments in reactions) (public link, your own summary and why it works; never their full text), up to 3 learnings with links as evidence. A learning must be useful to EEC within the guidelines (never copy a claim, a service EEC does not offer, or a flashy style). Mark each learning social (how to post) or business (what to say or offer). Skip anything already in learnings_so_far.
 
 ## learning  (get_learning_queue)
 - You decide every social item (writing rules and competitor learnings) now: decide_learning with one reason each, in plain words. Confirm only with evidence: platform guidance, our own results (recent_posts_with_metrics), the approver's edits, or the same pattern in at least two competitor posts; and only if it fits the guidelines and does not duplicate a standing rule. Otherwise discard and say why. The team sees every reason and can change any decision.

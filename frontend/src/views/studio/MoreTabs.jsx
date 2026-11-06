@@ -85,6 +85,8 @@ const LISTS = {
     fields: [
       ["name", "Company"],
       ["linkedin_url", "LinkedIn page"],
+      ["instagram_url", "Instagram profile"],
+      ["facebook_url", "Facebook page"],
       ["url", "Website"],
       ["category", "Category (direct competitor, adjacent...)"],
       ["focus", "What they post about"],
@@ -273,6 +275,8 @@ export function CompetitorsTab({ me, tz, onChanged }) {
                   )}
                   <div className="mt-2 flex flex-wrap gap-3 text-xs">
                     {LINK(r.linkedin_url, "LinkedIn")}
+                    {LINK(r.instagram_url, "Instagram")}
+                    {LINK(r.facebook_url, "Facebook")}
                     {LINK(r.url, list === "posts" ? "Open the post" : "Website")}
                   </div>
                 </div>

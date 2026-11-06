@@ -13,7 +13,7 @@ const isUrl = (u) => /^https?:\/\/\S+$/i.test(String(u || "").trim());
 const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 const PROFILE_FIELDS = {
-  company: { url: 500, linkedin_url: 500, category: 80, focus: 400 },
+  company: { url: 500, linkedin_url: 500, instagram_url: 500, facebook_url: 500, category: 80, focus: 400 },
   person: { role: 120, company: 120, linkedin_url: 500, topics: 300 },
 };
 
@@ -46,7 +46,7 @@ async function queue(now = new Date()) {
       kind: c.kind,
       id: c.id,
       name: c.name,
-      ...(c.kind === "company" ? { url: r.url, linkedin_url: r.linkedin_url, category: r.category, focus: r.focus } : { role: r.role, company: r.company, linkedin_url: r.linkedin_url, topics: r.topics }),
+      ...(c.kind === "company" ? { url: r.url, linkedin_url: r.linkedin_url, instagram_url: r.instagram_url, facebook_url: r.facebook_url, category: r.category, focus: r.focus } : { role: r.role, company: r.company, linkedin_url: r.linkedin_url, topics: r.topics }),
       team_notes: r.notes,
       last_checked: r.checked_at,
       last_summary: r.check_summary,

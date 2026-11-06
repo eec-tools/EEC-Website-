@@ -5,6 +5,9 @@
 alter table social_competitors add column if not exists checked_at timestamptz;
 alter table social_competitors add column if not exists check_summary text;
 alter table social_competitors add column if not exists updated_by text;
+-- Their social pages, read through the Bright Data connector.
+alter table social_competitors add column if not exists instagram_url text;
+alter table social_competitors add column if not exists facebook_url text;
 alter table social_competitor_people add column if not exists checked_at timestamptz;
 alter table social_competitor_people add column if not exists check_summary text;
 alter table social_competitor_people add column if not exists updated_by text;

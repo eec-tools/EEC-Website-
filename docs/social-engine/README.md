@@ -86,13 +86,13 @@ Every learning (a writing rule, or something learned from a competitor) has a do
 
 ## Competitor watch
 
-The writer's `competitors` job runs once a day and looks at up to 3 competitors (companies and people) not checked in the last 3 days, so each is checked about twice a week. It uses public pages only (websites, blogs, news, trade press, public search results; it never logs in to LinkedIn), then:
+The writer's `competitors` job runs once a day and looks at up to 3 competitors (companies and people) not checked in the last 3 days, so each is checked about twice a week. It reads their recent LinkedIn, Instagram and Facebook posts through the Bright Data connector (posts only, at most 10 per platform, never comments or followers) and their websites, blogs and news, then:
 
 - updates their details (website, LinkedIn link, focus, role, company, topics; the team's own notes are never overwritten),
 - saves posts it found with a summary and a note on why each works (marked "found by the writer"; one row per link),
 - files up to 3 learnings with links as evidence. Approved learnings go into the weekly plan.
 
-The team can still paste in a LinkedIn post by hand; the writer writes its note at the next run.
+Bright Data must be connected in claude.ai (Settings > Connectors, URL `https://mcp.brightdata.com/mcp?token=<API token>`) and attached to the scheduled task. Without it the job reads websites and news only. The team can still paste in a post by hand.
 
 ## Database changes
 

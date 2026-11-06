@@ -13,7 +13,7 @@ const CHECKS = [
   ["social_competitor_posts", "id,url,author,author_type,posted_on,format,hook,body,reactions,why_it_works,noted_at,added_by,created_at", "2026-11-05-studio-feedback.sql"],
   ["social_enquiries", "id,received_at,channel,keyword,post_id,company,contact_name,country,audience,product,status,notes,added_by,created_at,updated_at", "2026-11-05-studio-feedback.sql"],
   ["social_engagers", "id,post_id,name,headline,action,type,role,seniority,company,follow_up,note,classified_at,added_by,created_at", "2026-11-05-studio-feedback.sql"],
-  ["social_competitors", "checked_at,check_summary,updated_by", "2026-11-06-competitor-learning.sql"],
+  ["social_competitors", "checked_at,check_summary,updated_by,instagram_url,facebook_url", "2026-11-06-competitor-learning.sql"],
   ["social_competitor_people", "checked_at,check_summary,updated_by", "2026-11-06-competitor-learning.sql"],
   ["social_competitor_posts", "source,summary", "2026-11-06-competitor-learning.sql"],
   ["social_competitor_learnings", "id,competitor,text,domain,channel,rule_type,evidence,status,decided_by,decision_note,decided_at,created_at", "2026-11-06-competitor-learning.sql"],
