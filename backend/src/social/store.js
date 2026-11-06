@@ -27,6 +27,7 @@ const KEYS = {
   social_competitor_posts: "id",
   social_enquiries: "id",
   social_engagers: "id",
+  social_competitor_learnings: "id",
 };
 
 // ---------- Supabase ----------

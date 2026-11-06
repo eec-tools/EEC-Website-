@@ -67,6 +67,24 @@ const g = { stop: 9, useful: 9, true: 10, human: 9, ours: 9, clean: 10 };
   await studioData.saveCompetitor(demoMember, "companies", { name: "QIMA", url: "https://www.qima.com", category: "Industry leader", focus: "Audits, inspections and lab testing" });
   await studioData.saveCompetitor(demoMember, "posts", { author: "Example company", author_type: "company", format: "Document, 8 pages", reactions: "140 reactions, 22 comments", hook: "Eight things our auditors found last quarter", body: "Example post text pasted from LinkedIn." });
   await studioData.saveEnquiry(demoMember, { channel: "linkedin", keyword: "SPICE", company: "Example Foods LLC", country: "UAE", audience: "buyer", product: "Cumin", status: "qualified" });
+  // Competitor watch and learning decisions.
+  const watch = require("../src/social/competitorWatch");
+  const learning = require("../src/social/learning");
+  const found = await watch.saveFindings({
+    competitor: "QIMA",
+    kind: "company",
+    profile: { focus: "Audits, inspections, lab testing; monthly food safety webinars" },
+    summary: "Monthly food safety webinars, and recap documents shared a few days after each one.",
+    posts: [{ url: "https://www.qima.com/blog", posted_on: "2026-11-03", format: "article", hook: "Five findings from our October food audits", summary: "A short recap of common audit findings, with one chart.", why_it_works: "Specific, dated and useful to buyers; one chart carries the main point; it ends with a single next step." }],
+    learnings: [
+      { text: "Recap documents of 6 to 8 pages, posted a few days after an event, get shared by buyers. EEC could post a short recap after each trade fair it attends.", domain: "social", channel: "linkedin_company", rule_type: "format", evidence: [{ title: "QIMA blog", url: "https://www.qima.com/blog" }] },
+      { text: "QIMA leads with lab testing for food buyers. EEC could explain how it works with independent labs during a Supplier Background Check, without offering testing itself.", domain: "business", rule_type: "service", evidence: [{ title: "QIMA quality control India", url: "https://www.qima.com/quality-control-india" }] },
+    ],
+  });
+  await learning.decide("competitor", found.learnings_added[0].id, "confirm", "Seen in two QIMA posts this month and it matches our document format, which suits buyers saving checklists.", "writer");
+  const [hookRule] = await store.insert("social_preferences", { approver: "all", channel: "linkedin_company", rule_type: "hook", domain: "social", rule_text: "Put the product and the market in the first line.", status: "candidate", evidence_count: 2, updated_at: new Date().toISOString() });
+  await learning.decide("rule", hookRule.id, "confirm", "Both posts that named product and market in line 1 had the most impressions this week; matches LinkedIn's own advice.", "writer");
+  await store.insert("social_preferences", { approver: "Mohita", channel: "all", rule_type: "claims", domain: "business", rule_text: "Do not mention years of experience until the exact wording is agreed.", status: "candidate", evidence_count: 1, example: "Edit on 4 Nov: removed '20+ years'", updated_at: new Date().toISOString() });
   await audit("claude", "job.research", null, { summary: "Filed 4 findings on spice residue limits and the rice crop", sources: [{ title: "Spices Board of India", url: "https://www.indianspices.com/", date: "2026-11-01", used_for: "research note" }] });
   const app = buildApp();
   app.listen(port, () => console.log(`Studio demo API on http://localhost:${port} (login ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD})`));

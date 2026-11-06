@@ -77,6 +77,23 @@ After changing `src/social/seedData.js`, run `node scripts/social-build-seed.js`
 - Reels generation (a reel can be posted today by putting a public .mp4 URL in the post's media).
 - Shirali's personal LinkedIn (`linkedin_shirali`) is retired: hidden in Studio settings, kept only so the imported 26 Oct post still displays.
 
+## Learning: who decides what
+
+Every learning (a writing rule, or something learned from a competitor) has a domain:
+
+- **social**: how to post (hooks, formats, structure, length, hashtags, timing, CTA wording). The writer decides these itself in its `learning` job, with a reason in plain words. The team sees every decision ("Decided by the writer" on the Learning tab, "Approved" on the Competitors tab) and can change it with one click. A social item nobody decided within 7 days is set aside automatically.
+- **business**: what EEC says and offers (services, claims, tone, brand, scope, audience, wording). Only the business team (approver or editors) confirms or discards these, on the Learning and Competitors tabs. The writer cannot make a business rule standing unless a team member asked for it in a comment, and at most 10 business items wait at once, so the list never becomes a backlog. The reminder emails and the weekly report list what is waiting.
+
+## Competitor watch
+
+The writer's `competitors` job runs once a day and looks at up to 3 competitors (companies and people) not checked in the last 3 days, so each is checked about twice a week. It uses public pages only (websites, blogs, news, trade press, public search results; it never logs in to LinkedIn), then:
+
+- updates their details (website, LinkedIn link, focus, role, company, topics; the team's own notes are never overwritten),
+- saves posts it found with a summary and a note on why each works (marked "found by the writer"; one row per link),
+- files up to 3 learnings with links as evidence. Approved learnings go into the weekly plan.
+
+The team can still paste in a LinkedIn post by hand; the writer writes its note at the next run.
+
 ## Database changes
 
 New installs: run `backend/sql/social_schema.sql` then `backend/sql/social_seed.sql`.

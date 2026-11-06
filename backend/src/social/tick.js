@@ -140,13 +140,17 @@ async function remind(summary, settings) {
     const changed = p.change_request && p.change_request.state === "done" ? " · changed on your request" : "";
     return `<tr><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee;white-space:nowrap">${notify.esc(notify.whenLocal(p.slot_at, tz))}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${notify.esc(notify.CHANNEL_NAMES[p.channel] || p.channel)}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${notify.esc(p.topic)}${changed}</td><td style="padding:6px 10px;border-bottom:1px solid #e3e6ee">${when}</td></tr>`;
   };
+  const businessWaiting = await require("./learning").pendingBusiness().catch(() => 0);
+  const businessLine = businessWaiting
+    ? `<p>${businessWaiting} learning${businessWaiting === 1 ? "" : "s"} also wait${businessWaiting === 1 ? "s" : ""} for the business team to confirm or discard (<a href="${notify.studioUrl("?tab=learning")}">Learning</a> and <a href="${notify.studioUrl("?tab=competitors")}">Competitors</a> tabs).</p>`
+    : "";
   const first = Date.parse(waiting[0].slot_at) - t.getTime();
   const sent = await notify.send(
     await notify.approverEmails(),
     `EEC Social: ${waiting.length} post${waiting.length === 1 ? "" : "s"} waiting for your approval (${first > 0 ? `first goes out in ${timeLeft(first)}` : "one is already past its time"})`,
     notify.wrap(
       "Posts waiting for your approval",
-      `<table style="border-collapse:collapse;font-size:14px"><tr><th align="left" style="padding:6px 10px">When (IST)</th><th align="left" style="padding:6px 10px">Channel</th><th align="left" style="padding:6px 10px">Topic</th><th align="left" style="padding:6px 10px">Time left</th></tr>${waiting.map(row).join("")}</table><p>Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p><p><a href="${notify.studioUrl("?tab=pending")}">Open the Studio</a></p>`
+      `<table style="border-collapse:collapse;font-size:14px"><tr><th align="left" style="padding:6px 10px">When (IST)</th><th align="left" style="padding:6px 10px">Channel</th><th align="left" style="padding:6px 10px">Topic</th><th align="left" style="padding:6px 10px">Time left</th></tr>${waiting.map(row).join("")}</table><p>Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p>${businessLine}<p><a href="${notify.studioUrl("?tab=pending")}">Open the Studio</a></p>`
     )
   );
   if (sent) {
@@ -199,6 +203,13 @@ async function daily(summary, settings) {
         summary.errors.push(`metrics ${p.post_id}: ${e.message}`);
       }
     }
+  }
+
+  // Social learnings the writer did not decide within a week are set aside (the team can undo it).
+  try {
+    summary.learning_set_aside = await require("./learning").expireSocial(t);
+  } catch (e) {
+    summary.errors.push(`learning: ${e.message}`);
   }
 
   // Batches nobody has looked at.

@@ -11,6 +11,8 @@ const service = require("./service");
 const notify = require("./notify");
 const { mondayOf, addDays, localParts, cadenceSlots, zonedToUtc } = require("./time");
 const { FORMATS, FORMAT_KEYS, SEGMENTS, SEGMENT_KEYS } = require("./formats");
+const learning = require("./learning");
+const competitorWatch = require("./competitorWatch");
 
 const S = {
   str: (description) => ({ type: "string", description }),
@@ -142,7 +144,7 @@ async function activeRules(withExamples) {
   const rows = await getStore().list("social_preferences", { where: { status: { in: ["active", "candidate"] } }, order: ["id", "asc"] });
   return rows
     .filter((r) => r.channel !== "linkedin_shirali")
-    .map((r) => ({ id: r.id, channel: r.channel, type: r.rule_type, status: r.status, from: r.approver, text: r.rule_text, example: withExamples ? clip(r.example, 160) : undefined }));
+    .map((r) => ({ id: r.id, channel: r.channel, type: r.rule_type, domain: learning.ruleDomain(r), status: r.status, from: r.approver, text: r.rule_text, example: withExamples ? clip(r.example, 160) : undefined }));
 }
 
 async function openSlots(settings, monday, livePosts) {
@@ -232,6 +234,13 @@ async function getContext({ view = "plan" } = {}) {
     competitor_posts: (await store.list("social_competitor_posts", { order: ["created_at", "desc"], limit: 12 }).catch(() => []))
       .filter((c) => c.why_it_works)
       .map((c) => ({ author: c.author, format: c.format, hook: clip(c.hook, 160), why_it_works: c.why_it_works })),
+    // What the team (business) or the writer (social) approved from watching competitors: apply as guidance.
+    competitor_learnings: (await store.list("social_competitor_learnings", { where: { status: "approved" }, order: ["decided_at", "desc"], limit: 20 }).catch(() => [])).map((l) => ({
+      competitor: l.competitor,
+      channel: l.channel,
+      domain: l.domain,
+      text: l.text,
+    })),
     recent_results: (await store.list("social_learning", { where: { kind: "result" }, order: ["created_at", "desc"], limit: 5 })).map((l) => ({ title: l.title, evidence: l.evidence })),
   });
 }
@@ -267,6 +276,19 @@ async function startRun() {
   if (unnoted || unsorted) jobs.push({ job: "notes", competitor_posts: unnoted, engagers: unsorted });
 
   const midnight = zonedToUtc(today, "00:00", tz).toISOString();
+
+  // Competitor watch: up to 3 competitors not looked at in the last 3 days, from 06:00, once a day.
+  if (lp.hour >= 6) {
+    const watchedToday = await store.list("social_audit", { where: { action: "job.competitors", at: { gte: midnight } }, limit: 1 });
+    const dueNow = watchedToday.length ? [] : await competitorWatch.due(t).catch(() => []);
+    if (dueNow.length) jobs.push({ job: "competitors", competitors: dueNow.map((c) => c.name) });
+  }
+
+  // Social learnings (writing rules and competitor learnings) the writer decides itself; business ones wait for the team.
+  const sq = await learning.socialQueue().catch(() => ({ rules: [], competitor: [] }));
+  const toDecide = sq.rules.length + sq.competitor.length;
+  if (toDecide || jobs.some((j) => j.job === "competitors")) jobs.push({ job: "learning", social_to_decide: toDecide });
+
   const researchedToday = await store.list("social_audit", { where: { action: "job.research", at: { gte: midnight } }, limit: 1 });
   if (!researchedToday.length && lp.hour >= 6) jobs.push({ job: "research" });
 
@@ -378,6 +400,26 @@ async function getReportData({ from, to }) {
 }
 
 // Results by format, who engaged, and enquiries in the period (for the weekly report).
+// Learning decisions in the period: what the writer decided (social) and what still waits for the team (business).
+async function learningReport(start, end) {
+  const store = getStore();
+  const inRange = (r) => r.decided_at && r.decided_at >= start.toISOString() && r.decided_at < end.toISOString();
+  const [rules, comp, checked] = await Promise.all([
+    store.list("social_preferences", {}),
+    store.list("social_competitor_learnings", {}).catch(() => []),
+    store.list("social_audit", { where: { action: "competitors.checked", at: { gte: start.toISOString(), lt: end.toISOString() } } }).catch(() => []),
+  ]);
+  const row = (kind) => (r) => ({ kind, id: r.id, text: kind === "rule" ? r.rule_text : r.text, competitor: r.competitor, status: r.status, by: r.decided_by, reason: r.decision_note });
+  return {
+    learning_decided_in_period: [...rules.filter(inRange).map(row("rule")), ...comp.filter(inRange).map(row("competitor"))],
+    learning_waiting_for_business_team: [
+      ...rules.filter((r) => r.status === "candidate" && learning.ruleDomain(r) === "business").map(row("rule")),
+      ...comp.filter((r) => r.status === "pending" && r.domain === "business").map(row("competitor")),
+    ],
+    competitor_checks_in_period: checked.map((a) => ({ competitor: a.target, posts: (a.detail || {}).posts, learnings: (a.detail || {}).learnings })),
+  };
+}
+
 async function reportExtras(start, end) {
   const store = getStore();
   try {
@@ -390,6 +432,7 @@ async function reportExtras(start, end) {
       results_by_format_last_8_weeks: by_format,
       engaged_people_last_8_weeks: engaged,
       enquiries: enquiries.map((e) => ({ at: e.received_at, channel: e.channel, keyword: e.keyword, post_id: e.post_id, company: e.company, country: e.country, audience: e.audience, product: e.product, status: e.status })),
+      ...(await learningReport(start, end)),
     };
   } catch (e) {
     return {}; // tables not created yet
@@ -398,13 +441,13 @@ async function reportExtras(start, end) {
 
 const TOOLS = {
   start_run: {
-    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, research, plan_week, report) in the order to do them, or a note that nothing is due.",
+    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, notes, competitors, learning, research, plan_week, report) in the order to do them, or a note that nothing is due.",
     inputSchema: S.obj({}),
     run: () => startRun(),
   },
   get_context: {
     description:
-      "Context for one job. view 'plan' (default): open slots next week, scope, services, tone reference, writing rules (active = hard rules, candidate = soft), competitors, never-repeat keys, recent posts with metrics, recent approver edits, research from the last 14 days, open experiments. view 'revise': scope, services, tone reference, rules. view 'research': scope, competitors, findings already filed.",
+      "Context for one job. view 'plan' (default): open slots next week, scope, services, tone reference, writing rules (active = hard rules, candidate = soft), competitors, approved competitor learnings, never-repeat keys, recent posts with metrics, recent approver edits, research from the last 14 days, open experiments. view 'revise': scope, services, tone reference, rules. view 'research': scope, competitors, findings already filed.",
     inputSchema: S.obj({ view: { type: "string", enum: ["plan", "revise", "research"] } }),
     run: (a) => getContext(a || {}),
   },
@@ -498,33 +541,60 @@ const TOOLS = {
         channel: { type: "string", enum: ["all", "linkedin_shirali", "linkedin_company", "instagram", "facebook"] },
         rule_type: S.str("phrase, hook, tone, structure, length, vocabulary, topic_more, topic_less, cta, hashtags, claims, brand, timing, format"),
         rule_text: S.str("Plain words"),
+        domain: { type: "string", enum: ["social", "business"], description: "social = platform mechanics (hook, structure, length, hashtags, timing, format, CTA wording); business = services, claims, tone, brand, scope, audience, wording" },
         status: { type: "string", enum: ["candidate", "active"] },
         evidence_count: S.num(""),
         example: S.str("Short before/after or post id"),
+        requested_in_comment_id: S.str("Business rules only: the comment_id where a team member asked for it explicitly (always/never). Without it a business rule is saved as a candidate for the team."),
       },
       ["rule_type", "rule_text", "status"]
     ),
     run: async (a) => {
+      const domain = learning.domainFor(a.rule_type, a.domain);
+      let status = a.status === "active" ? "active" : "candidate";
+      let decided = {};
+      if (domain === "business") {
+        // The writer cannot make a business rule standing by itself, unless a team member asked for it in a comment.
+        const c = a.requested_in_comment_id ? await getStore().get("social_comments", String(a.requested_in_comment_id)) : null;
+        const member = c ? await getStore().get("social_members", c.author_email) : null;
+        if (status === "active" && !(member && ["approver", "editor"].includes(member.role))) status = "candidate";
+        if (status === "active") decided = { decided_by: c.author_email, decision_note: `Asked for in a comment: ${clip(c.body, 300)}`, decided_at: service.now().toISOString() };
+        if (status === "candidate") await learning.assertBusinessRoom();
+      } else if (status === "active") {
+        decided = { decided_by: "writer", decision_note: a.example ? `Saved as standing: ${clip(a.example, 300)}` : "Saved as standing (seen at least twice or asked for explicitly).", decided_at: service.now().toISOString() };
+      }
       const [row] = await getStore().insert("social_preferences", {
+        domain,
+        ...decided,
         approver: a.approver || "all",
         channel: a.channel || "all",
         rule_type: a.rule_type,
         rule_text: String(a.rule_text).slice(0, 1500),
-        status: a.status === "active" ? "active" : "candidate",
+        status,
         evidence_count: Number(a.evidence_count) || 1,
         example: a.example || null,
         source: "claude learning task",
         updated_at: service.now().toISOString(),
       });
-      await audit("claude", "rule.added", String(row.id), { status: row.status, text: row.rule_text });
-      return { id: row.id };
+      await audit("claude", "rule.added", String(row.id), { status: row.status, domain, text: row.rule_text });
+      return { id: row.id, status: row.status, domain, note: domain === "business" && row.status === "candidate" ? "Waiting for the business team on the Studio page." : undefined };
     },
   },
   update_rule: {
     description: "Change a rule's status, text or evidence count (for example promote a candidate seen again, or merge duplicates by retiring one). Keep at most 15 active rules per channel.",
-    inputSchema: S.obj({ id: S.num(""), status: { type: "string", enum: ["candidate", "active", "retired"] }, rule_text: S.str(""), evidence_count: S.num(""), example: S.str("") }, ["id"]),
+    inputSchema: S.obj({ id: S.num(""), status: { type: "string", enum: ["candidate", "active", "retired"] }, rule_text: S.str(""), evidence_count: S.num(""), example: S.str(""), merged_into: S.num("When retiring a duplicate: the id of the rule that now covers it") }, ["id"]),
     run: async (a) => {
+      const current = await getStore().get("social_preferences", Number(a.id));
+      if (!current) return { error: "not found" };
+      if (a.status && a.status !== current.status && learning.ruleDomain(current) === "business") {
+        // Business rules change status only on the Studio page, except retiring a duplicate after a merge.
+        if (!(a.status === "retired" && a.merged_into && (await getStore().get("social_preferences", Number(a.merged_into)))))
+          return { error: "Business rules are confirmed or discarded by the business team on the Studio page. To merge a duplicate, retire it with merged_into set to the rule that covers it." };
+      }
+      if (a.status && a.status !== current.status && learning.ruleDomain(current) === "social" && current.status === "candidate")
+        return { error: "Use decide_learning for social candidates, so the reason is recorded." };
       const patch = { updated_at: service.now().toISOString() };
+      if (a.merged_into) patch.decision_note = `Merged into rule ${a.merged_into}`;
       for (const k of ["status", "rule_text", "evidence_count", "example"]) if (a[k] !== undefined) patch[k] = a[k];
       const [row] = await getStore().update("social_preferences", { id: a.id }, patch);
       await audit("claude", "rule.updated", String(a.id), patch);
@@ -581,7 +651,7 @@ const TOOLS = {
     description: "Call after each job from start_run, even when it found nothing, so the next run does not repeat it. summary: one line on what was done.",
     inputSchema: S.obj(
       {
-        job: { type: "string", enum: ["revise", "recheck", "notes", "research", "plan_week", "report"] },
+        job: { type: "string", enum: ["revise", "recheck", "notes", "competitors", "learning", "research", "plan_week", "report"] },
         summary: S.str("One line on what was done"),
         sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("Source date"), used_for: S.str("Which post, finding or check it was used for") }, ["url"]), "Every source opened or used in this job (shown on the Studio Activity tab)"),
       },
@@ -652,6 +722,83 @@ const TOOLS = {
         if (row) n += 1;
       }
       return { ok: true, sorted: n };
+    },
+  },
+  get_competitor_queue: {
+    description: "The competitors job: up to 3 competitors (companies or people) due for a look, with their current details, the post links already saved and what was learned from them so far.",
+    inputSchema: S.obj({}),
+    run: () => competitorWatch.queue(service.now()),
+  },
+  save_competitor_findings: {
+    description:
+      "Save one competitor check: updated details (only facts you saw on a public page), a 1 to 2 sentence summary of what they are doing now, posts you found (public link required, your own words, never their full text) and up to 3 learnings with links as evidence. Learnings go to the Competitors tab: social ones you decide in the learning job, business ones wait for the team. Call once per competitor, even if nothing changed (it records the check).",
+    inputSchema: S.obj(
+      {
+        competitor: S.str("Name exactly as in the queue"),
+        kind: { type: "string", enum: ["company", "person"] },
+        id: S.str("Person id from the queue (people only)"),
+        profile: S.obj({ url: S.str("Website"), linkedin_url: S.str(""), category: S.str(""), focus: S.str("What they post about now"), role: S.str("People: current role"), company: S.str("People: current company"), topics: S.str("People: topics they are known for") }),
+        summary: S.str("1 to 2 sentences: what they are doing or saying now"),
+        posts: S.arr(
+          S.obj(
+            {
+              url: S.str("Public link to the post, article or page"),
+              posted_on: S.str("YYYY-MM-DD"),
+              format: S.str("article, document, image, text, video, carousel, webinar..."),
+              hook: S.str("Their opening line, at most 200 characters"),
+              summary: S.str("What it says, in your own words"),
+              why_it_works: S.str("2 to 4 sentences, your own words: hook, format, structure, audience, what EEC can learn"),
+              reactions: S.str("Visible engagement, if shown"),
+            },
+            ["url", "summary"]
+          ),
+          "At most 5 per competitor"
+        ),
+        learnings: S.arr(
+          S.obj(
+            {
+              text: S.str("One practical learning for EEC, in plain words"),
+              domain: { type: "string", enum: ["social", "business"], description: "social = how to post (format, hook, length, timing, structure); business = what to say or offer (services, positioning, claims, topics, audience)" },
+              channel: { type: "string", enum: ["all", "linkedin_company", "instagram", "facebook"] },
+              rule_type: S.str("hook, format, structure, length, timing, hashtags, cta, topic, audience, service, tone, claims"),
+              evidence: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("") }, ["url"]), "Public links that show it"),
+            },
+            ["text", "domain", "evidence"]
+          ),
+          "At most 3"
+        ),
+      },
+      ["competitor", "kind", "summary"]
+    ),
+    run: (a) => competitorWatch.saveFindings(a, service.now()),
+  },
+  get_learning_queue: {
+    description: "The learning job: social learnings waiting for your decision (candidate writing rules and competitor learnings), with recent results by format to judge them. Business learnings are not included: the team decides those.",
+    inputSchema: S.obj({}),
+    run: async () => {
+      const q = await learning.socialQueue();
+      const posted = (await getStore().list("social_posts", { where: { status: "posted" }, order: ["slot_at", "desc"], limit: 60 })).map((p) => ({ channel: p.channel, format: p.format, kind: p.kind, metrics: p.metrics }));
+      return compact({ ...q, recent_posts_with_metrics: posted, pending_for_business_team: await learning.pendingBusiness() });
+    },
+  },
+  decide_learning: {
+    description:
+      "Confirm or discard social learnings (kind rule or competitor). Confirm only with evidence: platform guidance, our own results, the approver's edits, or a pattern seen in at least two competitor posts, and only if it fits the guidelines. Discard if it is weak, duplicates a standing rule, or would make posts flashier or less honest. The reason is shown to the team, who can undo it. Business learnings are refused: the team decides those.",
+    inputSchema: S.obj(
+      { items: S.arr(S.obj({ kind: { type: "string", enum: ["rule", "competitor"] }, id: S.num(""), decision: { type: "string", enum: ["confirm", "discard"] }, reason: S.str("Plain words: the evidence") }, ["kind", "id", "decision", "reason"]), "") },
+      ["items"]
+    ),
+    run: async ({ items }) => {
+      const out = [];
+      for (const it of (items || []).slice(0, 30)) {
+        try {
+          const r = await learning.decide(it.kind, it.id, it.decision, it.reason, "writer");
+          out.push({ kind: it.kind, id: it.id, ok: true, unchanged: r.unchanged || undefined });
+        } catch (e) {
+          out.push({ kind: it.kind, id: it.id, ok: false, message: e.message });
+        }
+      }
+      return { results: out };
     },
   },
   send_notice: {
