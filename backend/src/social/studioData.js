@@ -27,6 +27,8 @@ const LISTS = {
     schema: z.object({
       name: z.string().trim().min(2).max(120),
       linkedin_url: url,
+      instagram_url: url,
+      facebook_url: url,
       url,
       category: opt(80),
       focus: opt(400),
