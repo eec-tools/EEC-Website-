@@ -94,6 +94,16 @@ The writer's `competitors` job runs once a day and looks at up to 3 competitors 
 
 Bright Data must be connected in claude.ai (Settings > Connectors, URL `https://mcp.brightdata.com/mcp?token=<API token>`) and attached to the scheduled task. Without it the job reads websites and news only. The team can still paste in a post by hand.
 
+## Outreach (Studio > Outreach)
+
+Comments on buyers' LinkedIn posts, posted by the team from the EEC page. The writer's `outreach` job runs on Monday, Wednesday and Friday (setting `outreach`: days, comments per run, markets):
+
+- keeps a list of buyers (importers, retailers, brands, procurement teams in EEC's markets); it adds up to 10 a run, the team adds or removes any. Competitors are refused.
+- reads each buyer's LinkedIn page through Bright Data (free page reads, at most every two days per buyer), keeps posts from the last 10 days and drafts one comment per post, at most one per buyer a week.
+- the server refuses comments with links, hashtags, contact requests, service pitches, hype, guarantees, contractions or dashes.
+
+On the tab: **Copy and open post**, paste on LinkedIn with "Commenting as" set to the EEC page, then **Mark posted**. **Write another version** sends it back to the writer (done within about an hour), **Skip** drops it. Comments not posted within 4 days are set aside. After a comment is posted, mark the result (no reply, they replied, conversation, enquiry); the writer leans towards the kinds of comment that get replies, and the weekly report includes the numbers. Nothing is ever posted automatically: LinkedIn does not allow automated comments from pages without its partner programme.
+
 ## Database changes
 
 New installs: run `backend/sql/social_schema.sql` then `backend/sql/social_seed.sql`.

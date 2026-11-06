@@ -390,10 +390,11 @@ test("start_run: says exactly which jobs are due, and nothing twice", async () =
   // Friday 07:12 IST: research and the plan for next week.
   setNow("2026-11-06T01:42:00Z");
   let due = await jobs();
-  assert.deepEqual(due.map((j) => j.job), ["research", "plan_week"]);
-  assert.equal(due[1].week_start, "2026-11-09");
-  assert.ok(due[1].open_slots >= 3);
+  assert.deepEqual(due.map((j) => j.job), ["research", "outreach", "plan_week"]);
+  assert.equal(due[2].week_start, "2026-11-09");
+  assert.ok(due[2].open_slots >= 3);
   await call("finish_job", { job: "research" });
+  await call("finish_job", { job: "outreach", mode: "find" });
   await service.submitBatch(weekBatch());
   assert.deepEqual(await jobs(), [], "plan is done once the batch exists");
 
@@ -913,4 +914,106 @@ test("competitor watch: the writer updates details, adds posts and files learnin
   await rpc("finish_job", { job: "competitors", summary: "Checked QIMA and A. Person" });
   const later = await rpc("start_run");
   assert.ok(!later.jobs.some((j) => j.job === "competitors"));
+});
+
+test("outreach: the writer drafts LinkedIn comments on buyers' posts; the team posts them and marks the result", async () => {
+  setNow("2026-11-06T05:00:00Z"); // Friday 10:30 IST, an outreach day
+  await fresh();
+  const outreach = require("../src/social/outreach");
+  const at = (iso) => (BigInt(Date.parse(iso)) << 22n).toString();
+  const post = (slug, iso) => `https://www.linkedin.com/posts/${slug}-activity-${at(iso)}-abcd`;
+  await store.insert("social_competitors", { name: "QIMA", linkedin_url: "https://www.linkedin.com/company/qima", active: true });
+
+  // The post time is read from the link itself.
+  assert.equal(outreach.postTime(post("x", "2026-11-05T16:47:47Z")), "2026-11-05T16:47:47.000Z");
+
+  // Targets: competitors and duplicates are refused.
+  const t = await rpc("save_outreach_targets", {
+    targets: [
+      { name: "Veetee Group", linkedin_url: "https://uk.linkedin.com/company/veetee-foods-ltd?trk=x", market: "UK", category: "basmati rice", reason: "UK rice brand, posts weekly" },
+      { name: "Veetee again", linkedin_url: "https://www.linkedin.com/company/veetee-foods-ltd/", market: "UK", reason: "dup" },
+      { name: "QIMA", linkedin_url: "https://www.linkedin.com/company/qima", market: "EU", reason: "competitor" },
+      { name: "Hotel Group", linkedin_url: "https://www.linkedin.com/company/hotel-group", market: "Middle East", category: "towels", reason: "Hotel chain" },
+    ],
+  });
+  assert.equal(t.added.length, 2, JSON.stringify(t));
+  assert.ok(t.skipped.some((x) => /already on the list/.test(x.reason)));
+  assert.ok(t.skipped.some((x) => /Competitors tab/.test(x.reason)));
+
+  const run = await rpc("start_run");
+  const job = run.jobs.find((j) => j.job === "outreach");
+  assert.ok(job && job.comments_to_find === 10, JSON.stringify(run.jobs));
+  const q = await rpc("get_outreach_queue");
+  assert.equal(q.targets_to_read.length, 2);
+  assert.ok(q.never_comment_on.includes("QIMA"));
+  const veetee = q.targets_to_read.find((x) => x.name === "Veetee Group");
+  const hotel = q.targets_to_read.find((x) => x.name === "Hotel Group");
+
+  const good = "Good to see the harvest update. For UK private-label buyers, asking for the moisture and broken-grain figures on the new crop sample early saves a lot of back and forth later.";
+  const r = await rpc("submit_outreach_comments", {
+    checked_targets: [{ id: veetee.id, latest_post_url: post("veetee", "2026-11-05T16:47:47Z") }, { id: hotel.id }],
+    comments: [
+      { target_id: veetee.id, post_url: post("veetee-foods-ltd_harvest", "2026-11-05T16:47:47Z") + "?utm=1", post_excerpt: "Harvest update.", why_picked: "UK rice brand", angle: "tip", comment: good, reactions: 103, comments: 5 },
+      { target_id: veetee.id, post_url: post("veetee-foods-ltd_other", "2026-11-04T10:00:00Z"), post_excerpt: "x", why_picked: "x", angle: "tip", comment: good + " Second." },
+      { target_id: hotel.id, post_url: post("hotel_old", "2026-10-01T10:00:00Z"), post_excerpt: "x", why_picked: "x", angle: "question", comment: "How are you finding towel GSM consistency across reorders from your current mills this year?" },
+      { target_id: hotel.id, post_url: post("hotel_new", "2026-11-04T10:00:00Z"), post_excerpt: "x", why_picked: "x", angle: "tip", comment: "Great post! DM us for sourcing, we offer audits at www.eectrade.com — don't miss it." },
+      { author: "QIMA", post_url: post("qima_post", "2026-11-04T10:00:00Z"), post_excerpt: "x", why_picked: "x", angle: "question", comment: "Which inspection stage do your clients ask for most often when they move a textile order to India?" },
+      { target_id: hotel.id, post_url: post("hotel_fact", "2026-11-05T10:00:00Z"), post_excerpt: "x", why_picked: "x", angle: "fact", comment: "India extended its raw cotton import duty exemption to 31 December 2026, which may ease yarn costs for towel mills this season." },
+    ],
+  });
+  assert.equal(r.saved, 1, JSON.stringify(r.refused));
+  const reasons = r.refused.map((x) => x.problems.join(" | "));
+  assert.ok(reasons.some((x) => /one comment per target per run/.test(x)));
+  assert.ok(reasons.some((x) => /older than 10 days/.test(x)));
+  assert.ok(reasons.some((x) => /selling/.test(x) && /links/.test(x) && /dash/.test(x) && /Contraction/.test(x)));
+  assert.ok(reasons.some((x) => /competitors/.test(x)));
+  assert.ok(reasons.some((x) => /source link/.test(x)));
+  const saved = (await store.list("social_outreach_comments", {}))[0];
+  assert.ok(!saved.post_url.includes("?"), "tracking stripped from the link");
+  assert.equal(saved.post_posted_at, "2026-11-05T16:47:47.000Z");
+  assert.ok((await store.get("social_outreach_targets", hotel.id)).checked_at, "a page read with nothing to comment on is recorded");
+  assert.equal(((await rpc("get_outreach_queue")).targets_to_read || []).length, 0, "both pages rest for two days");
+
+  // The Studio: ask for another version; the writer rewrites it at its next run (any day).
+  const me = { email: approver.email, role: "approver" };
+  await outreach.act(me, saved.id, "rewrite", { request: "Make it a question" });
+  const due = await rpc("start_run");
+  assert.equal(due.jobs.find((j) => j.job === "outreach").rewrites, 1);
+  const rq = await rpc("get_outreach_queue");
+  assert.equal(rq.rewrites[0].request, "Make it a question");
+  const rv = await rpc("revise_outreach_comments", { items: [{ id: saved.id, angle: "question", comment: "Congratulations on the harvest. Are UK shoppers moving towards smaller packs this year, or is the 5 kg bag still the main seller for you?" }] });
+  assert.equal(rv.results[0].ok, true);
+  const after = await store.get("social_outreach_comments", saved.id);
+  assert.equal(after.status, "ready");
+  assert.equal(after.previous.length, 1);
+
+  // Mark posted (with a last edit), then the result.
+  await outreach.act(me, saved.id, "posted", { comment: after.comment + " Thank you for sharing." });
+  const posted = await store.get("social_outreach_comments", saved.id);
+  assert.equal(posted.status, "posted");
+  assert.equal(posted.edited, true);
+  assert.ok((await store.get("social_outreach_targets", veetee.id)).last_commented_at);
+  await outreach.act(me, saved.id, "outcome", { outcome: "reply", note: "Their brand manager replied" });
+  const st = await outreach.stats(service.now());
+  assert.equal(st.replies, 1);
+  assert.equal(st.by_angle.question.replies, 1);
+  await assert.rejects(() => outreach.act({ email: "v@x.com", role: "viewer" }, saved.id, "skip", {}), /approver or editor/);
+
+  // The team adds a target by hand.
+  await outreach.addTarget(me, { name: "Spice Importer", linkedin_url: "https://www.linkedin.com/company/spice-importer", market: "EU" });
+  await assert.rejects(() => outreach.addTarget(me, { name: "Bad", linkedin_url: "https://example.com" }), /LinkedIn/);
+
+  // Finished for today: no new search until Monday.
+  await rpc("finish_job", { job: "outreach", mode: "find", summary: "1 comment" });
+  assert.ok(!(await rpc("start_run")).jobs.some((j) => j.job === "outreach"));
+  setNow("2026-11-07T05:00:00Z"); // Saturday
+  assert.ok(!(await rpc("start_run")).jobs.some((j) => j.job === "outreach"));
+
+  // A ready comment nobody posted is set aside after 4 days.
+  await store.insert("social_outreach_comments", { post_url: post("old", "2026-11-06T01:00:00Z"), target_name: "X", comment: good, status: "ready", created_at: "2026-11-06T05:00:00Z", batch_date: "2026-11-06" });
+  setNow("2026-11-10T06:00:00Z");
+  assert.equal(await outreach.expire(service.now()), 1);
+  const list = await outreach.list(service.now());
+  assert.equal(list.targets.length, 3);
+  assert.equal(list.stats.expired, 1);
 });

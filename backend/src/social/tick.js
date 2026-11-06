@@ -133,7 +133,18 @@ async function remind(summary, settings) {
     where: { status: "pending", slot_at: { gt: new Date(t.getTime() - lateMs).toISOString() } },
     order: ["slot_at", "asc"],
   });
-  if (!waiting.length) return;
+  // Outreach comments ready to post (mentioned in the morning email; on their own they get a short email in the morning only).
+  const outreachReady = await require("./outreach").readyCount().catch(() => 0);
+  const morning = slot.endsWith(` ${times[0]}`);
+  const outreachLine = outreachReady
+    ? `<p>${outreachReady} LinkedIn comment${outreachReady === 1 ? " is" : "s are"} ready to post from the EEC page on the <a href="${notify.studioUrl("?tab=outreach")}">Outreach tab</a> (about 30 seconds each).</p>`
+    : "";
+  if (!waiting.length) {
+    if (outreachReady && morning) {
+      await notify.send(await notify.approverEmails(), `EEC Social: ${outreachReady} outreach comment${outreachReady === 1 ? "" : "s"} ready to post`, notify.wrap("Outreach comments ready", outreachLine));
+    }
+    return;
+  }
   const row = (p) => {
     const until = Date.parse(p.slot_at) - t.getTime();
     const when = until > 0 ? `goes out in ${timeLeft(until)}` : `<b style="color:#a63a2e">past its time: approve within ${timeLeft(Date.parse(p.slot_at) + lateMs - t.getTime())} or it is skipped</b>`;
@@ -150,7 +161,7 @@ async function remind(summary, settings) {
     `EEC Social: ${waiting.length} post${waiting.length === 1 ? "" : "s"} waiting for your approval (${first > 0 ? `first goes out in ${timeLeft(first)}` : "one is already past its time"})`,
     notify.wrap(
       "Posts waiting for your approval",
-      `<table style="border-collapse:collapse;font-size:14px"><tr><th align="left" style="padding:6px 10px">When (IST)</th><th align="left" style="padding:6px 10px">Channel</th><th align="left" style="padding:6px 10px">Topic</th><th align="left" style="padding:6px 10px">Time left</th></tr>${waiting.map(row).join("")}</table><p>Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p>${businessLine}<p><a href="${notify.studioUrl("?tab=pending")}">Open the Studio</a></p>`
+      `<table style="border-collapse:collapse;font-size:14px"><tr><th align="left" style="padding:6px 10px">When (IST)</th><th align="left" style="padding:6px 10px">Channel</th><th align="left" style="padding:6px 10px">Topic</th><th align="left" style="padding:6px 10px">Time left</th></tr>${waiting.map(row).join("")}</table><p>Anything not approved within ${settings.late_window_hours} hours of its time is skipped.</p>${businessLine}${morning ? outreachLine : ""}<p><a href="${notify.studioUrl("?tab=pending")}">Open the Studio</a></p>`
     )
   );
   if (sent) {
@@ -210,6 +221,13 @@ async function daily(summary, settings) {
     summary.learning_set_aside = await require("./learning").expireSocial(t);
   } catch (e) {
     summary.errors.push(`learning: ${e.message}`);
+  }
+
+  // Outreach comments nobody posted within a few days are set aside (the post is no longer fresh).
+  try {
+    summary.outreach_expired = await require("./outreach").expire(t);
+  } catch (e) {
+    summary.errors.push(`outreach: ${e.message}`);
   }
 
   // Batches nobody has looked at.

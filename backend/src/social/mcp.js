@@ -13,6 +13,7 @@ const { mondayOf, addDays, localParts, cadenceSlots, zonedToUtc } = require("./t
 const { FORMATS, FORMAT_KEYS, SEGMENTS, SEGMENT_KEYS } = require("./formats");
 const learning = require("./learning");
 const competitorWatch = require("./competitorWatch");
+const outreach = require("./outreach");
 
 const S = {
   str: (description) => ({ type: "string", description }),
@@ -292,6 +293,10 @@ async function startRun() {
   const researchedToday = await store.list("social_audit", { where: { action: "job.research", at: { gte: midnight } }, limit: 1 });
   if (!researchedToday.length && lp.hour >= 6) jobs.push({ job: "research" });
 
+  // Outreach: on outreach days (Mon/Wed/Fri) from 06:00, comments to draft; any day, comments the team asked to rewrite.
+  const reach = await outreach.due(t).catch(() => null);
+  if (reach) jobs.push(reach);
+
   // Friday, with Saturday and Sunday as catch-up if Friday's run did not complete.
   if (["fri", "sat", "sun"].includes(lp.weekday)) {
     const nextMonday = addDays(mondayOf(today), 7);
@@ -417,6 +422,7 @@ async function learningReport(start, end) {
       ...comp.filter((r) => r.status === "pending" && r.domain === "business").map(row("competitor")),
     ],
     competitor_checks_in_period: checked.map((a) => ({ competitor: a.target, posts: (a.detail || {}).posts, learnings: (a.detail || {}).learnings })),
+    outreach_last_30_days: await outreach.stats(end, 30).catch(() => undefined),
   };
 }
 
@@ -441,7 +447,7 @@ async function reportExtras(start, end) {
 
 const TOOLS = {
   start_run: {
-    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, notes, competitors, learning, research, plan_week, report) in the order to do them, or a note that nothing is due.",
+    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, notes, competitors, learning, outreach, research, plan_week, report) in the order to do them, or a note that nothing is due.",
     inputSchema: S.obj({}),
     run: () => startRun(),
   },
@@ -651,18 +657,19 @@ const TOOLS = {
     description: "Call after each job from start_run, even when it found nothing, so the next run does not repeat it. summary: one line on what was done.",
     inputSchema: S.obj(
       {
-        job: { type: "string", enum: ["revise", "recheck", "notes", "competitors", "learning", "research", "plan_week", "report"] },
+        job: { type: "string", enum: ["revise", "recheck", "notes", "competitors", "learning", "outreach", "research", "plan_week", "report"] },
+        mode: { type: "string", enum: ["find", "rewrite"], description: "Outreach only: find (new comments drafted) or rewrite (only rewrites were done)" },
         summary: S.str("One line on what was done"),
         sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("Source date"), used_for: S.str("Which post, finding or check it was used for") }, ["url"]), "Every source opened or used in this job (shown on the Studio Activity tab)"),
       },
       ["job"]
     ),
-    run: async ({ job, summary = "", sources = [] }) => {
+    run: async ({ job, mode, summary = "", sources = [] }) => {
       const clean = (Array.isArray(sources) ? sources : [])
         .filter((x) => x && /^https?:\/\//.test(String(x.url || "")))
         .slice(0, 40)
         .map((x) => ({ title: String(x.title || "").slice(0, 200), url: String(x.url).slice(0, 500), date: String(x.date || "").slice(0, 40), used_for: String(x.used_for || "").slice(0, 200) }));
-      await audit("claude", `job.${job}`, null, { summary: String(summary).slice(0, 500), sources: clean });
+      await audit("claude", `job.${job}`, null, { summary: String(summary).slice(0, 500), sources: clean, ...(job === "outreach" ? { mode: mode === "rewrite" ? "rewrite" : "find" } : {}) });
       return { ok: true };
     },
   },
@@ -800,6 +807,71 @@ const TOOLS = {
       }
       return { results: out };
     },
+  },
+  get_outreach_queue: {
+    description:
+      "The outreach job: how many LinkedIn comments to draft today, buyer pages to read (targets not read in 2 days and not commented on in 7), markets, competitors to never comment on, post links already used, recent comments (do not repeat them) and what has worked (replies by angle). Also comments the team asked you to rewrite.",
+    inputSchema: S.obj({}),
+    run: () => outreach.queue(service.now()),
+  },
+  save_outreach_targets: {
+    description:
+      "Add buyers to the Outreach target list: importers, distributors, retailers, private-label brands, hotel and hospital groups, food manufacturers and similar companies (or their sourcing and procurement people) in EEC's markets, that buy in EEC's categories and post on LinkedIn. Never competitors, suppliers, exporters, freight forwarders or sourcing agents. At most 10 a run; give a one-line reason for each.",
+    inputSchema: S.obj(
+      {
+        targets: S.arr(
+          S.obj(
+            {
+              name: S.str("Company or person"),
+              linkedin_url: S.str("LinkedIn company page (linkedin.com/company/...) or profile (linkedin.com/in/...)"),
+              kind: { type: "string", enum: ["company", "person"] },
+              market: S.str("UK, EU, US, Canada, Australia, South Africa, Middle East or Asia-Pacific"),
+              category: S.str("What they buy that EEC sources, e.g. basmati rice, spices, shrimp, towels, private-label apparel"),
+              reason: S.str("One line: why they are worth knowing"),
+            },
+            ["name", "linkedin_url", "market", "reason"]
+          ),
+          ""
+        ),
+      },
+      ["targets"]
+    ),
+    run: (a) => outreach.saveTargets(a.targets, "writer", service.now()),
+  },
+  submit_outreach_comments: {
+    description:
+      "Save the comments you drafted (they go to the Studio Outreach tab, where the team posts them from the EEC page by hand), and list every target page you read, even with nothing worth a comment. Each comment: 1 to 3 sentences in EEC's voice that add something to the post (a practical tip, a sharp question, a dated fact with a source, a relevant observation), specific to that post. No links, hashtags, contact requests, service pitches, contractions or dashes. Comments that break these are refused with the reason.",
+    inputSchema: S.obj(
+      {
+        checked_targets: S.arr(S.obj({ id: S.num("Target id"), latest_post_url: S.str("Newest post link seen on their page, if any") }, ["id"]), "Every target page you read this run"),
+        comments: S.arr(
+          S.obj(
+            {
+              target_id: S.num("Target id, if the post is from a target"),
+              author: S.str("Who posted it, if not a target"),
+              post_url: S.str("Public link to the post (linkedin.com/posts/... or /feed/update/...)"),
+              posted_on: S.str("YYYY-MM-DD, if the link does not carry it"),
+              post_excerpt: S.str("What the post says, in your own words, 1 to 2 sentences"),
+              reactions: S.num("Reactions shown"),
+              comments: S.num("Comments shown"),
+              why_picked: S.str("One line for the team: why this post and this buyer"),
+              angle: { type: "string", enum: ["tip", "question", "fact", "experience", "congrats"] },
+              comment: S.str("The comment, ready to paste"),
+              sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("") }, ["url"]), "Sources for any fact in the comment (shown to the team, not posted)"),
+            },
+            ["post_url", "angle", "comment", "why_picked", "post_excerpt"]
+          ),
+          "At most the number asked for today"
+        ),
+      },
+      ["checked_targets", "comments"]
+    ),
+    run: (a) => outreach.submitComments(a, service.now()),
+  },
+  revise_outreach_comments: {
+    description: "New versions of comments the team asked you to rewrite (rewrites in get_outreach_queue). Follow the team's request; write something clearly different from the earlier versions.",
+    inputSchema: S.obj({ items: S.arr(S.obj({ id: S.num(""), comment: S.str("The new comment"), angle: { type: "string", enum: ["tip", "question", "fact", "experience", "congrats"] } }, ["id", "comment"]), "") }, ["items"]),
+    run: (a) => outreach.reviseComments(a.items, service.now()),
   },
   send_notice: {
     description: "Email a notice to the system contact (kind notice) or the weekly report to the report recipients (kind report). Recipients are fixed on the server.",
