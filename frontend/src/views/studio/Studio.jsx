@@ -163,6 +163,12 @@ function StudioInner() {
             {label}
             {key === "pending" && waiting.length ? <span className="ml-1.5 rounded-full bg-[#A6831F] px-1.5 text-[11px] text-white">{waiting.length}</span> : null}
             {key === "queue" && queue.some((p) => p.status === "failed") ? <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[11px] text-white">!</span> : null}
+            {key === "learning" && (me.learning_waiting || {}).rules ? (
+              <span className="ml-1.5 rounded-full bg-[#012D76] px-1.5 text-[11px] text-white" title="Waiting for the business team">{me.learning_waiting.rules}</span>
+            ) : null}
+            {key === "competitors" && (me.learning_waiting || {}).competitor ? (
+              <span className="ml-1.5 rounded-full bg-[#012D76] px-1.5 text-[11px] text-white" title="Learnings waiting for the business team">{me.learning_waiting.competitor}</span>
+            ) : null}
           </button>
         ))}
       </nav>
@@ -255,8 +261,8 @@ function StudioInner() {
       ) : null}
       {tab === "posted" ? (posted.length ? <div className="space-y-3">{posted.map((p) => card(p, true))}</div> : <Empty title="Nothing posted in this period" />) : null}
       {tab === "insights" ? <InsightsTab me={me} tz={tz} /> : null}
-      {tab === "learning" ? <LearningTab me={me} tz={tz} /> : null}
-      {tab === "competitors" ? <CompetitorsTab me={me} /> : null}
+      {tab === "learning" ? <LearningTab me={me} tz={tz} onChanged={() => load({ quiet: true })} /> : null}
+      {tab === "competitors" ? <CompetitorsTab me={me} tz={tz} onChanged={() => load({ quiet: true })} /> : null}
       {tab === "activity" ? <ActivityTab tz={tz} /> : null}
       {tab === "health" ? <HealthTab me={me} tz={tz} onChanged={load} onOpen={setOpen} /> : null}
 

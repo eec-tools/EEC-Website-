@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Pencil, ExternalLink } from "lucide-react";
 import { Button, Card, Empty, call, fmtLocal } from "./shared";
+import { DomainChip, DecideButtons, DecidedLine } from "./LearningItems";
 
 const input = "w-full rounded border border-[#E5EBF2] px-2 py-1 text-sm";
 
@@ -106,18 +107,83 @@ const LISTS = {
   },
 };
 
-export function CompetitorsTab({ me }) {
+// What we learn from competitors. Social learnings (how to post) are decided by the writer; business ones by the team.
+function CompetitorLearnings({ rows, tz, canEdit, onDone }) {
+  const [showOld, setShowOld] = useState(false);
+  const waiting = rows.filter((l) => l.status === "pending" && l.domain === "business");
+  const socialPending = rows.filter((l) => l.status === "pending" && l.domain === "social");
+  const decided = rows.filter((l) => l.status !== "pending");
+  const approved = decided.filter((l) => l.status === "approved");
+  const discarded = decided.filter((l) => l.status === "discarded");
+  const item = (l, actions) => (
+    <li key={l.id} className="py-2.5 text-sm">
+      <div className="text-[#111827]">{l.text}</div>
+      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[#6B7280]">
+        <DomainChip domain={l.domain} />
+        <span>from {l.competitor || "competitors"}</span>
+        {l.channel && l.channel !== "all" ? <span>· {l.channel.replace("linkedin_company", "LinkedIn").replace("instagram", "Instagram").replace("facebook", "Facebook")}</span> : null}
+        <span>· {fmtLocal(l.created_at, tz)}</span>
+      </div>
+      {(l.evidence || []).length ? (
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+          {l.evidence.map((e, i) => (
+            <span key={i}>{LINK(e.url, e.title || "evidence")}</span>
+          ))}
+        </div>
+      ) : null}
+      {actions}
+    </li>
+  );
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="mb-1 font-semibold text-[#012D76]">
+          Waiting for the business team <span className="text-sm font-normal text-[#6B7280]">({waiting.length})</span>
+        </div>
+        <p className="mb-2 text-xs text-[#6B7280]">What competitors do that touches what EEC says or offers. Approve what EEC should act on; the writer then uses it when planning. Discard the rest.</p>
+        {waiting.length ? (
+          <ul className="divide-y divide-[#EFF4F9]">
+            {waiting.map((l) => item(l, canEdit ? <DecideButtons kind="competitor" item={l} onDone={onDone} confirmLabel="Approve" /> : <div className="mt-1 text-xs text-[#6B7280]">Waiting for an editor or the approver.</div>))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[#6B7280]">Nothing waiting.</p>
+        )}
+      </Card>
+      <Card className="p-4">
+        <div className="mb-1 font-semibold text-[#012D76]">
+          Approved <span className="text-sm font-normal text-[#6B7280]">({approved.length})</span>
+        </div>
+        <p className="mb-2 text-xs text-[#6B7280]">Used by the writer when it plans each week. How-to-post learnings are approved by the writer with its reason; change any decision with one click.</p>
+        {socialPending.length ? <p className="mb-2 rounded bg-sky-50 px-2 py-1 text-xs text-sky-900">{socialPending.length} new social learning{socialPending.length === 1 ? "" : "s"} will be decided at the writer&apos;s next run.</p> : null}
+        {approved.length ? <ul className="divide-y divide-[#EFF4F9]">{approved.map((l) => item(l, <DecidedLine kind="competitor" item={l} tz={tz} canEdit={canEdit} onDone={onDone} />))}</ul> : <p className="text-sm text-[#6B7280]">None yet.</p>}
+        {discarded.length ? (
+          <button type="button" className="mt-2 text-xs text-[#0096D6] hover:underline" onClick={() => setShowOld(!showOld)}>
+            {showOld ? "Hide" : "Show"} {discarded.length} discarded
+          </button>
+        ) : null}
+        {showOld ? <ul className="mt-2 divide-y divide-[#EFF4F9] opacity-80">{discarded.map((l) => item(l, <DecidedLine kind="competitor" item={l} tz={tz} canEdit={canEdit} onDone={onDone} />))}</ul> : null}
+      </Card>
+    </div>
+  );
+}
+
+export function CompetitorsTab({ me, tz, onChanged }) {
   const canEdit = ["approver", "editor"].includes(me.member.role);
   const [data, setData] = useState(null);
-  const [list, setList] = useState("posts");
+  const [list, setList] = useState("learnings");
   const [editing, setEditing] = useState(null); // "new" or a row
-  const load = () => call("get", "/studio/competitors").then(setData).catch(() => setData({ companies: [], people: [], posts: [] }));
+  const load = () => call("get", "/studio/competitors").then(setData).catch(() => setData({ companies: [], people: [], posts: [], learnings: [] }));
+  const refresh = () => {
+    load();
+    onChanged && onChanged();
+  };
   useEffect(() => {
     load();
   }, []);
   if (!data) return <Empty title="Loading…" />;
-  const def = LISTS[list];
+  const def = LISTS[list] || {};
   const rows = data[list] || [];
+  const waitingCount = (data.learnings || []).filter((l) => l.status === "pending" && l.domain === "business").length;
   const save = async (values) => {
     if (editing === "new") await call("post", `/studio/competitors/${list}`, values, { success: "Saved" });
     else await call("patch", `/studio/competitors/${list}/${encodeURIComponent(editing[def.key])}`, values, { success: "Saved" });
@@ -133,11 +199,11 @@ export function CompetitorsTab({ me }) {
   return (
     <div className="space-y-4">
       <p className="max-w-3xl text-sm text-[#3A4759]">
-        Companies and people we watch on LinkedIn, and their posts that worked. The engine cannot read LinkedIn itself, so the team pastes in a post&apos;s link and text. At its next run the engine writes a short note on why
-        the post works and uses those notes when it plans the week. It never copies their wording.
+        The writer checks each company and person about twice a week on public pages (websites, blogs, news, public search results). It updates their details, saves posts it finds with a note on why they work, and files what
+        EEC can learn. It cannot log in to LinkedIn, so you can still paste in a LinkedIn post you saw: it writes the note at its next run. It never copies their wording.
       </p>
       <div className="flex flex-wrap items-center gap-1 border-b border-[#E5EBF2]">
-        {Object.entries(LISTS).map(([k, l]) => (
+        {[["learnings", { title: "Learnings" }], ...Object.entries(LISTS)].map(([k, l]) => (
           <button
             key={k}
             type="button"
@@ -147,17 +213,20 @@ export function CompetitorsTab({ me }) {
             }}
             className={`border-b-2 px-3 py-2 text-sm font-semibold ${list === k ? "border-[#A6831F] text-[#012D76]" : "border-transparent text-[#6B7280]"}`}
           >
-            {l.title} ({(data[k] || []).length})
+            {l.title}{" "}
+            {k === "learnings" ? (waitingCount ? <span className="rounded-full bg-[#012D76] px-1.5 text-[11px] text-white">{waitingCount} to decide</span> : null) : `(${(data[k] || []).length})`}
           </button>
         ))}
-        {canEdit ? (
+        {canEdit && list !== "learnings" ? (
           <Button className="ml-auto" variant="outline" onClick={() => setEditing("new")}>
             <Plus size={14} /> Add
           </Button>
         ) : null}
       </div>
       {editing ? <RowForm fields={def.fields} initial={editing === "new" ? {} : editing} onSave={save} onCancel={() => setEditing(null)} /> : null}
-      {!rows.length ? (
+      {list === "learnings" ? (
+        <CompetitorLearnings rows={data.learnings || []} tz={tz} canEdit={canEdit} onDone={refresh} />
+      ) : !rows.length ? (
         <Empty title={def.title}>{def.empty}</Empty>
       ) : (
         <div className="space-y-3">
@@ -170,9 +239,11 @@ export function CompetitorsTab({ me }) {
                       <div className="font-semibold text-[#012D76]">
                         {r.author}
                         {r.author_type ? <span className="ml-2 rounded bg-[#F5F9FC] px-1.5 py-0.5 text-xs font-medium text-[#3A4759]">{r.author_type}</span> : null}
+                        {r.source === "engine" ? <span className="ml-2 rounded bg-sky-50 px-1.5 py-0.5 text-xs font-medium text-sky-800">found by the writer</span> : null}
                       </div>
-                      <div className="text-xs text-[#6B7280]">{[r.format, r.posted_on, r.reactions, r.added_by && `saved by ${r.added_by}`].filter(Boolean).join(" · ")}</div>
+                      <div className="text-xs text-[#6B7280]">{[r.format, r.posted_on, r.reactions, r.added_by && r.added_by !== "writer" && `saved by ${r.added_by}`].filter(Boolean).join(" · ")}</div>
                       {r.hook ? <div className="mt-2 text-[#111827]">“{r.hook}”</div> : null}
+                      {r.summary ? <div className="mt-1 text-[#3A4759]">{r.summary}</div> : null}
                       <div className={`mt-2 rounded-md p-2 ${r.why_it_works ? "bg-emerald-50 text-emerald-900" : "bg-[#F5F9FC] text-[#6B7280]"}`}>
                         {r.why_it_works ? (
                           <>
@@ -188,6 +259,16 @@ export function CompetitorsTab({ me }) {
                       <div className="font-semibold text-[#012D76]">{r.name}</div>
                       <div className="text-xs text-[#6B7280]">{[r.role, r.company, r.category, r.topics, r.focus].filter(Boolean).join(" · ")}</div>
                       {r.notes ? <div className="mt-1 text-[#3A4759]">{r.notes}</div> : null}
+                      <div className="mt-1.5 rounded bg-[#F5F9FC] px-2 py-1 text-xs text-[#3A4759]">
+                        {r.checked_at ? (
+                          <>
+                            <b>Checked by the writer</b> {fmtLocal(r.checked_at, tz)}
+                            {r.check_summary ? `: ${r.check_summary}` : ""}
+                          </>
+                        ) : (
+                          "The writer checks this at its next daily run."
+                        )}
+                      </div>
                     </>
                   )}
                   <div className="mt-2 flex flex-wrap gap-3 text-xs">
@@ -219,6 +300,8 @@ const JOB_NAMES = {
   revise: "Changes and learning",
   recheck: "Fact check before posting",
   notes: "Competitor notes and engagers",
+  competitors: "Competitor watch",
+  learning: "Learning decisions",
   research: "Research",
   plan_week: "Plan and write next week",
   report: "Weekly report",

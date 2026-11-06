@@ -13,7 +13,15 @@ const { tick, quickSync } = require("../social/tick");
 const service = require("../social/service");
 const data = require("../social/studioData");
 const { mondayOf, addDays, zonedToUtc, localParts } = require("../social/time");
-const { missingSchema, MIGRATION } = require("../social/dbCheck");
+const { missingSchema, filesFor, MIGRATION } = require("../social/dbCheck");
+const learning = require("../social/learning");
+
+async function learningWaiting() {
+  const store = getStore();
+  const rules = (await store.list("social_preferences", { where: { status: "candidate" } })).filter((r) => learning.ruleDomain(r) === "business").length;
+  const competitor = (await store.list("social_competitor_learnings", { where: { status: "pending", domain: "business" } }).catch(() => [])).length;
+  return { rules, competitor };
+}
 
 const router = express.Router();
 
@@ -40,6 +48,7 @@ router.get(
   auth,
   asyncHandler(async (req, res) => {
     const settings = await getSettings();
+    const dbMissing = await missingSchema().catch(() => []);
     res.json({
       member: req.member,
       timezone: settings.timezone,
@@ -49,8 +58,10 @@ router.get(
       // When a change requested now would be ready (next scheduled run plus a margin).
       change_ready_by: service.changeReadyBy(settings).toISOString(),
       // Tables or columns the database still lacks (the page shows a banner while any are missing).
-      db_update_needed: await missingSchema().catch(() => []),
-      db_migration: MIGRATION,
+      db_update_needed: dbMissing,
+      // Learnings waiting for the business team (shown as a number on the Learning and Competitors tabs).
+      learning_waiting: await learningWaiting().catch(() => ({ rules: 0, competitor: 0 })),
+      db_migration: filesFor(dbMissing).join(" and then ") || MIGRATION,
     });
   })
 );
@@ -115,6 +126,17 @@ router.post("/studio/posts/:id/retry-change", auth, act((req) => service.retryCh
 
 // Competitors (companies, people, best posts), enquiries, engagers, run log.
 router.get("/studio/competitors", auth, plain(() => data.listCompetitors()));
+// Confirm or discard a learning (writing rule or competitor learning), or undo the writer's decision.
+router.post(
+  "/studio/learnings/:kind/:id/decide",
+  auth,
+  plain(async (req) => {
+    service.requireRole(req.member, ["approver", "editor"]);
+    const b = req.body || {};
+    const r = await learning.decide(req.params.kind, req.params.id, b.decision, b.note, req.member.email);
+    return r.row;
+  })
+);
 router.post("/studio/competitors/:list", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body)));
 router.patch("/studio/competitors/:list/:id", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body, req.params.id)));
 router.delete("/studio/competitors/:list/:id", auth, plain((req) => data.removeCompetitor(req.member, req.params.list, req.params.id)));
@@ -229,7 +251,7 @@ router.post(
     const text = (req.body || {}).rule_text;
     if (status && !["active", "candidate", "retired"].includes(status)) throw new HttpError(422, "Unknown status");
     const patch = { updated_at: new Date().toISOString() };
-    if (status) patch.status = status;
+    if (status) Object.assign(patch, { status, decided_by: req.member.email, decided_at: patch.updated_at, decision_note: (req.body || {}).note || null });
     if (typeof text === "string" && text.trim()) patch.rule_text = text.trim().slice(0, 1500);
     const [row] = await getStore().update("social_preferences", { id: Number(req.params.id) }, patch);
     if (!row) throw new HttpError(404, "Rule not found");
@@ -250,6 +272,9 @@ router.post(
       channel: b.channel || "all",
       rule_type: String(b.rule_type).slice(0, 40),
       rule_text: String(b.rule_text).slice(0, 1500),
+      domain: learning.domainFor(b.rule_type, b.domain),
+      decided_by: req.member.email,
+      decided_at: new Date().toISOString(),
       status: "active",
       evidence_count: 1,
       source: `added on the Studio page by ${req.member.email}`,

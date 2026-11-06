@@ -765,3 +765,152 @@ test("database update not run yet: reads stay working and writes say what to run
   assert.equal(status, 503);
   assert.equal(body.detail, MESSAGE);
 });
+
+const rpcRaw = async (name, args = {}) => (await handleRpc({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name, arguments: args } })).result;
+
+test("learning: the writer decides social rules itself; business rules wait for the team", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const learning = require("../src/social/learning");
+  // Social candidate -> writer decides with a reason.
+  const soc = await rpc("save_rule", { rule_type: "hook", rule_text: "Open with the most specific number.", status: "candidate" });
+  assert.equal(soc.domain, "social");
+  // Business rule asked for as 'active' without a team comment -> saved as a candidate for the team.
+  const biz = await rpc("save_rule", { rule_type: "claims", rule_text: "Never mention years of experience.", status: "active" });
+  assert.equal(biz.domain, "business");
+  assert.equal(biz.status, "candidate");
+  // ...but standing when a team member asked for it in a comment.
+  await store.insert("social_comments", { comment_id: "c1", author_email: editor.email, author_name: "Harsh", body: "Always say Singapore-headquartered.", created_at: "2026-11-06T04:00:00Z" });
+  const asked = await rpc("save_rule", { rule_type: "brand", rule_text: "Always say Singapore-headquartered.", status: "active", requested_in_comment_id: "c1" });
+  assert.equal(asked.status, "active");
+  assert.equal((await store.get("social_preferences", asked.id)).decided_by, editor.email);
+
+  const q = await rpc("get_learning_queue");
+  assert.deepEqual(q.rules.map((r) => r.id), [soc.id], "only social items reach the writer");
+  assert.equal(q.pending_for_business_team, 1);
+
+  const run = await rpc("start_run");
+  assert.ok(run.jobs.some((j) => j.job === "learning" && j.social_to_decide === 1));
+
+  const d = await rpc("decide_learning", {
+    items: [
+      { kind: "rule", id: soc.id, decision: "confirm", reason: "Our two best LinkedIn posts opened with a number." },
+      { kind: "rule", id: biz.id, decision: "confirm", reason: "Writer tries to decide a business rule." },
+    ],
+  });
+  assert.equal(d.results[0].ok, true);
+  assert.equal(d.results[1].ok, false);
+  assert.match(d.results[1].message, /business team/);
+  const r1 = await store.get("social_preferences", soc.id);
+  assert.equal(r1.status, "active");
+  assert.equal(r1.decided_by, "writer");
+  assert.match(r1.decision_note, /best LinkedIn posts/);
+  assert.equal((await store.get("social_preferences", biz.id)).status, "candidate");
+
+  // update_rule cannot sidestep the team, except to retire a merged duplicate.
+  const blocked = await rpcRaw("update_rule", { id: biz.id, status: "active" });
+  assert.match(blocked.content[0].text, /business team/);
+  const merged = await rpc("update_rule", { id: biz.id, status: "retired", merged_into: asked.id });
+  assert.equal(merged.ok, true);
+
+  // The team can undo the writer's decision.
+  await learning.decide("rule", soc.id, "discard", "We prefer question hooks.", editor.email);
+  const r2 = await store.get("social_preferences", soc.id);
+  assert.equal(r2.status, "retired");
+  assert.equal(r2.decided_by, editor.email);
+
+  // The team's list stays short: at most 10 business learnings wait at once.
+  for (let i = 0; i < 10; i++) await store.insert("social_preferences", { rule_type: "tone", rule_text: `tone ${i}`, status: "candidate", domain: "business", updated_at: "2026-11-06T04:00:00Z" });
+  const full = await rpcRaw("save_rule", { rule_type: "tone", rule_text: "One more tone rule.", status: "candidate" });
+  assert.match(full.content[0].text, /already wait for the team/);
+});
+
+test("learning: undecided social learnings are set aside after a week; the team can undo it", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const learning = require("../src/social/learning");
+  const [old] = await store.insert("social_preferences", { rule_type: "length", rule_text: "Shorter captions.", status: "candidate", domain: "social", updated_at: "2026-10-27T00:00:00Z" });
+  const [recent] = await store.insert("social_preferences", { rule_type: "length", rule_text: "Even shorter captions.", status: "candidate", domain: "social", updated_at: "2026-11-05T00:00:00Z" });
+  const [biz] = await store.insert("social_preferences", { rule_type: "claims", rule_text: "No years of experience.", status: "candidate", domain: "business", updated_at: "2026-10-01T00:00:00Z" });
+  const n = await learning.expireSocial(new Date("2026-11-06T05:00:00Z"));
+  assert.equal(n, 1);
+  assert.equal((await store.get("social_preferences", old.id)).status, "retired");
+  assert.match((await store.get("social_preferences", old.id)).decision_note, /Not decided within 7 days/);
+  assert.equal((await store.get("social_preferences", recent.id)).status, "candidate");
+  assert.equal((await store.get("social_preferences", biz.id)).status, "candidate", "business items are never set aside automatically");
+});
+
+test("competitor watch: the writer updates details, adds posts and files learnings to approve or discard", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const learning = require("../src/social/learning");
+  await store.insert("social_competitors", { name: "QIMA", url: "https://www.qima.com", focus: "Audits", notes: "Team note", active: true });
+  await store.insert("social_competitors", { name: "Vega Sourcing", active: true, checked_at: "2026-11-05T05:00:00Z" });
+  await store.insert("social_competitor_people", { name: "A. Person", role: "Head of sourcing", active: true });
+
+  const run = await rpc("start_run");
+  const job = run.jobs.find((j) => j.job === "competitors");
+  assert.ok(job, "competitors job is due");
+  assert.deepEqual(job.competitors.sort(), ["A. Person", "QIMA"], "Vega was checked yesterday");
+  assert.ok(run.jobs.some((j) => j.job === "learning"), "learning runs after the watch");
+
+  const queue = await rpc("get_competitor_queue");
+  const person = queue.competitors.find((c) => c.kind === "person");
+
+  const saved = await rpc("save_competitor_findings", {
+    competitor: "QIMA",
+    kind: "company",
+    profile: { focus: "Supplier audits and lab testing, monthly webinars", url: "not a url", linkedin_url: "https://www.linkedin.com/company/qima" },
+    summary: "Monthly webinars on food testing; a new India lab announced.",
+    posts: [
+      { url: "https://www.qima.com/blog/india-lab", posted_on: "2026-11-02", format: "article", hook: "Our new lab in India", summary: "Announces a lab.", why_it_works: "Concrete news with a photo; short." },
+      { url: "https://www.qima.com/blog/india-lab", summary: "Duplicate link" },
+      { url: "", summary: "No link" },
+    ],
+    learnings: [
+      { text: "Short webinar recaps as document posts get shared by buyers.", domain: "social", channel: "linkedin_company", rule_type: "format", evidence: [{ title: "Webinar recap", url: "https://www.qima.com/blog/recap" }] },
+      { text: "They lead with lab testing; EEC could explain how it works with labs.", domain: "business", rule_type: "service", evidence: [{ title: "India lab", url: "https://www.qima.com/blog/india-lab" }] },
+      { text: "No evidence here.", domain: "social", evidence: [] },
+    ],
+  });
+  assert.equal(saved.posts_added, 1);
+  assert.deepEqual(saved.updated_fields.sort(), ["focus", "linkedin_url"], "bad link ignored");
+  assert.equal(saved.learnings_added.length, 2);
+  assert.ok(saved.skipped.some((x) => /already saved/.test(x.reason)));
+  assert.ok(saved.skipped.some((x) => /evidence/.test(x.reason)));
+  const q = await store.get("social_competitors", "QIMA");
+  assert.equal(q.notes, "Team note", "the team's notes are never overwritten");
+  assert.ok(q.checked_at);
+  const post = (await store.list("social_competitor_posts", {}))[0];
+  assert.equal(post.source, "engine");
+  assert.ok(post.why_it_works);
+
+  // A person is checked too (records the check even with nothing new).
+  await rpc("save_competitor_findings", { competitor: person.name, kind: "person", id: String(person.id), profile: { role: "VP Sourcing" }, summary: "Spoke at a trade fair." });
+  assert.equal((await store.get("social_competitor_people", person.id)).role, "VP Sourcing");
+
+  // Same learning again is not filed twice.
+  const again = await rpc("save_competitor_findings", { competitor: "QIMA", kind: "company", summary: "x", learnings: [{ text: "Short webinar recaps as document posts get shared by buyers.", domain: "social", evidence: [{ url: "https://x.org" }] }] });
+  assert.equal((again.learnings_added || []).length, 0);
+
+  // The writer decides the social one; the business one waits for the team.
+  const lq = await rpc("get_learning_queue");
+  assert.equal(lq.competitor.length, 1);
+  const [soc, biz] = saved.learnings_added;
+  const d = await rpc("decide_learning", { items: [{ kind: "competitor", id: soc.id, decision: "confirm", reason: "Seen in two competitor posts and fits our document format." }] });
+  assert.equal(d.results[0].ok, true);
+  assert.equal((await store.get("social_competitor_learnings", soc.id)).status, "approved");
+  await learning.decide("competitor", biz.id, "discard", "Not a service we offer.", approver.email);
+  assert.equal((await store.get("social_competitor_learnings", biz.id)).status, "discarded");
+
+  // Approved learnings reach the weekly plan; the Studio lists them all.
+  const ctx = await rpc("get_context", { view: "plan" });
+  assert.equal(ctx.competitor_learnings.length, 1);
+  const list = await studioData.listCompetitors();
+  assert.equal(list.learnings.length, 2);
+
+  // finish_job closes the watch for today; nothing new is due.
+  await rpc("finish_job", { job: "competitors", summary: "Checked QIMA and A. Person" });
+  const later = await rpc("start_run");
+  assert.ok(!later.jobs.some((j) => j.job === "competitors"));
+});

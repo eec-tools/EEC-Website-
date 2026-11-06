@@ -65,12 +65,14 @@ const LISTS = {
 
 async function listCompetitors() {
   const store = getStore();
-  const [companies, people, posts] = await Promise.all([
+  const since = new Date(Date.now() - 180 * 86400000).toISOString();
+  const [companies, people, posts, learnings] = await Promise.all([
     store.list("social_competitors", { order: ["name", "asc"] }),
     orEmpty(store.list("social_competitor_people", { order: ["name", "asc"] })),
     orEmpty(store.list("social_competitor_posts", { order: ["created_at", "desc"], limit: 200 })),
+    orEmpty(store.list("social_competitor_learnings", { where: { created_at: { gte: since } }, order: ["created_at", "desc"], limit: 200 })),
   ]);
-  return { companies, people: people || [], posts: posts || [], db_update_needed: people === null || posts === null };
+  return { companies, people: people || [], posts: posts || [], learnings: learnings || [], db_update_needed: people === null || posts === null || learnings === null };
 }
 
 async function saveCompetitor(member, list, raw, id) {
