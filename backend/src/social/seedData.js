@@ -58,6 +58,16 @@ const config = [
     { enabled: true, times: ["09:30", "18:30"] },
     "One reminder email to the approvers at each of these local times, only while posts are waiting for approval.",
   ],
+  [
+    "outreach",
+    {
+      enabled: true,
+      days: ["mon", "wed", "fri"],
+      per_run: 10,
+      markets: ["UK", "EU", "US", "Canada", "Australia", "South Africa", "Middle East", "Asia-Pacific"],
+    },
+    "Outreach: on these days the writer drafts this many LinkedIn comments on recent posts from buyers in these markets. The team posts them from the EEC page.",
+  ],
   ["notify_email", "harshp.eec@gmail.com", "Receives failures, missed posts and system alerts."],
   [
     "report_recipients",

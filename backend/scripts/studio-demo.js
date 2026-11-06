@@ -86,6 +86,26 @@ const g = { stop: 9, useful: 9, true: 10, human: 9, ours: 9, clean: 10 };
   await learning.decide("rule", hookRule.id, "confirm", "Both posts that named product and market in line 1 had the most impressions this week; matches LinkedIn's own advice.", "writer");
   await store.insert("social_preferences", { approver: "Mohita", channel: "all", rule_type: "claims", domain: "business", rule_text: "Do not mention years of experience until the exact wording is agreed.", status: "candidate", evidence_count: 1, example: "Edit on 4 Nov: removed '20+ years'", updated_at: new Date().toISOString() });
   await audit("claude", "job.research", null, { summary: "Filed 4 findings on spice residue limits and the rice crop", sources: [{ title: "Spices Board of India", url: "https://www.indianspices.com/", date: "2026-11-01", used_for: "research note" }] });
+  // Outreach: buyers and drafted comments.
+  const outreach = require("../src/social/outreach");
+  const pid = (iso) => (BigInt(Date.parse(iso)) << 22n).toString();
+  const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString();
+  const tg = await outreach.saveTargets(
+    [
+      { name: "Veetee Group", linkedin_url: "https://uk.linkedin.com/company/veetee-foods-ltd", market: "UK", category: "basmati rice", reason: "UK rice brand; posts weekly about harvest and retail" },
+      { name: "East End Foods", linkedin_url: "https://uk.linkedin.com/company/east-end-foods", market: "UK", category: "spices, rice", reason: "UK importer and brand of Indian foods" },
+      { name: "Westmill Foods", linkedin_url: "https://uk.linkedin.com/company/westmill-foods", market: "UK", category: "rice, flour", reason: "Part of Associated British Foods" },
+    ],
+    "writer"
+  );
+  const ids = tg.added.map((x) => x.id);
+  await outreach.submitComments({
+    checked_targets: ids.map((id) => ({ id })),
+    comments: [
+      { target_id: ids[0], post_url: `https://www.linkedin.com/posts/veetee-foods-ltd_veetee-rice-growth-activity-${pid(daysAgo(1))}-t_lc`, post_excerpt: "Veetee shares growth in its UK retail rice range and thanks its farming partners.", reactions: 103, comments: 5, why_picked: "UK rice brand that sources basmati from India; growth means new supply questions.", angle: "question", comment: "Congratulations on the growth. With the new basmati crop arriving, are you seeing UK shoppers move towards smaller packs, or is the 5 kg bag still the main seller?" },
+      { target_id: ids[1], post_url: `https://www.linkedin.com/posts/east-end-foods_spices-activity-${pid(daysAgo(2))}-ab12`, post_excerpt: "East End Foods introduces its new range of whole spices for UK supermarkets.", reactions: 48, comments: 2, why_picked: "Importer of Indian spices launching a new line.", angle: "tip", comment: "A strong range. For whole spices headed to UK shelves, asking each supplier for a recent pesticide residue report against GB limits, per lot rather than per year, avoids most hold-ups at the port." },
+    ],
+  });
   const app = buildApp();
   app.listen(port, () => console.log(`Studio demo API on http://localhost:${port} (login ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD})`));
 })();

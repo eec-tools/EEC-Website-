@@ -18,6 +18,8 @@ const CHECKS = [
   ["social_competitor_posts", "source,summary", "2026-11-06-competitor-learning.sql"],
   ["social_competitor_learnings", "id,competitor,text,domain,channel,rule_type,evidence,status,decided_by,decision_note,decided_at,created_at", "2026-11-06-competitor-learning.sql"],
   ["social_preferences", "domain,decided_by,decision_note,decided_at", "2026-11-06-competitor-learning.sql"],
+  ["social_outreach_targets", "id,name,kind,linkedin_url,market,category,reason,active,added_by,checked_at,last_post_at,last_commented_at,created_at,updated_at", "2026-11-07-outreach.sql"],
+  ["social_outreach_comments", "id,target_id,target_name,channel,post_url,post_posted_at,post_excerpt,post_reactions,post_comments,why_picked,comment,angle,sources,previous,status,rewrite_request,batch_date,edited,posted_at,posted_by,skip_reason,outcome,outcome_note,outcome_at,outcome_by,created_at,updated_at", "2026-11-07-outreach.sql"],
 ];
 
 // Postgres "relation/column does not exist" and PostgREST "not in the schema cache".

@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import PostCard from "./PostCard";
 import { PlanTab, InsightsTab, LearningTab, HealthTab } from "./Tabs";
 import { CompetitorsTab, ActivityTab } from "./MoreTabs";
+import { OutreachTab } from "./OutreachTab";
 import { RequestChangeBox } from "./RequestChange";
 import { Button, Card, Empty, call, fmtLocal, localDateTime } from "./shared";
 
@@ -17,6 +18,7 @@ const TABS = [
   ["queue", "Queue"],
   ["posted", "Posted"],
   ["insights", "Insights"],
+  ["outreach", "Outreach"],
   ["competitors", "Competitors"],
   ["learning", "Learning"],
   ["activity", "Activity"],
@@ -166,6 +168,9 @@ function StudioInner() {
             {key === "learning" && (me.learning_waiting || {}).rules ? (
               <span className="ml-1.5 rounded-full bg-[#012D76] px-1.5 text-[11px] text-white" title="Waiting for the business team">{me.learning_waiting.rules}</span>
             ) : null}
+            {key === "outreach" && me.outreach_ready ? (
+              <span className="ml-1.5 rounded-full bg-[#A6831F] px-1.5 text-[11px] text-white" title="Comments ready to post">{me.outreach_ready}</span>
+            ) : null}
             {key === "competitors" && (me.learning_waiting || {}).competitor ? (
               <span className="ml-1.5 rounded-full bg-[#012D76] px-1.5 text-[11px] text-white" title="Learnings waiting for the business team">{me.learning_waiting.competitor}</span>
             ) : null}
@@ -262,6 +267,7 @@ function StudioInner() {
       {tab === "posted" ? (posted.length ? <div className="space-y-3">{posted.map((p) => card(p, true))}</div> : <Empty title="Nothing posted in this period" />) : null}
       {tab === "insights" ? <InsightsTab me={me} tz={tz} /> : null}
       {tab === "learning" ? <LearningTab me={me} tz={tz} onChanged={() => load({ quiet: true })} /> : null}
+      {tab === "outreach" ? <OutreachTab me={me} tz={tz} onChanged={() => load({ quiet: true })} /> : null}
       {tab === "competitors" ? <CompetitorsTab me={me} tz={tz} onChanged={() => load({ quiet: true })} /> : null}
       {tab === "activity" ? <ActivityTab tz={tz} /> : null}
       {tab === "health" ? <HealthTab me={me} tz={tz} onChanged={load} onOpen={setOpen} /> : null}

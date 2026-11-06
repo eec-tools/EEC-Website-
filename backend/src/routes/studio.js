@@ -15,6 +15,7 @@ const data = require("../social/studioData");
 const { mondayOf, addDays, zonedToUtc, localParts } = require("../social/time");
 const { missingSchema, filesFor, MIGRATION } = require("../social/dbCheck");
 const learning = require("../social/learning");
+const outreach = require("../social/outreach");
 
 async function learningWaiting() {
   const store = getStore();
@@ -61,6 +62,8 @@ router.get(
       db_update_needed: dbMissing,
       // Learnings waiting for the business team (shown as a number on the Learning and Competitors tabs).
       learning_waiting: await learningWaiting().catch(() => ({ rules: 0, competitor: 0 })),
+      // Outreach comments ready to post (shown as a number on the Outreach tab).
+      outreach_ready: await outreach.readyCount().catch(() => 0),
       db_migration: filesFor(dbMissing).join(" and then ") || MIGRATION,
     });
   })
@@ -137,6 +140,11 @@ router.post(
     return r.row;
   })
 );
+// Outreach: comments the writer drafted for the team to post from the EEC page, and the target list.
+router.get("/studio/outreach", auth, plain(() => outreach.list(service.now())));
+router.post("/studio/outreach/comments/:id/:action", auth, plain((req) => outreach.act(req.member, req.params.id, req.params.action, req.body || {}, service.now())));
+router.post("/studio/outreach/targets", auth, plain((req) => outreach.addTarget(req.member, req.body || {}, service.now())));
+router.patch("/studio/outreach/targets/:id", auth, plain((req) => outreach.updateTarget(req.member, req.params.id, req.body || {}, service.now())));
 router.post("/studio/competitors/:list", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body)));
 router.patch("/studio/competitors/:list/:id", auth, plain((req) => data.saveCompetitor(req.member, req.params.list, req.body, req.params.id)));
 router.delete("/studio/competitors/:list/:id", auth, plain((req) => data.removeCompetitor(req.member, req.params.list, req.params.id)));
