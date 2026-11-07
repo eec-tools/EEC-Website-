@@ -185,6 +185,8 @@ export default function NextLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const ctaConfig = CTA_CONFIG[pathname];
+  // The Social Studio is an internal tool with its own frame: no site header, footer or WhatsApp button.
+  const bare = pathname === "/studio" || pathname.startsWith("/studio/");
 
   const onNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -204,6 +206,8 @@ export default function NextLayout({ children }) {
       setNewsletterSubmitting(false);
     }
   };
+
+  if (bare) return <>{children}</>;
 
   return (
     <div className="min-h-screen flex flex-col bg-eec">

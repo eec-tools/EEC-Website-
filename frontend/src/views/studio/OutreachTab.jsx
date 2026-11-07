@@ -102,7 +102,7 @@ function ReadyCard({ c, tz, canEdit, onDone }) {
             ))}
           </div>
         ) : null}
-        {(c.previous || []).length ? <div className="mt-1 text-[11px] text-[#9CA3AF]">Version {(c.previous || []).length + 1}</div> : null}
+        {(c.previous || []).length ? <div className="mt-1 text-[11px] text-[#6B7280]">Version {(c.previous || []).length + 1}</div> : null}
       </div>
 
       {canEdit && !rewriting ? (
@@ -146,7 +146,7 @@ function ReadyCard({ c, tz, canEdit, onDone }) {
           ) : null}
         </>
       ) : null}
-      <div className="mt-2 text-[11px] text-[#9CA3AF]">Drafted {fmtLocal(c.created_at, tz)}</div>
+      <div className="mt-2 text-[11px] text-[#6B7280]">Drafted {fmtLocal(c.created_at, tz)}</div>
     </Card>
   );
 }
@@ -298,7 +298,7 @@ function Targets({ rows, tz, canEdit, onDone }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+              <tr className="text-left text-[11px] uppercase tracking-wide text-[#6B7280]">
                 <th className="pb-1 pr-3 font-semibold">Buyer</th>
                 <th className="pb-1 pr-3 font-semibold">Market</th>
                 <th className="pb-1 pr-3 font-semibold">Buys</th>
@@ -380,7 +380,7 @@ export function OutreachTab({ me, tz, onChanged }) {
                 <dt className="text-[11px] text-[#6B7280]">{k}</dt>
               </div>
             ))}
-            <div className="col-span-4 -mt-2 text-[11px] text-[#9CA3AF]">last 30 days</div>
+            <div className="col-span-4 -mt-2 text-[11px] text-[#6B7280]">last 30 days</div>
           </dl>
         </div>
         <ol className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-lg bg-[#F5F9FC] px-3 py-2 text-xs text-[#374151]">

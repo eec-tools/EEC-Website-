@@ -400,7 +400,7 @@ async function expire(now = new Date()) {
 async function stats(now = new Date(), days = 30) {
   const store = getStore();
   const since = new Date(now.getTime() - days * 86400000).toISOString();
-  const rows = await store.list("social_outreach_comments", { where: { created_at: { gte: since } }, limit: 1000 }).catch(() => []);
+  const rows = (await store.list("social_outreach_comments", { where: { created_at: { gte: since } }, limit: 1000 }).catch(() => [])).filter((r) => !r.created_at || r.created_at <= now.toISOString());
   const posted = rows.filter((r) => r.status === "posted");
   const won = (r) => ["reply", "conversation", "enquiry"].includes(r.outcome);
   const by_angle = {};

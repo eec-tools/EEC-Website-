@@ -235,9 +235,19 @@ async function removeEngager(member, id) {
 }
 
 // ---------------- activity (run log) ----------------
-async function listActivity({ days = 30 } = {}) {
+async function listActivity({ days = 30, all = false } = {}) {
   const since = new Date(Date.now() - Math.min(Number(days) || 30, 90) * 86400000).toISOString();
   const rows = await getStore().list("social_audit", { where: { at: { gte: since } }, order: ["at", "desc"], limit: 1000 });
+  if (all) {
+    // Everything that happened, for the Activity page and the Today feed (the page words each one).
+    const keep = ["summary", "sources", "reason", "note", "topic", "target", "outcome", "saved", "refused", "checked", "posts", "learnings", "added", "domain", "count", "key", "kind", "subject", "error", "channel"];
+    return rows.slice(0, 400).map((r) => {
+      const d = r.detail || {};
+      const detail = {};
+      for (const k of keep) if (d[k] !== undefined) detail[k] = d[k];
+      return { id: r.id, at: r.at, actor: r.actor, action: r.action, target: r.target, detail };
+    });
+  }
   return rows
     .filter((r) => String(r.action || "").startsWith("job."))
     .slice(0, 300)
