@@ -540,3 +540,8 @@ input::placeholder, textarea::placeholder {
   background: #0b5e58;
   box-shadow: 0 8px 24px rgba(15, 118, 110, 0.25);
 }
+
+/* Social Studio: an app, so headings use the body face (the greeting keeps the serif inline). */
+.eec-studio h1, .eec-studio h2, .eec-studio h3, .eec-studio h4 {
+  font-family: 'Outfit', system-ui, sans-serif;
+}

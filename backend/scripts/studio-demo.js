@@ -86,6 +86,35 @@ const g = { stop: 9, useful: 9, true: 10, human: 9, ours: 9, clean: 10 };
   await learning.decide("rule", hookRule.id, "confirm", "Both posts that named product and market in line 1 had the most impressions this week; matches LinkedIn's own advice.", "writer");
   await store.insert("social_preferences", { approver: "Mohita", channel: "all", rule_type: "claims", domain: "business", rule_text: "Do not mention years of experience until the exact wording is agreed.", status: "candidate", evidence_count: 1, example: "Edit on 4 Nov: removed '20+ years'", updated_at: new Date().toISOString() });
   await audit("claude", "job.research", null, { summary: "Filed 4 findings on spice residue limits and the rice crop", sources: [{ title: "Spices Board of India", url: "https://www.indianspices.com/", date: "2026-11-01", used_for: "research note" }] });
+  // Published posts with results over the last 8 weeks, so Insights has something to show.
+  {
+    const store = require("../src/social/store").getStore();
+    const fmts = ["document", "comparison", "checklist", "market_update", "number"];
+    const chans = ["linkedin_company", "linkedin_company", "instagram", "facebook"];
+    for (let w = 8; w >= 1; w -= 1) {
+      for (let k = 0; k < 3; k += 1) {
+        const ch = chans[(w + k) % chans.length];
+        const imp = Math.round((ch === "linkedin_company" ? 420 : ch === "instagram" ? 220 : 90) * (1 + (8 - w) * 0.12) * (0.8 + k * 0.2));
+        await store.insert("social_posts", {
+          post_id: `demo-past-${w}-${k}`,
+          batch_id: "demo-past",
+          channel: ch,
+          slot_at: new Date(Date.now() - (w * 7 - k * 2) * 86400000).toISOString(),
+          status: "posted",
+          kind: "text",
+          pillar: ["Food and ingredients", "Seafood", "Home textiles"][k],
+          format: fmts[(w + k) % fmts.length],
+          topic: ["Basmati specification checklist", "Frozen shrimp: glaze and count", "Towel GSM explained", "Landed cost in 6 steps", "India-EU FTA: what changes"][(w + k) % 5],
+          body: "Example published post.",
+          version: 1,
+          metrics: { impressions: imp, reactions: Math.round(imp * 0.03), comments: Math.round(imp * 0.004), saves: Math.round(imp * 0.006), clicks: Math.round(imp * 0.01) },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
   // Outreach: buyers and drafted comments.
   const outreach = require("../src/social/outreach");
   const pid = (iso) => (BigInt(Date.parse(iso)) << 22n).toString();

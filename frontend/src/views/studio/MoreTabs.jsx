@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Pencil, ExternalLink } from "lucide-react";
-import { Button, Card, Empty, call, fmtLocal } from "./shared";
+import { Button, Card, Empty, call, fmtLocal, useAsk } from "./shared";
 import { DomainChip, DecideButtons, DecidedLine } from "./LearningItems";
 
 const input = "w-full rounded border border-[#E5EBF2] px-2 py-1 text-sm";
@@ -170,6 +170,7 @@ function CompetitorLearnings({ rows, tz, canEdit, onDone }) {
 }
 
 export function CompetitorsTab({ me, tz, onChanged }) {
+  const ask = useAsk();
   const canEdit = ["approver", "editor"].includes(me.member.role);
   const [data, setData] = useState(null);
   const [list, setList] = useState("learnings");
@@ -193,7 +194,7 @@ export function CompetitorsTab({ me, tz, onChanged }) {
     load();
   };
   const remove = async (row) => {
-    if (!window.confirm("Remove this entry?")) return;
+    if (!(await ask({ title: "Remove this entry?", confirm: "Remove", danger: true }))) return;
     await call("delete", `/studio/competitors/${list}/${encodeURIComponent(row[def.key])}`, undefined, { success: "Removed" }).catch(() => null);
     load();
   };
@@ -311,59 +312,6 @@ const JOB_NAMES = {
   report: "Weekly report",
 };
 
-export function ActivityTab({ tz }) {
-  const [days, setDays] = useState(14);
-  const [rows, setRows] = useState(null);
-  useEffect(() => {
-    call("get", `/studio/activity?days=${days}`).then(setRows).catch(() => setRows([]));
-  }, [days]);
-  if (!rows) return <Empty title="Loading…" />;
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-[#3A4759]">
-        Every scheduled run, what it did, and every source it used. Last
-        <select aria-label="Days" className="rounded border border-[#E5EBF2] px-2 py-1" value={days} onChange={(e) => setDays(Number(e.target.value))}>
-          {[7, 14, 30, 90].map((d) => (
-            <option key={d} value={d}>{d} days</option>
-          ))}
-        </select>
-      </div>
-      {!rows.length ? (
-        <Empty title="No runs recorded yet">Runs appear here as the scheduled task finishes each job.</Empty>
-      ) : (
-        rows.map((r, k) => (
-          <Card key={`${r.at}-${k}`} className="p-4 text-sm">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <div className="font-semibold text-[#012D76]">{JOB_NAMES[r.job] || r.job}</div>
-              <div className="text-xs text-[#6B7280]">{fmtLocal(r.at, tz)} IST</div>
-            </div>
-            {r.summary ? <div className="mt-1 text-[#3A4759]">{r.summary}</div> : null}
-            {r.sources && r.sources.length ? (
-              <details className="mt-2" open={r.sources.length <= 4}>
-                <summary className="cursor-pointer text-xs font-semibold text-[#012D76]">Sources ({r.sources.length})</summary>
-                <ul className="mt-1 space-y-1">
-                  {r.sources.map((s, i) => (
-                    <li key={i} className="text-xs text-[#3A4759]">
-                      <a href={s.url} target="_blank" rel="noreferrer" className="text-[#0096D6] hover:underline">
-                        {s.title || s.url}
-                      </a>
-                      {s.date ? ` · ${s.date}` : ""}
-                      {s.used_for ? <span className="text-[#6B7280]"> · used for: {s.used_for}</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ) : (
-              <div className="mt-1 text-xs text-[#6B7280]">No outside sources used.</div>
-            )}
-          </Card>
-        ))
-      )}
-    </div>
-  );
-}
-
-// ---------------- Insights: results by format ----------------
 export function FormatTable({ data }) {
   const rows = Object.entries(data.by_format || {});
   if (!rows.length) return null;
@@ -414,6 +362,7 @@ const ENQ_FIELDS = [
 const STATUS_TONE = { new: "bg-sky-50 text-sky-800", qualified: "bg-amber-50 text-amber-800", quoted: "bg-violet-50 text-violet-800", won: "bg-emerald-50 text-emerald-800", lost: "bg-slate-100 text-slate-600" };
 
 export function EnquiriesPanel({ me, tz, postsById = {} }) {
+  const ask = useAsk();
   const canEdit = ["approver", "editor"].includes(me.member.role);
   const [rows, setRows] = useState(null);
   const [editing, setEditing] = useState(null);
@@ -480,7 +429,7 @@ export function EnquiriesPanel({ me, tz, postsById = {} }) {
                           variant="ghost"
                           aria-label="Remove enquiry"
                           onClick={async () => {
-                            if (!window.confirm("Remove this enquiry?")) return;
+                            if (!(await ask({ title: "Remove this enquiry?", confirm: "Remove", danger: true }))) return;
                             await call("delete", `/studio/enquiries/${r.id}`).catch(() => null);
                             load();
                           }}

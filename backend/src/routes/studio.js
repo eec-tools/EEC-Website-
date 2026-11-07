@@ -33,6 +33,28 @@ const member = asyncHandler(async (req, res, next) => {
 });
 const auth = [requireAuth, member];
 
+// What is stopping posts from going out, in plain words. level: error (posts will not go out) or warn.
+async function systemAlerts(settings) {
+  const out = [];
+  const store = getStore();
+  const live = settings.publishing_enabled && !settings.dry_run;
+  if (!process.env.BUFFER_API_KEY) out.push({ level: live ? "error" : "warn", key: "buffer_key", text: "Publishing is not set up: the Buffer key is missing, so approved posts cannot go out." });
+  if (!settings.publishing_enabled) out.push({ level: "warn", key: "paused", text: "Publishing is paused. Approved posts wait until the approver resumes it." });
+  const mapped = settings.buffer_channels || {};
+  const used = Object.entries(settings.cadence || {}).filter(([, c]) => (c.days || []).length).map(([ch]) => ch).filter((ch) => ch !== "linkedin_shirali");
+  const missing = used.filter((ch) => !mapped[ch]);
+  if (missing.length && process.env.BUFFER_API_KEY) out.push({ level: live ? "error" : "warn", key: "channels", text: `${missing.length} channel${missing.length === 1 ? " is" : "s are"} not connected to Buffer yet.` });
+  if (settings.last_tick && Date.now() - Date.parse(settings.last_tick) > 2 * 3600000) out.push({ level: "error", key: "clock", text: "The clock has not run for over 2 hours, so nothing is being sent or reminded." });
+  const failed = await store.list("social_posts", { where: { status: "failed" }, limit: 20 }).catch(() => []);
+  if (failed.length) out.push({ level: "error", key: "failed", text: `${failed.length} post${failed.length === 1 ? "" : "s"} could not be published.` });
+  return out;
+}
+
+async function lastWriterRun() {
+  const rows = await getStore().list("social_audit", { where: { actor: "claude" }, order: ["at", "desc"], limit: 1 });
+  return rows[0] ? rows[0].at : null;
+}
+
 function decorate(p) {
   const slides = p.slides || [];
   return {
@@ -65,6 +87,10 @@ router.get(
       // Outreach comments ready to post (shown as a number on the Outreach tab).
       outreach_ready: await outreach.readyCount().catch(() => 0),
       db_migration: filesFor(dbMissing).join(" and then ") || MIGRATION,
+      // Problems that stop posts going out, shown as a banner on every Studio page.
+      alerts: await systemAlerts(settings).catch(() => []),
+      // When the writer last finished a job (shown on the Today page).
+      writer_last_run: await lastWriterRun().catch(() => null),
     });
   })
 );
@@ -156,7 +182,7 @@ router.get("/studio/posts/:id/engagers", auth, plain((req) => data.listEngagers(
 router.post("/studio/engagers", auth, plain((req) => data.addEngagers(req.member, req.body || {})));
 router.patch("/studio/engagers/:id", auth, plain((req) => data.updateEngager(req.member, req.params.id, req.body)));
 router.delete("/studio/engagers/:id", auth, plain((req) => data.removeEngager(req.member, req.params.id)));
-router.get("/studio/activity", auth, plain((req) => data.listActivity({ days: req.query.days })));
+router.get("/studio/activity", auth, plain((req) => data.listActivity({ days: req.query.days, all: req.query.all === "1" })));
 router.post("/studio/posts/:id/post-now", auth, act((req) => service.postNow(req.member, req.params.id, req.body || {})));
 router.post("/studio/batches/:id/delete", auth, act((req) => service.deleteBatch(req.member, req.params.id)));
 router.post("/studio/comments", auth, act((req) => service.addComment(req.member, req.body || {})));
@@ -210,14 +236,50 @@ router.get(
   auth,
   asyncHandler(async (req, res) => {
     const weeks = Math.min(Math.max(Number(req.query.weeks) || 8, 1), 52);
-    const since = new Date(Date.now() - weeks * 7 * 86400000).toISOString();
-    const posts = await getStore().list("social_posts", { where: { slot_at: { gte: since } }, order: ["slot_at", "asc"] });
+    const span = weeks * 7 * 86400000;
+    const since = new Date(Date.now() - span).toISOString();
+    const before = new Date(Date.now() - 2 * span).toISOString();
+    const nowIso = new Date().toISOString();
+    const all = await getStore().list("social_posts", { where: { slot_at: { gte: before, lt: nowIso } }, order: ["slot_at", "asc"] });
+    const posts = all.filter((p) => p.slot_at >= since);
+    const earlier = all.filter((p) => p.slot_at < since);
+    const FIELDS = ["impressions", "reactions", "comments", "shares", "saves", "clicks", "enquiries"];
+    const totals = (list, enq) => {
+      const t = { posts: list.length, posted: 0, with_metrics: 0 };
+      for (const f of FIELDS) t[f] = 0;
+      for (const p of list) {
+        if (p.status === "posted") t.posted += 1;
+        const m = p.metrics || {};
+        if (Object.keys(m).some((x) => !["updated", "entered_by"].includes(x))) t.with_metrics += 1;
+        for (const f of FIELDS) t[f] += Number(m[f]) || 0;
+      }
+      if (enq !== undefined) t.enquiries = Math.max(t.enquiries, enq);
+      const engaged = t.reactions + t.comments + t.shares + t.saves + t.clicks;
+      t.engagement_rate = t.impressions ? +((engaged / t.impressions) * 100).toFixed(2) : null;
+      return t;
+    };
+    // Impressions per week and channel, oldest first (weeks start on Monday in EEC's time zone).
+    const settings = await getSettings();
+    const weekOf = (iso) => mondayOf(localParts(new Date(iso), settings.timezone).date);
+    const firstWeek = mondayOf(localParts(new Date(since), settings.timezone).date);
+    const byWeek = [];
+    for (let w = firstWeek; w <= weekOf(nowIso); w = addDays(w, 7)) byWeek.push({ week: w, posts: 0, impressions: 0, by_channel: {} });
+    for (const p of posts) {
+      const row = byWeek.find((r) => r.week === weekOf(p.slot_at));
+      if (!row || p.status !== "posted") continue;
+      const imp = Number((p.metrics || {}).impressions) || 0;
+      row.posts += 1;
+      row.impressions += imp;
+      row.by_channel[p.channel] = (row.by_channel[p.channel] || 0) + imp;
+    }
     const group = (key) => {
       const out = {};
       for (const p of posts) {
         const k = p[key] || "other";
-        const o = (out[k] = out[k] || { posts: 0, posted: 0, missed: 0, failed: 0, dropped: 0, impressions: 0, reactions: 0, comments: 0, shares: 0, saves: 0, clicks: 0, enquiries: 0, with_metrics: 0 });
+        const o = (out[k] = out[k] || { posts: 0, posted: 0, missed: 0, failed: 0, dropped: 0, impressions: 0, reactions: 0, comments: 0, shares: 0, saves: 0, clicks: 0, enquiries: 0, with_metrics: 0, best: null });
         o.posts += 1;
+        const imp = Number((p.metrics || {}).impressions) || 0;
+        if (p.status === "posted" && imp && (!o.best || imp > o.best.impressions)) o.best = { post_id: p.post_id, topic: p.topic, impressions: imp };
         if (o[p.status] !== undefined) o[p.status] += 1;
         const m = p.metrics || {};
         if (Object.keys(m).some((x) => !["updated", "entered_by"].includes(x))) o.with_metrics += 1;
@@ -226,8 +288,17 @@ router.get(
       return out;
     };
     const extra = await data.insightsExtra(posts);
+    const enqNow = Object.values(extra.per_post || {}).reduce((n, x) => n + x.enquiries, 0);
+    const prevExtra = earlier.length ? await data.insightsExtra(earlier).catch(() => ({ per_post: {} })) : { per_post: {} };
+    const enqBefore = Object.values(prevExtra.per_post || {}).reduce((n, x) => n + x.enquiries, 0);
     res.json({
       weeks,
+      totals: totals(posts, enqNow),
+      previous: totals(earlier, enqBefore),
+      by_week: byWeek,
+      by_format_group: group("format"),
+      outreach: await outreach.stats(new Date(), weeks * 7).catch(() => null),
+      outreach_previous: await outreach.stats(new Date(Date.now() - span), weeks * 7).catch(() => null),
       by_channel: group("channel"),
       by_pillar: group("pillar"),
       by_series: group("series"),
@@ -340,8 +411,8 @@ router.get(
 );
 
 const SETTINGS_BY_ROLE = {
-  approver: ["cadence", "reminders", "late_window_hours", "notify_email", "report_recipients", "buffer_channels", "content_scope", "services", "audience_split", "dry_run", "tone_reference"],
-  editor: ["cadence", "reminders", "notify_email", "report_recipients", "buffer_channels"],
+  approver: ["cadence", "reminders", "late_window_hours", "notify_email", "report_recipients", "buffer_channels", "content_scope", "services", "audience_split", "dry_run", "tone_reference", "outreach"],
+  editor: ["cadence", "reminders", "notify_email", "report_recipients", "buffer_channels", "outreach"],
 };
 router.post(
   "/studio/settings",
@@ -359,6 +430,12 @@ router.post(
       }
     }
     if (key === "dry_run" && typeof value !== "boolean") throw new HttpError(422, "dry_run must be true or false.");
+    if (key === "outreach") {
+      const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+      const v = value || {};
+      if (!Array.isArray(v.days) || !v.days.every((d) => days.includes(d))) throw new HttpError(422, "Outreach days are not valid.");
+      if (!(Number(v.per_run) >= 1 && Number(v.per_run) <= 30)) throw new HttpError(422, "Comments per run must be between 1 and 30.");
+    }
     await setSetting(key, value, req.member.email);
     await audit(req.member.email, "setting.changed", key, { value: key === "tone_reference" ? "(text)" : value });
     res.json({ ok: true });
