@@ -104,6 +104,17 @@ Comments on buyers' LinkedIn posts, posted by the team from the EEC page. The wr
 
 On the tab: **Copy and open post**, paste on LinkedIn with "Commenting as" set to the EEC page, then **Mark posted**. **Write another version** sends it back to the writer (done within about an hour), **Skip** drops it. Comments not posted within 4 days are set aside. After a comment is posted, mark the result (no reply, they replied, conversation, enquiry); the writer leans towards the kinds of comment that get replies, and the weekly report includes the numbers. Nothing is ever posted automatically: LinkedIn does not allow automated comments from pages without its partner programme.
 
+## Human posts (from 11 November 2026)
+
+What the core team asked for, built into the engine:
+
+- **Five beats in every post:** the mistake the reader recognises, what it cost them, why it happens (in plain words), the exact fix ("Ask for"), and a reason to save it or send the keyword.
+- **Seven formats** (backend/src/social/formats.js, layouts in slidesV2.js): checks carousel, mistake carousel, mistake card, ready list, official update, quote comparison, good against bad. The server refuses posts that use the old formats, put the layouts in the wrong order, leave a photo cover without a photo, or use long lines.
+- **Design:** cream, olive green and yellow, Outfit, the EEC emblem with the company name, an audience pill (For buyers / For suppliers) and a DM keyword button.
+- **Pictures:** the writer generates them with Higgsfield. On submit the server downloads each one once and keeps it (social_photos), so a post never depends on an outside link. A change request can ask for a picture or a new picture; the writer adds it in its revision.
+- **Feedback:** every change request and comment from the last 60 days goes to the writer as team_feedback when it plans and revises. Repeated requests become rules.
+- **Planning:** the writer runs at 10:00, 12:00 and 14:00 IST. When any posting time in the next 3 days is empty it fills every open time in the next 7 days (batch kind "rolling").
+
 ## Database changes
 
 New installs: run `backend/sql/social_schema.sql` then `backend/sql/social_seed.sql`.

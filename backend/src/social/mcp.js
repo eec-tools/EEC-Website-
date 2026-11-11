@@ -10,7 +10,8 @@ const { getSettings, audit } = require("./settings");
 const service = require("./service");
 const notify = require("./notify");
 const { mondayOf, addDays, localParts, cadenceSlots, zonedToUtc } = require("./time");
-const { FORMATS, FORMAT_KEYS, SEGMENTS, SEGMENT_KEYS } = require("./formats");
+const { FORMATS, FORMAT_KEYS, SEGMENTS, SEGMENT_KEYS, CURRENT_FORMATS } = require("./formats");
+const { ICON_KEYS } = require("./slidesV2");
 const learning = require("./learning");
 const competitorWatch = require("./competitorWatch");
 const outreach = require("./outreach");
@@ -38,7 +39,7 @@ const POST_SCHEMA = S.obj(
     date: S.str("Local posting date YYYY-MM-DD (must be a cadence day for the channel)"),
     time: S.str("Optional local time HH:MM; defaults to the channel's cadence time"),
     kind: { type: "string", enum: ["text", "image", "carousel", "reel", "document"], description: "document = LinkedIn PDF carousel built from the slides (LinkedIn only, 3 to 12 pages)" },
-    format: { type: "string", enum: FORMAT_KEYS, description: "One of the 10 rotation formats" },
+    format: { type: "string", enum: CURRENT_FORMATS, description: "checks_carousel, mistake_carousel (carousel on Instagram/Facebook, document on LinkedIn) or a one-image format: mistake_card, ready_list, official_update, quote_compare, good_bad" },
     segment: { type: "string", enum: SEGMENT_KEYS, description: "The reader this post is written for" },
     audience: { type: "string", enum: ["buyer", "supplier", "both"] },
     market: S.str("Target market, e.g. UK, EU, GCC"),
@@ -52,20 +53,46 @@ const POST_SCHEMA = S.obj(
     first_comment: S.str("Optional first comment (Instagram, Facebook)"),
     slides: S.arr(
       S.obj({
-        type: { type: "string", enum: ["cover", "point", "list", "stat", "cta", "compare", "question"] },
-        kicker: S.str("cover, compare and question; max 60 chars"),
-        columns: S.arr(S.str(""), "compare only: the two column headings, e.g. [\"FOB\", \"Landed\"]"),
-        rows: S.arr(S.obj({ label: S.str(""), a: { type: ["boolean", "string"] }, b: { type: ["boolean", "string"] } }), "compare only: up to 7 rows; a/b true (dot), false (dash) or short text"),
-        number: S.str("point only"),
-        title: S.str("max 14 words (question: the buyer's question)"),
-        body: S.str("max 45 words (question: the answer)"),
-        items: S.arr(S.str(""), "list only, max 5"),
-        value: S.str("stat only, e.g. 10%"),
-        label: S.str("stat only"),
-        source: S.str("stat only"),
-        cta: S.str("cta only, button text"),
+        type: {
+          type: "string",
+          enum: ["photo_cover", "statement_cover", "why", "check", "saver", "mistake", "ready", "update", "quotes", "goodbad"],
+          description:
+            "Carousel: photo_cover or statement_cover first, then check/why slides, saver last. One image: mistake, ready, update, quotes or goodbad. Use \\n in title or accent to break the line where you want it.",
+        },
+        kicker: S.str("Small line above the headline, usually a question to the reader: 'Buying cardamom?' (max 40 chars)"),
+        title: S.str("The headline: the reader's mistake or loss, in their words (max 12 words). check: the pain line, e.g. 'Light pods are half empty.'"),
+        accent: S.str("Second headline line in green, the turn: 'Your customers noticed.' (max 8 words)"),
+        photo: S.str("photo_cover (required), mistake, ready, goodbad (optional): https link of the image you generated"),
+        cta: S.str("Covers: what the swipe gives, e.g. '3 checks that stop this'"),
+        step: S.str("check: '1 of 5'"),
+        name: S.str("check: the check's name, e.g. 'Litre weight'"),
+        icon: { type: "string", enum: ICON_KEYS, description: "check: icon" },
+        body: S.str("check: why it matters, explained so anyone gets it, e.g. 'Fill a 1 litre jug. Weigh it.' (max 25 words)"),
+        table: S.arr(S.obj({ label: S.str(""), value: S.str("") }, ["label", "value"]), "check: up to 4 rows, e.g. Best / 7 mm or bigger"),
+        big: S.obj({ value: S.str("e.g. 11%"), caption: S.str("e.g. moisture, at most") }, ["value"], "check: one big number instead of a table"),
+        swatches: S.arr(S.obj({ color: S.str("#RRGGBB"), label: S.str(""), note: S.str("") }, ["color", "label"]), "check: up to 3 colour swatches"),
+        good: S.obj({ title: S.str(""), text: S.str(""), items: S.arr(S.str(""), "") }, [], "why, goodbad, check: the right way"),
+        bad: S.obj({ title: S.str(""), text: S.str(""), items: S.arr(S.str(""), "") }, [], "why, goodbad, check: the wrong way"),
+        ask_label: S.str("Label on the dark box: 'Ask for' (default), 'Ask every supplier for', 'Do this instead'"),
+        ask: S.str("check (required): the exact words to put in an enquiry or say to the supplier (max 20 words)"),
+        rule_label: S.str("why: label, default 'The rule'"),
+        rule: S.str("why: the one rule that fixes it"),
+        items: S.arr(S.str(""), "saver, mistake, ready, goodbad: up to 5 short lines (max 10 words each)"),
+        offer: S.str("saver: what the keyword gets them, e.g. 'Get our 1-page towel checklist'"),
+        keyword: S.str("Saver and one-image posts: the DM keyword in capitals, e.g. TOWELS"),
+        got_label: S.str("mistake: default 'What you got'"),
+        got: S.arr(S.str(""), "mistake: up to 3 things that went wrong"),
+        why: S.str("mistake: why it happens, one line"),
+        intro: S.str("ready, goodbad: the line above the list"),
+        badge: S.str("update: e.g. 'Official update · Cotton'"),
+        value: S.str("update: the date or number, big, e.g. '31 Dec'"),
+        meaning: S.str("update: what it means for the reader, in two short sentences"),
+        source: S.str("update: who said it, e.g. 'DGFT notification, 4 Nov 2026'"),
+        columns: S.arr(S.str(""), "quotes: the two card titles, default Quote A / Quote B"),
+        rows: S.arr(S.obj({ label: S.str("") }, ["label"]), "quotes: the 3 or 4 numbers that differ"),
+        close: S.str("quotes: what to do, e.g. 'Ask both for these 3 numbers. Then compare the price.'"),
       }),
-      "Carousel or single image slides; the server renders them in EEC brand colours"
+      "The slides. The server draws them in the team's design (cream, green, yellow, EEC emblem)."
     ),
     media: S.arr(S.str(""), "Public image or video URLs, only when not using slides (reels need an .mp4)"),
     alt: S.arr(S.str(""), "Alt text per image, same order as slides/media"),
@@ -80,8 +107,8 @@ const POST_SCHEMA = S.obj(
 
 const BATCH_SCHEMA = S.obj(
   {
-    week_start: S.str("Monday of the posting week, YYYY-MM-DD"),
-    kind: { type: "string", enum: ["weekly", "fast_lane"] },
+    week_start: S.str("rolling: plan_from from the plan job (the first of the 7 days), YYYY-MM-DD"),
+    kind: { type: "string", enum: ["rolling", "fast_lane"], description: "rolling for the plan job" },
     plan: S.obj({}, [], "Storyline for the week: theme, audience split, why now, how the days connect"),
     experiment: S.str("The one experiment this week tests and how it is measured"),
     qa_summary: S.obj({}, [], "Checker findings and its one lesson"),
@@ -157,7 +184,34 @@ async function openSlots(settings, monday, livePosts) {
     .map((s) => ({ channel: s.channel, date: s.date, time: s.time }));
 }
 
-// view: "plan" (Friday writing), "revise" (rewriting sent-back posts), "research" (daily research).
+// Open posting times from the cadence between `from` (a date) and 7 days later, at least 2 hours away.
+async function openSlotsRange(settings, from, livePosts, { days = 7 } = {}) {
+  const tz = settings.timezone;
+  const until = addDays(from, days);
+  const minAt = service.now().getTime() + 2 * 3600000;
+  const mondays = [...new Set([mondayOf(from), mondayOf(addDays(from, days - 1))])];
+  const all = [];
+  for (const m of mondays) all.push(...(await openSlots(settings, m, livePosts)));
+  return all
+    .filter((s) => s.date >= from && s.date < until)
+    .filter((s) => zonedToUtc(s.date, s.time, tz).getTime() >= minAt)
+    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+}
+
+// What the team asked to change and said in comments: feedback every new post must take into account.
+async function teamFeedback(days = 60) {
+  const store = getStore();
+  const since = new Date(service.now().getTime() - days * 86400000).toISOString();
+  const rows = await store.list("social_comments", { where: { kind: { in: ["change_request", "comment"] }, created_at: { gte: since } }, order: ["created_at", "desc"], limit: 60 });
+  const out = [];
+  for (const c of rows) {
+    const p = c.post_id ? await store.get("social_posts", c.post_id) : null;
+    out.push({ at: c.created_at.slice(0, 10), by: c.author_name || c.author_email, kind: c.kind === "change_request" ? "change request" : "comment", feedback: c.body, on: p ? `${p.channel} ${p.format || ""}: ${clip(p.topic, 90)}` : undefined });
+  }
+  return out;
+}
+
+// view: "plan" (filling the next 7 days), "revise" (rewriting sent-back posts), "research" (daily research).
 async function getContext({ view = "plan" } = {}) {
   const store = getStore();
   const settings = await getSettings();
@@ -166,7 +220,7 @@ async function getContext({ view = "plan" } = {}) {
   const today = localParts(t, tz).date;
 
   if (view === "revise") {
-    return compact({ today, content_scope: settings.content_scope, services: settings.services, tone_reference: settings.tone_reference, rules: await activeRules(false) });
+    return compact({ today, content_scope: settings.content_scope, services: settings.services, tone_reference: settings.tone_reference, rules: await activeRules(false), team_feedback: (await teamFeedback(60)).slice(0, 25) });
   }
   if (view === "research") {
     const recent = await store.list("social_research", { where: { found_at: { gte: new Date(t.getTime() - 21 * 86400000).toISOString() } }, order: ["found_at", "desc"], limit: 60 });
@@ -178,7 +232,6 @@ async function getContext({ view = "plan" } = {}) {
     });
   }
 
-  const nextMonday = addDays(mondayOf(today), 7);
   const since = new Date(t.getTime() - 120 * 86400000).toISOString();
   const posts = await store.list("social_posts", { where: { slot_at: { gte: since } }, order: ["slot_at", "desc"] });
   const live = posts.filter((p) => service.LIVE.includes(p.status));
@@ -194,8 +247,11 @@ async function getContext({ view = "plan" } = {}) {
   return compact({
     today,
     timezone: tz,
-    next_week_start: nextMonday,
-    open_slots_next_week: await openSlots(settings, nextMonday, live),
+    // Fill every open slot in these 7 days (submit_batch kind "rolling", week_start = plan_from).
+    plan_from: today,
+    plan_to: addDays(today, 6),
+    open_slots: await openSlotsRange(settings, today, live),
+    team_feedback: await teamFeedback(60),
     content_scope: settings.content_scope,
     services: settings.services,
     audience_split: settings.audience_split,
@@ -225,7 +281,7 @@ async function getContext({ view = "plan" } = {}) {
       source_date: r.source_date,
     })),
     open_experiments: (await store.list("social_learning", { where: { kind: "experiment", status: "open" }, order: ["created_at", "desc"], limit: 5 })).map((l) => ({ id: l.id, title: l.title, measure: l.measure })),
-    formats: Object.fromEntries(Object.entries(FORMATS).map(([k, f]) => [k, f.label])),
+    formats: Object.fromEntries(CURRENT_FORMATS.map((k) => [k, FORMATS[k].label])),
     // Last formats used per channel, newest first, so the rotation never repeats one twice in a row.
     format_history: Object.fromEntries(
       ["linkedin_company", "instagram", "facebook"].map((ch) => [ch, shown.filter((p) => p.channel === ch).slice(0, 12).map((p) => p.format || "not set")])
@@ -297,15 +353,12 @@ async function startRun() {
   const reach = await outreach.due(t).catch(() => null);
   if (reach) jobs.push(reach);
 
-  // Friday, with Saturday and Sunday as catch-up if Friday's run did not complete.
-  if (["fri", "sat", "sun"].includes(lp.weekday)) {
-    const nextMonday = addDays(mondayOf(today), 7);
-    const batches = await store.list("social_batches", { where: { week_start: nextMonday, kind: "weekly", status: { neq: "deleted" } } });
-    if (!batches.length) {
-      const live = (await store.list("social_posts", { where: { slot_at: { gte: zonedToUtc(nextMonday, "00:00", tz).toISOString() } } })).filter((p) => service.LIVE.includes(p.status));
-      const open = await openSlots(settings, nextMonday, live);
-      if (open.length) jobs.push({ job: "plan_week", week_start: nextMonday, open_slots: open.length });
-    }
+  // Rolling plan: when any posting time in the next 3 days is still empty, fill every open time in the next 7 days.
+  {
+    const ahead = (await store.list("social_posts", { where: { slot_at: { gte: t.toISOString() } } })).filter((p) => service.LIVE.includes(p.status));
+    const open = await openSlotsRange(settings, today, ahead);
+    const soon = open.filter((o) => zonedToUtc(o.date, o.time, tz).getTime() < t.getTime() + 72 * 3600000);
+    if (soon.length && lp.hour >= 6) jobs.push({ job: "plan", plan_from: today, plan_to: addDays(today, 6), open_slots: open.length, empty_in_next_3_days: soon.length });
   }
 
   // Sunday from 18:00, with Monday as catch-up. Once per week.
@@ -447,7 +500,7 @@ async function reportExtras(start, end) {
 
 const TOOLS = {
   start_run: {
-    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, notes, competitors, learning, outreach, research, plan_week, report) in the order to do them, or a note that nothing is due.",
+    description: "Call first on every scheduled run. Returns the jobs due now (revise, recheck, notes, competitors, learning, research, outreach, plan, report) in the order to do them, or a note that nothing is due.",
     inputSchema: S.obj({}),
     run: () => startRun(),
   },
@@ -517,6 +570,8 @@ const TOOLS = {
         from_version: S.num(""),
         body: S.str("Full revised text"),
         slides: POST_SCHEMA.properties.slides,
+        kind: { type: "string", enum: ["image", "carousel", "document"], description: "Only when the request needs another post type (e.g. a picture added to a text post)" },
+        format: POST_SCHEMA.properties.format,
         alt: POST_SCHEMA.properties.alt,
         sources: POST_SCHEMA.properties.sources,
         claims: POST_SCHEMA.properties.claims,
@@ -526,6 +581,12 @@ const TOOLS = {
       ["post_id", "from_version", "body", "note"]
     ),
     run: (args) => service.submitRevision(args, "claude"),
+  },
+  clear_old_posts: {
+    description:
+      "ONLY when the owner explicitly asks in a conversation to clear the old posts. Never in a scheduled run. Drops every post that has not been published yet (waiting, changing, approved or in the Buffer queue) and takes it out of Buffer. Published posts stay.",
+    inputSchema: S.obj({ confirm: S.str('Exactly "REMOVE ALL UNPUBLISHED POSTS"'), reason: S.str("Why, in the owner's words") }, ["confirm", "reason"]),
+    run: (a) => service.removeUnpublished(a, "claude"),
   },
   mark_processed: {
     description: "Mark approver edits (version_ids) and comments (comment_ids) as learned from, so they are not returned again.",
@@ -657,7 +718,7 @@ const TOOLS = {
     description: "Call after each job from start_run, even when it found nothing, so the next run does not repeat it. summary: one line on what was done.",
     inputSchema: S.obj(
       {
-        job: { type: "string", enum: ["revise", "recheck", "notes", "competitors", "learning", "outreach", "research", "plan_week", "report"] },
+        job: { type: "string", enum: ["revise", "recheck", "notes", "competitors", "learning", "outreach", "research", "plan", "plan_week", "report"] },
         mode: { type: "string", enum: ["find", "rewrite"], description: "Outreach only: find (new comments drafted) or rewrite (only rewrites were done)" },
         summary: S.str("One line on what was done"),
         sources: S.arr(S.obj({ title: S.str(""), url: S.str(""), date: S.str("Source date"), used_for: S.str("Which post, finding or check it was used for") }, ["url"]), "Every source opened or used in this job (shown on the Studio Activity tab)"),

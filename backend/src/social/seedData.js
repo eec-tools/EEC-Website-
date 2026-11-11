@@ -49,7 +49,7 @@ const config = [
   ["dry_run", true, "SAFETY: while true, approving does not call Buffer; posts are marked as scheduled (dry run). Set false at go-live."],
   [
     "engine_runs",
-    ["08:12", "09:12", "10:12", "11:12", "12:12", "13:12", "14:12", "15:12", "16:12", "17:12", "18:12", "19:12", "20:12"],
+    ["10:00", "12:00", "14:00"],
     "Local times the scheduled Claude task runs. Used to tell people when a requested change will be ready. Keep in step with the task's schedule.",
   ],
   ["late_window_hours", 6, "A post approved after its time but within this many hours goes out straight away; later than that it is marked missed."],

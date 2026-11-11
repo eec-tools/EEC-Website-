@@ -31,11 +31,11 @@ async function slidesFor(postId, version) {
   const v = await getStore().list("social_post_versions", { where: { post_id: post.post_id, version } });
   return v.length ? { post, slides: v[0].slides || [] } : null;
 }
-async function cachedSlide(postId, version, slides, i) {
+async function cachedSlide(postId, version, slides, i, audience) {
   const key = `${postId}/${version}/${i}`;
   if (!rendered.has(key)) {
     if (rendered.size > 60) rendered.delete(rendered.keys().next().value);
-    rendered.set(key, await renderSlide(slides, i));
+    rendered.set(key, await renderSlide(slides, i, { audience }));
   }
   return rendered.get(key);
 }
@@ -53,7 +53,7 @@ router.get(
     const found = Number.isInteger(version) ? await slidesFor(req.params.postId, version) : null;
     if (!found || !found.slides.length) return res.status(404).end();
     const pages = [];
-    for (let i = 0; i < found.slides.length; i++) pages.push(await cachedSlide(req.params.postId, version, found.slides, i));
+    for (let i = 0; i < found.slides.length; i++) pages.push(await cachedSlide(req.params.postId, version, found.slides, i, found.post.audience));
     sendCached(res, "application/pdf", buildPdf(pages, { title: found.post.topic }));
   })
 );
@@ -66,7 +66,7 @@ router.get(
     if (!Number.isInteger(n) || n < 1 || !Number.isInteger(version)) return res.status(404).end();
     const found = await slidesFor(req.params.postId, version);
     if (!found || n > found.slides.length) return res.status(404).end();
-    sendCached(res, "image/jpeg", await cachedSlide(req.params.postId, version, found.slides, n - 1));
+    sendCached(res, "image/jpeg", await cachedSlide(req.params.postId, version, found.slides, n - 1, found.post.audience));
   })
 );
 
