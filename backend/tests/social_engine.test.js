@@ -101,10 +101,12 @@ const liBody = (topic) =>
   `𝗜𝗻𝗱𝗶𝗮'𝘀 ${topic} market is opening new options for buyers.\n\nCompare landed cost, specifications and supplier capability before you commit.\n\nAt EEC, we help buyers compare offers through our paid Supplier Background Check.\n\nDM "SPICE" or visit https://www.eectrade.com/services.\n\nEEC | Your India Sourcing Office\n\n#IndiaSourcing #Procurement #SupplyChain #FoodIngredients #InternationalTrade`;
 const igBody = `A clear specification makes Indian spice quotes comparable.\n\nSwipe for the four points to put in your next enquiry.\n\nMessage us SPICE and we will send the checklist.\n\neectrade.com\n\n#Sourcing #Procurement #Spices #SupplyChain #FoodIngredients`;
 const slides = [
-  { type: "cover", title: "A clear specification makes spice quotes comparable" },
-  { type: "list", title: "Put these in your enquiry", items: ["Grade and origin", "Moisture limits", "Packing", "Shipment window"] },
-  { type: "cta", title: "Planning spice sourcing?", cta: "Comment SPICE" },
+  { type: "statement_cover", kicker: "Buying spices?", title: "Two quotes. Same spice name.", accent: "Not the same spice.", cta: "2 checks that stop this" },
+  { type: "check", step: "1 of 2", name: "Moisture", icon: "moisture", title: "Wet spice arrives mouldy.", body: "Dry spice keeps its colour at sea.", big: { value: "11%", caption: "moisture, at most" }, ask: "Moisture limit, tested before loading" },
+  { type: "check", step: "2 of 2", name: "Grade", icon: "tag", title: "Same name, different grade.", body: "Ask for the grade by name.", table: [{ label: "Grade", value: "In writing" }], ask: "The grade and origin of this lot" },
+  { type: "saver", title: "Before you compare prices:", items: ["Moisture limit", "Grade and origin"], offer: "Get our spice checklist", keyword: "SPICE" },
 ];
+const card = (topic) => [{ type: "mistake", kicker: `Buying ${topic}?`, title: "You picked the cheaper quote.", accent: "Your customers noticed.", got: ["Lower grade than you expected"], why: "The same name can mean many grades.", items: ["The grade in writing"], keyword: "SPICE" }];
 
 function weekBatch(extra = {}) {
   return {
@@ -113,11 +115,11 @@ function weekBatch(extra = {}) {
     plan: { theme: "Opportunities in Indian food sourcing" },
     experiment: "Carousel vs single image on Instagram",
     posts: [
-      { channel: "linkedin_company", date: "2026-11-09", kind: "text", pillar: "Food and ingredients", topic: "Spice specifications", body: liBody("spice"), sources: src, scores: goodScores },
-      { channel: "linkedin_company", date: "2026-11-11", kind: "text", pillar: "Agricultural commodities", topic: "Rice landed cost", body: liBody("rice"), sources: src, scores: goodScores },
-      { channel: "linkedin_company", date: "2026-11-13", kind: "text", pillar: "Home textiles", topic: "Towel GSM checks", body: liBody("towel"), sources: src, scores: goodScores },
-      { channel: "instagram", date: "2026-11-10", kind: "carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody, slides, alt: ["a", "b", "c"], scores: goodScores },
-      { channel: "facebook", date: "2026-11-10", kind: "carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody.replace("#FoodIngredients", ""), slides, alt: ["a", "b", "c"], scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-09", kind: "image", format: "mistake_card", pillar: "Food and ingredients", topic: "Spice specifications", body: liBody("spice"), slides: card("spice"), alt: ["a"], sources: src, scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-11", kind: "image", format: "mistake_card", pillar: "Agricultural commodities", topic: "Rice landed cost", body: liBody("rice"), slides: card("rice"), alt: ["a"], sources: src, scores: goodScores },
+      { channel: "linkedin_company", date: "2026-11-13", kind: "image", format: "mistake_card", pillar: "Home textiles", topic: "Towel GSM checks", body: liBody("towel"), slides: card("towels"), alt: ["a"], sources: src, scores: goodScores },
+      { channel: "instagram", date: "2026-11-10", kind: "carousel", format: "checks_carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody, slides, alt: ["a", "b", "c", "d"], scores: goodScores },
+      { channel: "facebook", date: "2026-11-10", kind: "carousel", format: "checks_carousel", pillar: "Food and ingredients", topic: "Spice specification carousel", body: igBody.replace("#FoodIngredients", ""), slides, alt: ["a", "b", "c", "d"], scores: goodScores },
     ],
     ...extra,
   };
@@ -229,7 +231,7 @@ test("approve schedules in Buffer once; edits pull it back", async () => {
   const ig = (await store.list("social_posts", { where: { channel: "instagram" } }))[0];
   await service.approvePost(approver, ig.post_id);
   const igCreate = buffer.calls.filter((c) => c[0] === "create").pop()[1];
-  assert.equal(igCreate.media.length, 3);
+  assert.equal(igCreate.media.length, 4);
   assert.match(igCreate.media[0], /\/api\/social\/media\/P-20261110-ig-[0-9a-f]{4}\/1\/1\.jpg$/);
 });
 
@@ -363,8 +365,10 @@ test("connector: no approve or publish tools; context lists open slots", async (
   assert.ok(names.includes("submit_batch") && names.includes("submit_revision"));
   assert.ok(!names.some((n) => /approve|publish|schedule|post_now/.test(n)), names.join(","));
   const ctx = JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "get_context", arguments: {} } })).result.content[0].text);
-  assert.equal(ctx.next_week_start, "2026-11-09");
-  assert.equal(ctx.open_slots_next_week.filter((s) => s.channel === "linkedin_company").length, 3);
+  assert.equal(ctx.plan_from, "2026-11-06");
+  assert.equal(ctx.plan_to, "2026-11-12");
+  assert.deepEqual(ctx.open_slots.filter((s) => s.channel === "linkedin_company").map((s) => s.date), ["2026-11-09", "2026-11-11"], "today's 09:30 has passed; Friday 13 is outside the 7 days");
+  assert.ok(Object.keys(ctx.formats).includes("checks_carousel") && !Object.keys(ctx.formats).includes("checklist"), "only current formats are offered");
   const check = JSON.parse((await handleRpc({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "check_posts", arguments: weekBatch() } })).result.content[0].text);
   assert.equal(check.ok, true, JSON.stringify(check));
   assert.equal((await store.list("social_posts")).length, 0, "check_posts saves nothing");
@@ -383,20 +387,32 @@ test("start_run: says exactly which jobs are due, and nothing twice", async () =
 
   // Tuesday 07:12 IST: research is due until finish_job is called.
   setNow("2026-11-03T01:42:00Z");
-  assert.deepEqual((await jobs()).map((j) => j.job), ["research"]);
+  assert.deepEqual((await jobs()).map((j) => j.job), ["research", "plan"], "an empty calendar is filled straight away");
   await call("finish_job", { job: "research", summary: "3 findings" });
-  assert.deepEqual(await jobs(), []);
+  assert.deepEqual((await jobs()).map((j) => j.job), ["plan"]);
 
-  // Friday 07:12 IST: research and the plan for next week.
+  // Friday 07:12 IST: research, outreach and the rolling plan (Friday 09:30 and Saturday's posts are still empty).
   setNow("2026-11-06T01:42:00Z");
   let due = await jobs();
-  assert.deepEqual(due.map((j) => j.job), ["research", "outreach", "plan_week"]);
-  assert.equal(due[2].week_start, "2026-11-09");
-  assert.ok(due[2].open_slots >= 3);
+  assert.deepEqual(due.map((j) => j.job), ["research", "outreach", "plan"]);
+  assert.equal(due[2].plan_from, "2026-11-06");
+  assert.equal(due[2].plan_to, "2026-11-12");
+  assert.ok(due[2].empty_in_next_3_days >= 3);
   await call("finish_job", { job: "research" });
   await call("finish_job", { job: "outreach", mode: "find" });
+  const fill = {
+    week_start: "2026-11-06",
+    kind: "rolling",
+    posts: [
+      { ...weekBatch().posts[0], date: "2026-11-06", topic: "Cardamom grades" },
+      { ...weekBatch().posts[3], date: "2026-11-07", topic: "Rice checks" },
+      { ...weekBatch().posts[4], date: "2026-11-07", topic: "Rice checks" },
+    ],
+  };
+  const filled = await service.submitBatch(fill);
+  assert.equal(filled.ok, true, JSON.stringify(filled));
+  assert.ok(!(await jobs()).some((j) => j.job === "plan"), "nothing empty in the next 3 days: no plan");
   await service.submitBatch(weekBatch());
-  assert.deepEqual(await jobs(), [], "plan is done once the batch exists");
 
   // A post sent back makes revise due first.
   const [p] = await store.list("social_posts", { order: ["slot_at", "asc"] });
@@ -420,7 +436,7 @@ test("start_run: says exactly which jobs are due, and nothing twice", async () =
 
   // Lean views: revise context carries no posts or research.
   const ctx = await call("get_context", { view: "revise" });
-  assert.ok(ctx.today && !ctx.recent_posts && !ctx.research && !ctx.open_slots_next_week);
+  assert.ok(ctx.today && !ctx.recent_posts && !ctx.research && !ctx.open_slots);
 });
 
 test("lint: platform rules (hashtag cap, hook length, engagement bait, links)", () => {
@@ -721,12 +737,12 @@ test("competitors, enquiries, engagers and the run log", async () => {
   const extra = await studioData.insightsExtra(await store.list("social_posts"));
   assert.equal(extra.per_post[mon.post_id].enquiries, 1);
   assert.equal(extra.per_post[mon.post_id].buyer, 1);
-  assert.equal(extra.by_format["not set"].enquiries, 1);
+  assert.equal(extra.by_format.mistake_card.enquiries, 1);
   all = await studioData.listCompetitors();
   assert.ok(all.posts[0].why_it_works);
   const ctx = await rpc("get_context", { view: "plan" });
   assert.equal(ctx.competitor_posts.length, 1);
-  assert.ok(ctx.formats.document);
+  assert.ok(ctx.formats.checks_carousel);
 });
 
 test("database update not run yet: reads stay working and writes say what to run", async () => {
@@ -1016,4 +1032,83 @@ test("outreach: the writer drafts LinkedIn comments on buyers' posts; the team p
   const list = await outreach.list(service.now());
   assert.equal(list.targets.length, 3);
   assert.equal(list.stats.expired, 1);
+});
+
+test("human posts: layouts, generated photos kept on the server, picture added by a change request, team feedback, reset", async () => {
+  setNow("2026-11-06T05:00:00Z");
+  await fresh();
+  const photos = require("../src/social/photos");
+  const { renderSlide } = require("../src/social/slides");
+  // A small real PNG stands in for the generated photo.
+  const { Resvg } = require("@resvg/resvg-js");
+  const png = new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500"><rect width="400" height="500" fill="#6a9a3a"/></svg>').render().asPng();
+  const realFetch = global.fetch;
+  let downloads = 0;
+  global.fetch = async (url) => {
+    downloads += 1;
+    if (String(url).includes("broken")) return { ok: false, status: 404, headers: { get: () => null } };
+    return { ok: true, status: 200, headers: { get: () => String(png.length) }, arrayBuffer: async () => png.buffer.slice(png.byteOffset, png.byteOffset + png.length) };
+  };
+  try {
+    const cover = { type: "photo_cover", kicker: "Buying cardamom?", title: "The cheaper quote\nis often the expensive one.", photo: "https://cdn.example.com/cardamom.png" };
+    const post = {
+      channel: "instagram", date: "2026-11-10", kind: "carousel", format: "checks_carousel", audience: "buyer",
+      pillar: "Food and ingredients", topic: "Cardamom checks", body: igBody,
+      slides: [cover, slides[1], slides[2], slides[3]], alt: ["a", "b", "c", "d"], scores: goodScores,
+    };
+
+    // Layout rules.
+    const lint = (p) => rules.lintPost(p).filter((l) => l.level === "error").map((l) => l.code);
+    assert.deepEqual(lint(post), []);
+    assert.ok(lint({ ...post, slides: [{ ...cover, photo: undefined }, ...post.slides.slice(1)] }).includes("photo_missing"));
+    assert.ok(lint({ ...post, slides: post.slides.slice(0, 3) }).includes("format_layout"), "a carousel ends with a saver");
+    assert.ok(lint({ ...post, slides: [cover, { ...slides[1], ask: undefined }, slides[2], slides[3]] }).includes("ask_missing"));
+    assert.ok(lint({ ...post, slides: [cover, { ...slides[1], title: "This headline is far too long for anyone to read in three quick seconds" }, slides[2], slides[3]] }).includes("too_many_words"));
+    assert.ok(lint({ ...post, format: "mistake_card" }).includes("format_layout"), "a card is one image");
+    const old = await service.checkPosts({ week_start: "2026-11-06", kind: "rolling", posts: [{ ...post, format: "checklist" }] });
+    assert.ok(old.posts[0].errors.some((e) => e.code === "format"), "retired formats are refused");
+
+    // The photo is downloaded once and kept; the slide then points at the stored copy.
+    const res = await service.submitBatch({ week_start: "2026-11-06", kind: "rolling", posts: [post] });
+    assert.equal(res.ok, true, JSON.stringify(res));
+    const saved = await store.get("social_posts", res.posts[0].post_id);
+    assert.match(saved.slides[0].photo, /^photo:[0-9a-f]{20}$/);
+    const kept = await store.get("social_photos", saved.slides[0].photo.slice(6));
+    assert.ok(kept && kept.data.length > 100 && kept.width === 400);
+    assert.equal(downloads, 1);
+    const bad = await service.submitBatch({ week_start: "2026-11-06", kind: "rolling", posts: [{ ...post, date: "2026-11-12", topic: "Other", slides: [{ ...cover, photo: "https://cdn.example.com/broken.png" }, ...post.slides.slice(1)] }] });
+    assert.equal(bad.ok, false);
+    assert.match(bad.message, /Slide 1: Could not download the photo/);
+
+    // The slides render with the stored photo and the audience pill.
+    const jpg = await renderSlide(saved.slides, 0, { audience: "buyer" });
+    assert.ok(jpg.length > 20000 && jpg[0] === 0xff && jpg[1] === 0xd8);
+    for (let i = 1; i < saved.slides.length; i++) assert.ok((await renderSlide(saved.slides, i)).length > 10000);
+
+    // A LinkedIn card; the team asks for a picture. The writer adds one in its revision.
+    const li = await service.submitBatch({ week_start: "2026-11-06", kind: "rolling", posts: [{ ...weekBatch().posts[0], audience: "buyer" }] });
+    const card = await store.get("social_posts", li.posts[0].post_id);
+    await service.requestChange(approver, card.post_id, { note: "Add a picture of the spice, people like pictures", visuals: true });
+    const ctx = await rpc("get_context", { view: "plan" });
+    assert.ok(ctx.team_feedback.some((f) => /people like pictures/.test(f.feedback) && f.kind === "change request"), "every change request is feedback for new posts");
+    assert.ok((await rpc("get_context", { view: "revise" })).team_feedback.length >= 1);
+    const withPhoto = [{ ...card.slides[0], photo: "https://cdn.example.com/spice.png" }];
+    const rev = await rpc("submit_revision", { post_id: card.post_id, from_version: card.version, body: card.body, slides: withPhoto, note: "Added a photo of the spice, as asked" });
+    assert.equal(rev.ok, true, JSON.stringify(rev));
+    const after = await store.get("social_posts", card.post_id);
+    assert.match(after.slides[0].photo, /^photo:/);
+    assert.equal(after.change_request.state, "done");
+    assert.ok((await renderSlide(after.slides, 0, { audience: "buyer" })).length > 20000);
+
+    // The owner's reset: every unpublished post goes, published ones stay.
+    await store.update("social_posts", { post_id: saved.post_id }, { status: "posted" });
+    const refused = await rpcRaw("clear_old_posts", { confirm: "yes", reason: "x" });
+    assert.ok(refused.isError && /REMOVE ALL UNPUBLISHED POSTS/.test(refused.content[0].text));
+    const cleared = await rpc("clear_old_posts", { confirm: "REMOVE ALL UNPUBLISHED POSTS", reason: "New post format from 11 Nov" });
+    assert.equal(cleared.removed, 1);
+    assert.equal((await store.get("social_posts", saved.post_id)).status, "posted");
+    assert.equal((await store.get("social_posts", card.post_id)).status, "dropped");
+  } finally {
+    global.fetch = realFetch;
+  }
 });

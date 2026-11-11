@@ -19,7 +19,9 @@ const { lintPost, hasErrors, addUtm, ideaKey } = require("./rules");
 const { zonedToUtc, weekdayOf, addDays, mondayOf, localParts } = require("./time");
 const notify = require("./notify");
 const { defer } = require("./defer");
-const { FORMAT_KEYS, SEGMENT_KEYS } = require("./formats");
+const { FORMATS, FORMAT_KEYS, SEGMENT_KEYS, CURRENT_FORMATS } = require("./formats");
+const photos = require("./photos");
+const { TYPES: V2_TYPES, ICON_KEYS: V2_ICONS } = require("./slidesV2");
 
 const LIVE = ["pending", "changes_requested", "approved", "scheduled", "posting", "posted"];
 const EDITABLE = ["pending", "changes_requested", "approved", "scheduled", "failed"];
@@ -78,8 +80,32 @@ function requireRole(member, roles) {
 
 // ---------------- validation ----------------
 const compareCell = z.union([z.boolean(), z.string().max(40)]).optional();
+const panelSchema = z.object({ title: z.string().max(60).optional(), text: z.string().max(140).optional(), items: z.array(z.string().max(60)).max(4).optional() });
 const slideSchema = z.object({
-  type: z.enum(["cover", "point", "list", "stat", "cta", "compare", "question"]),
+  type: z.enum(["cover", "point", "list", "stat", "cta", "compare", "question", ...V2_TYPES]),
+  accent: z.string().max(120).optional(),
+  photo: z.string().max(1000).optional(),
+  step: z.string().max(20).optional(),
+  name: z.string().max(40).optional(),
+  icon: z.enum(V2_ICONS).optional(),
+  table: z.array(z.object({ label: z.string().max(40), value: z.string().max(60) })).max(4).optional(),
+  big: z.object({ value: z.string().max(10), caption: z.string().max(60).optional() }).optional(),
+  swatches: z.array(z.object({ color: z.string().regex(/^#[0-9a-fA-F]{6}$/), label: z.string().max(24), note: z.string().max(24).optional() })).max(3).optional(),
+  good: panelSchema.optional(),
+  bad: panelSchema.optional(),
+  ask_label: z.string().max(40).optional(),
+  ask: z.string().max(160).optional(),
+  rule_label: z.string().max(40).optional(),
+  rule: z.string().max(160).optional(),
+  offer: z.string().max(80).optional(),
+  keyword: z.string().regex(/^[A-Z0-9]{2,16}$/, "keyword: 2 to 16 capital letters or digits").optional(),
+  got_label: z.string().max(40).optional(),
+  got: z.array(z.string().max(80)).max(3).optional(),
+  why: z.string().max(200).optional(),
+  intro: z.string().max(120).optional(),
+  close: z.string().max(160).optional(),
+  badge: z.string().max(40).optional(),
+  meaning: z.string().max(200).optional(),
   columns: z.array(z.string().max(30)).max(2).optional(),
   rows: z.array(z.object({ label: z.string().max(120), a: compareCell, b: compareCell })).max(7).optional(),
   kicker: z.string().max(60).optional(),
@@ -130,7 +156,8 @@ const postInput = z.object({
 });
 const batchInput = z.object({
   week_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  kind: z.enum(["weekly", "fast_lane"]).default("weekly"),
+  // rolling: the next 7 days from week_start (any date); filled whenever fewer than 3 days are ready.
+  kind: z.enum(["weekly", "fast_lane", "rolling"]).default("weekly"),
   plan: z.record(z.string(), z.any()).default({}),
   experiment: z.string().max(500).optional(),
   qa_summary: z.record(z.string(), z.any()).default({}),
@@ -211,12 +238,12 @@ async function evaluatePosts(input, { replaceIds = new Set() } = {}) {
     } catch (e) {
       problems.push({ level: "error", code: "time", message: e.message });
     }
-    if (input.kind === "weekly") {
+    if (input.kind === "weekly" || input.kind === "rolling") {
       if (!(cad.days || []).length) problems.push({ level: "error", code: "channel_off", message: `${p.channel} has no posting days in the cadence.` });
       else if (!cad.days.includes(weekdayOf(p.date)))
         problems.push({ level: "error", code: "cadence", message: `${p.channel} posts on ${cad.days.join(", ")}; ${p.date} is a ${weekdayOf(p.date)}.` });
       if (p.date < input.week_start || p.date >= weekEnd)
-        problems.push({ level: "error", code: "week", message: `${p.date} is outside the week starting ${input.week_start}.` });
+        problems.push({ level: "error", code: "week", message: `${p.date} is outside the 7 days starting ${input.week_start}.` });
     }
     if (slotAt) {
       if (Date.parse(slotAt) < t.getTime() + 30 * 60000) problems.push({ level: "error", code: "past", message: `The time ${p.date} ${time} has passed or is less than 30 minutes away.` });
@@ -226,20 +253,27 @@ async function evaluatePosts(input, { replaceIds = new Set() } = {}) {
       if (live.some((x) => x.channel === p.channel && Date.parse(x.slot_at) === Date.parse(slotAt)))
         problems.push({ level: "error", code: "slot_taken", message: `${p.channel} already has a post at ${p.date} ${time}.` });
     }
+    if (input.kind !== "fast_lane" && (!p.format || (FORMATS[p.format] && FORMATS[p.format].retired)))
+      problems.push({ level: "error", code: "format", message: `Use one of the current formats: ${CURRENT_FORMATS.join(", ")}.` });
     const key = p.idea_key ? ideaKey(p.idea_key) : ideaKey(p.topic);
     const repeat = live.find((x) => x.channel === p.channel && x.idea_key === key);
     if (repeat) problems.push({ level: "error", code: "repeat", message: `Same idea as ${repeat.post_id} (${repeat.status}) on ${p.channel}.` });
 
-    if (input.kind === "weekly") {
-      perChannelCount[p.channel] = (perChannelCount[p.channel] || 0) + 1;
-      const wFrom = zonedToUtc(input.week_start, "00:00", tz).getTime();
-      const wTo = zonedToUtc(weekEnd, "00:00", tz).getTime();
+    if (input.kind === "weekly" || input.kind === "rolling") {
+      // The cap counts per calendar week (Monday to Sunday) of the post's own date.
+      const wk = mondayOf(p.date);
+      const ck = `${p.channel}|${wk}`;
+      perChannelCount[ck] = (perChannelCount[ck] || 0) + 1;
+      const wFrom = zonedToUtc(wk, "00:00", tz).getTime();
+      const wTo = zonedToUtc(addDays(wk, 7), "00:00", tz).getTime();
       const already = live.filter((x) => x.channel === p.channel && Date.parse(x.slot_at) >= wFrom && Date.parse(x.slot_at) < wTo).length;
       const cap = cad.max_per_week ?? 7;
-      if (already + perChannelCount[p.channel] > cap)
+      if (already + perChannelCount[ck] > cap)
         problems.push({ level: "error", code: "weekly_cap", message: `${p.channel} is capped at ${cap} posts a week.` });
     }
 
+    for (const [k, sl] of (p.slides || []).entries())
+      if (sl.photo && !photos.isRef(sl.photo) && !/^https:\/\/\S+$/i.test(sl.photo)) problems.push({ level: "error", code: "photo", message: `Slide ${k + 1}: photo must be an https link to the generated image.` });
     const row = toRow(p, { postId: "check", batchId: "check", slotAt, campaign });
     problems.push(...lintPost(row));
     results.push({ index: i, channel: p.channel, date: p.date, time, slot_at: slotAt, problems });
@@ -284,6 +318,13 @@ async function submitBatch(raw, actor = "claude") {
       message: "Nothing was saved. Fix the errors and submit the whole batch again.",
       posts: results.map((r) => ({ index: r.index, channel: r.channel, date: r.date, errors: r.problems.filter((x) => x.level === "error") })),
     };
+  }
+
+  // Generated photos are downloaded and kept now, so the post never depends on the outside link.
+  try {
+    for (const p of input.posts) if ((p.slides || []).some((x) => x.photo)) p.slides = await photos.ingestSlides(p.slides, actor);
+  } catch (e) {
+    return { ok: false, message: `Nothing was saved. ${e.message}` };
   }
 
   for (const id of replaceIds) {
@@ -665,11 +706,32 @@ async function dropPost(member, postId, { reason } = {}) {
   return p;
 }
 
+// The owner's reset: every post not yet published is dropped (and taken out of Buffer). Published posts stay.
+async function removeUnpublished({ confirm, reason } = {}, actor = "claude") {
+  if (confirm !== "REMOVE ALL UNPUBLISHED POSTS") throw new HttpError(422, 'confirm must be exactly "REMOVE ALL UNPUBLISHED POSTS".');
+  const store = getStore();
+  const posts = await store.list("social_posts", { where: { status: { in: ["pending", "changes_requested", "approved", "scheduled", "failed"] } } });
+  const done = [];
+  const skipped = [];
+  for (const post of posts) {
+    if (post.sending || post.status === "posting") {
+      skipped.push({ post_id: post.post_id, why: "being sent right now" });
+      continue;
+    }
+    await unschedule(post, actor, "removed with all unpublished posts").catch(() => null);
+    await store.update("social_posts", { post_id: post.post_id }, { status: "dropped", buffer_id: null, error: `Removed: ${String(reason || "").slice(0, 200)}`, updated_at: now().toISOString() });
+    done.push(post.post_id);
+  }
+  for (const b of [...new Set(posts.map((p) => p.batch_id))]) await refreshBatchStatus(b).catch(() => null);
+  await audit(actor, "posts.removed_unpublished", null, { count: done.length, reason: reason || null });
+  return { ok: true, removed: done.length, skipped };
+}
+
 // ---------------- Request a change ----------------
 // When the next scheduled run will have the change ready: the next run time plus a margin.
 function changeReadyBy(settings, from = now()) {
   const tz = settings.timezone;
-  const runs = (Array.isArray(settings.engine_runs) && settings.engine_runs.length ? settings.engine_runs : ["07:12", "11:12", "15:12", "19:12"]).slice().sort();
+  const runs = (Array.isArray(settings.engine_runs) && settings.engine_runs.length ? settings.engine_runs : ["10:00", "12:00", "14:00"]).slice().sort();
   const today = localParts(from, tz).date;
   for (let d = 0; d < 3; d++) {
     const date = addDays(today, d);
@@ -941,6 +1003,9 @@ const revisionSchema = z.object({
   from_version: z.number().int(),
   body: z.string().min(1).max(5000),
   slides: z.array(slideSchema).max(10).optional(),
+  // Only for a change request that needs it (e.g. a text post that should now carry a picture).
+  kind: z.enum(["text", "image", "carousel", "document"]).optional(),
+  format: z.enum(FORMAT_KEYS).optional(),
   alt: z.array(z.string().max(500)).max(10).optional(),
   sources: z.array(sourceSchema).max(20).optional(),
   claims: z.array(claimSchema).max(20).optional(),
@@ -959,8 +1024,17 @@ async function submitRevision(raw, actor = "claude") {
     return { ok: false, message: `Post is now at version ${post.version}, not ${input.from_version}. Read it again before revising.` };
   }
   const batch = await store.get("social_batches", post.batch_id);
+  if (input.slides && input.slides.some((x) => x.photo)) {
+    try {
+      input.slides = await photos.ingestSlides(input.slides, actor);
+    } catch (e) {
+      return { ok: false, message: `Nothing was saved. ${e.message}` };
+    }
+  }
   const next = {
     ...post,
+    kind: input.kind || post.kind,
+    format: input.format || post.format,
     body: addUtm(input.body, { channel: post.channel, campaign: `wk${String(batch ? batch.week_start : "").replace(/-/g, "")}`, content: post.post_id }),
     slides: input.slides || post.slides,
     alt: input.alt || post.alt,
@@ -972,6 +1046,8 @@ async function submitRevision(raw, actor = "claude") {
   if (hasErrors(lint)) return { ok: false, message: "The revision breaks a rule; nothing was saved.", errors: lint.filter((l) => l.level === "error") };
   const [saved] = await store.update("social_posts", { post_id: post.post_id, version: post.version }, {
     body: next.body,
+    kind: next.kind,
+    ...(next.format ? { format: next.format } : {}),
     slides: next.slides,
     alt: next.alt,
     sources: next.sources,
@@ -1062,6 +1138,7 @@ async function recordFactCheck(raw, actor = "claude") {
 }
 
 module.exports = {
+  removeUnpublished,
   requestChange,
   cancelChange,
   retryChange,

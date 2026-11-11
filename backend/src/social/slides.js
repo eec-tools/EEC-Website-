@@ -176,10 +176,19 @@ function slideContent(s) {
   ];
 }
 
-async function renderSlide(slides, index, { quality = 88 } = {}) {
+const v2 = require("./slidesV2");
+const photos = require("./photos");
+const AUDIENCE = { buyer: "For buyers", supplier: "For suppliers", both: "Buyers and suppliers" };
+
+// opts.audience: the post's audience (buyer/supplier/both), shown as a pill on the new layouts.
+async function renderSlide(slides, index, { quality = 88, audience } = {}) {
   const s = slides[index];
   if (!s) throw new Error(`No slide ${index + 1}`);
-  const svg = await satori(frame(slideContent(s), { index, total: slides.length }), { width: W, height: H, fonts: loadFonts() });
+  const isNew = v2.TYPES.includes(s.type);
+  const node = isNew
+    ? v2.tree(s, { index, total: slides.length, audience: AUDIENCE[audience] || null, photo: s.photo ? await photos.dataUri(s.photo) : null })
+    : frame(slideContent(s), { index, total: slides.length });
+  const svg = await satori(node, { width: W, height: H, fonts: isNew ? v2.loadFonts() : loadFonts() });
   const img = new Resvg(svg, { fitTo: { mode: "width", value: W } }).render();
   const { data } = jpeg.encode({ data: Buffer.from(img.pixels), width: img.width, height: img.height }, quality);
   return data;

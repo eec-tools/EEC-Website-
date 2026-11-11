@@ -8,6 +8,46 @@ import { RequestChangeBox, ChangeStatus } from "./RequestChange";
 import EngagerLog from "./EngagerLog";
 
 const SLIDE_TYPES = ["cover", "point", "list", "stat", "cta", "compare", "question"];
+// The human layouts (November 2026). Their words can be edited here; the layout itself stays.
+const NEW_TYPES = { photo_cover: "Photo cover", statement_cover: "Cover", why: "Why it happens", check: "Check", saver: "Saver", mistake: "Mistake card", ready: "Ready list", update: "Official update", quotes: "Quote comparison", goodbad: "Good against bad" };
+const NEW_FIELDS = [
+  ["kicker", "Small line above the headline"],
+  ["title", "Headline"],
+  ["accent", "Second headline line (green)"],
+  ["body", "Explanation"],
+  ["ask", "Ask for"],
+  ["rule", "The rule"],
+  ["why", "Why"],
+  ["intro", "Line above the list"],
+  ["meaning", "What it means for you"],
+  ["close", "Closing line"],
+  ["offer", "What the keyword gets them"],
+  ["keyword", "DM keyword"],
+];
+
+function NewSlideFields({ s, i, set, field }) {
+  return (
+    <div className="space-y-1.5">
+      {NEW_FIELDS.filter(([k]) => s[k] !== undefined || ["title"].includes(k)).map(([k, label]) => (
+        <label key={k} className="block">
+          <span className="text-[11px] text-[#6B768C]">{label}</span>
+          {["body", "why", "meaning", "ask", "rule", "close"].includes(k) ? (
+            <textarea className={field} rows={2} value={s[k] || ""} onChange={(e) => set(i, { [k]: e.target.value })} />
+          ) : (
+            <input className={field} value={s[k] || ""} onChange={(e) => set(i, { [k]: k === "keyword" ? e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") : e.target.value })} />
+          )}
+        </label>
+      ))}
+      {Array.isArray(s.items) ? (
+        <label className="block">
+          <span className="text-[11px] text-[#6B768C]">List (one per line)</span>
+          <textarea className={field} rows={4} value={s.items.join("\n")} onChange={(e) => set(i, { items: e.target.value.split("\n").slice(0, 5) })} />
+        </label>
+      ) : null}
+      {s.photo ? <p className="text-[11px] text-[#6B768C]">Has a photo. To change the picture, use Request a change and say what it should show.</p> : null}
+    </div>
+  );
+}
 // The checker's six scores, in plain words, with the minimum each must reach.
 const SCORES = [
   ["stop", "Hook", 8],
@@ -40,12 +80,17 @@ function SlideEditor({ slides, onChange }) {
         <div key={i} className="rounded-md border border-[#E6EBF2] p-3">
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-[#44506A]">
             Slide {i + 1}
-            <select className="rounded border border-[#D5DCE8] px-1 py-0.5 text-xs" value={s.type} onChange={(e) => set(i, { type: e.target.value })}>
-              {SLIDE_TYPES.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
+            {NEW_TYPES[s.type] ? (
+              <span className="rounded bg-[#F2F5EA] px-1.5 py-0.5 font-medium text-[#465C1E]">{NEW_TYPES[s.type]}</span>
+            ) : (
+              <select className="rounded border border-[#D5DCE8] px-1 py-0.5 text-xs" value={s.type} onChange={(e) => set(i, { type: e.target.value })}>
+                {SLIDE_TYPES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+            )}
           </div>
+          {NEW_TYPES[s.type] ? <NewSlideFields s={s} i={i} set={set} field={field} /> : <>
           {s.type === "cover" ? <input className={`mb-2 ${field}`} placeholder="Small label above the title" value={s.kicker || ""} onChange={(e) => set(i, { kicker: e.target.value })} /> : null}
           {s.type === "stat" ? (
             <div className="mb-2 grid grid-cols-3 gap-2">
@@ -62,6 +107,7 @@ function SlideEditor({ slides, onChange }) {
             <textarea className={field} rows={2} placeholder="Body" value={s.body || ""} onChange={(e) => set(i, { body: e.target.value })} />
           ) : null}
           {s.type === "cta" ? <input className={`mt-2 ${field}`} placeholder="Button text" value={s.cta || ""} onChange={(e) => set(i, { cta: e.target.value })} /> : null}
+          </>}
         </div>
       ))}
     </div>

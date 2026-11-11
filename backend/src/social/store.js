@@ -30,6 +30,7 @@ const KEYS = {
   social_competitor_learnings: "id",
   social_outreach_targets: "id",
   social_outreach_comments: "id",
+  social_photos: "id",
 };
 
 // ---------- Supabase ----------

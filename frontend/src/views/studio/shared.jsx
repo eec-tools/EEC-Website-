@@ -65,6 +65,13 @@ export function Pill({ children, className = "" }) {
 }
 
 export const FORMATS = {
+  checks_carousel: "Checks carousel",
+  mistake_carousel: "Mistake carousel",
+  mistake_card: "Mistake card",
+  ready_list: "Ready list",
+  official_update: "Official update",
+  quote_compare: "Quote comparison",
+  good_bad: "Good against bad",
   document: "Document carousel (PDF)",
   comparison: "Comparison infographic",
   number: "One-number infographic",

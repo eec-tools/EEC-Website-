@@ -26,7 +26,7 @@ const OUT_OF_SCOPE = /\b(furniture|timber|wooden decor|wood decor|pharmaceutical
 const BAD_LOCATION = /\b(mumbai[- ]based|india[- ]headquartered|singapore[- ]registered|headquartered in mumbai|headquartered in india)\b/gi;
 const ABSOLUTE = /\b(all (?:our |of our )?suppliers (?:are|hold|have)|fully certified suppliers|100% (?:verified|compliant|guaranteed))\b/gi;
 const GUARANTEE = /\bguarantee(?:d|s)?\b/gi;
-const { FORMAT_KEYS } = require("./formats");
+const { FORMAT_KEYS, FORMAT_SLIDES } = require("./formats");
 // Words that make a post read as advertising rather than a serious B2B note.
 const HYPE = /\b(game[- ]?changer|unlock|secret|hack|skyrocket|supercharge|revolutioni[sz]e|don't miss|must[- ]have|mind[- ]blowing|insane|crushing it|10x)\b/i;
 // Mathematical bold / sans-serif bold letters (no longer used for hooks).
@@ -112,11 +112,18 @@ function lintPost(post) {
     if (words(s.body) > 45) add("error", "slide_body", `Slide ${i + 1}: body has ${words(s.body)} words (max 45).`);
     if ((s.items || []).length > 5) add("error", "slide_items", `Slide ${i + 1}: more than 5 list items.`);
     if (s.type === "compare" && (!(s.rows || []).length || (s.rows || []).length > 7)) add("error", "slide_rows", `Slide ${i + 1}: a comparison needs 1 to 7 rows.`);
-    const slideText = [s.kicker, s.title, s.body, s.cta, ...(s.items || []), s.value, s.label, ...(s.columns || []), ...(s.rows || []).flatMap((r) => [r.label, typeof r.a === "string" ? r.a : "", typeof r.b === "string" ? r.b : ""])].filter(Boolean).join(" ");
+    const panel = (p) => (p ? [p.title, p.text, ...(p.items || [])] : []);
+    const slideText = [
+      s.kicker, s.title, s.accent, s.body, s.cta, ...(s.items || []), s.value, s.label, s.name, s.ask, s.rule, s.offer, s.why, s.intro, s.close, s.badge, s.meaning,
+      ...(s.got || []), ...(s.table || []).flatMap((r) => [r.label, r.value]), s.big && s.big.caption, ...panel(s.good), ...panel(s.bad),
+      ...(s.columns || []), ...(s.rows || []).flatMap((r) => [r.label, typeof r.a === "string" ? r.a : "", typeof r.b === "string" ? r.b : ""]),
+    ].filter(Boolean).join(" ");
     if (CONTRACTION.test(slideText)) add("error", "slide_contractions", `Slide ${i + 1}: contains a contraction.`);
     CONTRACTION.lastIndex = 0;
     if (/[–—]/.test(slideText)) add("error", "slide_dashes", `Slide ${i + 1}: contains an em or en dash.`);
   }
+
+  out.push(...lintHuman(post));
 
   const hasFigure = /\d[\d,.]*\s?(%|percent|million|billion|tonnes|crore|lakh)|\$\s?\d|\b(19|20)\d{2}\b/i.test(body);
   if (hasFigure && !(post.sources || []).length) add("error", "sources", "The post states figures or dates but lists no sources.");
@@ -132,6 +139,47 @@ function lintPost(post) {
 
   CONTRACTION.lastIndex = 0;
   GUARANTEE.lastIndex = 0;
+  return out;
+}
+
+// The human post formats (November 2026): the right layouts in the right order, short plain lines,
+// a photo on every photo cover, and a short caption.
+const words = (x) => String(x || "").replace(/\n/g, " ").split(/\s+/).filter(Boolean).length;
+function lintHuman(post) {
+  const out = [];
+  const add = (level, code, message) => out.push({ level, code, message });
+  const spec = FORMAT_SLIDES[post.format];
+  if (!spec) return out;
+  const slides = post.slides || [];
+  const types = slides.map((x) => x.type);
+  if (spec.only) {
+    if (post.kind !== "image" || slides.length !== 1 || types[0] !== spec.only)
+      add("error", "format_layout", `A ${post.format} post is one image (kind "image") with one "${spec.only}" slide.`);
+  } else {
+    if (!["carousel", "document"].includes(post.kind)) add("error", "format_layout", `A ${post.format} post is a carousel (Instagram, Facebook) or a document (LinkedIn).`);
+    if (slides.length < 4 || slides.length > 8) add("error", "format_layout", `A ${post.format} has 4 to 8 slides: a cover, 2 to 6 middle slides and a saver; this one has ${slides.length}.`);
+    if (!spec.first.includes(types[0])) add("error", "format_layout", `Slide 1 must be a cover (${spec.first.join(" or ")}).`);
+    if (types[types.length - 1] !== "saver") add("error", "format_layout", 'The last slide must be a "saver".');
+    const mid = types.slice(1, -1);
+    if (mid.some((t) => !spec.middle.includes(t))) add("error", "format_layout", `Middle slides must be ${spec.middle.join(" or ")}.`);
+  }
+  for (const [i, x] of slides.entries()) {
+    const n = i + 1;
+    if (x.type === "photo_cover" && !x.photo) add("error", "photo_missing", `Slide ${n}: a photo cover needs a photo. Generate one and put its link in "photo".`);
+    if (x.type === "check" && !x.ask) add("error", "ask_missing", `Slide ${n}: every check ends with the exact thing to ask for ("ask").`);
+    const limits = [
+      ["title", 12],
+      ["accent", 8],
+      ["body", 25],
+      ["ask", 20],
+      ["why", 20],
+      ["meaning", 28],
+      ["rule", 22],
+    ];
+    for (const [f, max] of limits) if (words(x[f]) > max) add("error", "too_many_words", `Slide ${n}: "${f}" has ${words(x[f])} words; keep it to ${max} or fewer. Short, plain lines.`);
+    for (const it of [...(x.items || []), ...(x.got || [])]) if (words(it) > 10) add("error", "too_many_words", `Slide ${n}: "${it}" is over 10 words.`);
+  }
+  if (String(post.body || "").length > 700) add("warn", "caption_long", "Caption over 700 characters. The image does the work: two or three short lines, then the keyword.");
   return out;
 }
 
