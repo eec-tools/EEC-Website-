@@ -504,6 +504,42 @@ const TOOLS = {
     inputSchema: S.obj({}),
     run: () => startRun(),
   },
+  preview_post: {
+    description:
+      "See the slides exactly as they will be posted (1080x1350, shown at half size). Pass post_id for a saved post, or slides (+ audience) to check drafts before submit_batch. Look at every image: is every line simple English a small shop owner understands; any repeated words or labels; anything cut off, overlapping, cramped or badly spaced; a large empty area; a photo that does not match the product. Each slide also reports text_scale: below 0.9 the words were shrunk to fit, so shorten them. photo 'dropped' means the card had no room for it.",
+    inputSchema: S.obj({
+      post_id: S.str("A saved post"),
+      slides: { type: "array", items: { type: "object" }, description: "Draft slides, same shape as in submit_batch (photo links are downloaded and kept)" },
+      audience: { type: "string", enum: ["buyer", "supplier", "both"] },
+    }),
+    run: async ({ post_id, slides, audience }) => {
+      const { renderSlideInfo } = require("./slides");
+      const photos = require("./photos");
+      let list = slides;
+      let who = audience;
+      if (post_id) {
+        const p = await getStore().get("social_posts", post_id);
+        if (!p) return { ok: false, error: `No post ${post_id}` };
+        list = p.slides;
+        who = who || p.audience;
+      }
+      if (!Array.isArray(list) || !list.length) return { ok: false, error: "This post has no slides to preview." };
+      if (list.length > 12) return { ok: false, error: "At most 12 slides." };
+      list = await photos.ingestSlides(list, "claude");
+      const content = [];
+      const report = [];
+      for (let i = 0; i < list.length; i++) {
+        const r = await renderSlideInfo(list, i, { audience: who, width: 540, quality: 80 });
+        const note = [];
+        if (r.text_scale < 0.9) note.push(`text shrunk to ${Math.round(r.text_scale * 100)}% to fit: shorten this slide`);
+        if (r.photo.startsWith("dropped")) note.push("photo left out: no room");
+        if (r.photo === "missing") note.push("photo could not be loaded");
+        report.push({ slide: i + 1, type: list[i].type, text_scale: r.text_scale, photo: r.photo, ...(note.length ? { fix: note.join("; ") } : {}) });
+        content.push({ type: "image", data: Buffer.from(r.data).toString("base64"), mimeType: "image/jpeg" });
+      }
+      return { mcp_content: [{ type: "text", text: JSON.stringify({ ok: true, post_id, slides: report }) }, ...content] };
+    },
+  },
   get_context: {
     description:
       "Context for one job. view 'plan' (default): open slots next week, scope, services, tone reference, writing rules (active = hard rules, candidate = soft), competitors, approved competitor learnings, never-repeat keys, recent posts with metrics, recent approver edits, research from the last 14 days, open experiments. view 'revise': scope, services, tone reference, rules. view 'research': scope, competitors, findings already filed.",
@@ -973,6 +1009,7 @@ async function handleRpc(msg) {
       if (!tool) return fail(-32602, `Unknown tool ${params && params.name}`);
       try {
         const result = await tool.run((params && params.arguments) || {});
+        if (result && Array.isArray(result.mcp_content)) return reply({ content: result.mcp_content });
         return reply({ content: [{ type: "text", text: JSON.stringify(compact(result)) }], isError: Boolean(result && result.ok === false) });
       } catch (e) {
         const db = require("./dbCheck");

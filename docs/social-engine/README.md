@@ -113,6 +113,8 @@ What the core team asked for, built into the engine:
 - **Design:** cream, olive green and yellow, Outfit, the EEC emblem with the company name, an audience pill (For buyers / For suppliers) and a DM keyword button.
 - **Pictures:** the writer generates them with Higgsfield. On submit the server downloads each one once and keeps it (social_photos), so a post never depends on an outside link. A change request can ask for a picture or a new picture; the writer adds it in its revision.
 - **Feedback:** every change request and comment from the last 60 days goes to the writer as team_feedback when it plans and revises. Repeated requests become rules.
+- **Look check:** before anything is submitted, a separate checker looks at every slide image (preview_post) for hard words, repetition, and anything cut off, crowded or badly spaced. The renderer itself measures every slide and drops an optional photo or shrinks the text before anything can spill over.
+- **Sizes:** every slide is 1080x1350 (4:5), the largest size Instagram's publishing API, Facebook and LinkedIn (image and document posts) all show in the feed.
 - **Planning:** the writer runs at 10:00, 12:00 and 14:00 IST. When any posting time in the next 3 days is empty it fills every open time in the next 7 days (batch kind "rolling").
 
 ## Database changes

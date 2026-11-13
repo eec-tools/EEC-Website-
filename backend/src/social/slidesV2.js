@@ -125,7 +125,7 @@ function askBox(label, text, style = {}) {
 function numbered(items, { size = 38, numBg = C.badge, numInk = C.dark } = {}) {
   return h(
     "div",
-    { flexDirection: "column" },
+    { flexDirection: "column", width: "100%", flexShrink: 1 },
     ...(items || []).slice(0, 5).map((t, i, a) =>
       h(
         "div",
