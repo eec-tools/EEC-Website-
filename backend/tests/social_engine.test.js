@@ -1112,3 +1112,29 @@ test("human posts: layouts, generated photos kept on the server, picture added b
     global.fetch = realFetch;
   }
 });
+
+test("preview_post shows the slides as images and says when text had to shrink", async () => {
+  const short = await rpcRaw("preview_post", {
+    audience: "buyer",
+    slides: [{ type: "quotes", kicker: "Buying cashews?", title: "You chose the cheaper quote.", rows: [{ label: "Broken nuts allowed (%)" }, { label: "Harvest year" }], close: "Ask both. Then compare.", keyword: "CASHEW" }],
+  });
+  assert.equal(short.content[0].type, "text");
+  const info = JSON.parse(short.content[0].text);
+  assert.equal(info.ok, true);
+  assert.equal(info.slides[0].text_scale, 1);
+  assert.equal(short.content[1].type, "image");
+  assert.equal(short.content[1].mimeType, "image/jpeg");
+  const jpg = Buffer.from(short.content[1].data, "base64");
+  assert.equal(jpg[0], 0xff);
+
+  const long = "Fabric fibre content and weight in grams per square metre, with an allowed range checked on bulk";
+  const crowded = await rpcRaw("preview_post", {
+    slides: [{ type: "ready", kicker: "Selling T-shirts to Europe?", title: "You sent your price.\nThe buyer never replied.\nThey needed details.", accent: "Send these with every price.", intro: "Have these ready:", items: [long, long, long, long, long], keyword: "TSHIRTS" }],
+  });
+  const crowdedInfo = JSON.parse(crowded.content[0].text);
+  assert.ok(crowdedInfo.slides[0].text_scale < 1, "crowded card shrinks to fit");
+  if (crowdedInfo.slides[0].text_scale < 0.9) assert.match(crowdedInfo.slides[0].fix, /shorten/);
+
+  const none = await rpc("preview_post", { post_id: "P-none" });
+  assert.equal(none.ok, false);
+});

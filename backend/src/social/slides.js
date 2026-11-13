@@ -185,16 +185,25 @@ const AUDIENCE = { buyer: "For buyers", supplier: "For suppliers", both: "Buyers
 // larger canvas (the same text, smaller once scaled to 1080 wide). On one-image cards the optional
 // photo goes first, before any text gets smaller.
 const SCALES = [1, 0.92, 0.85, 0.78, 0.72, 0.66];
+// Lays the slide out on a canvas wider and taller than the page; anything drawn right of the page
+// (a line that did not wrap) counts as not fitting, otherwise the height is where the page ends.
 async function contentHeight(s, ctx) {
   const tall = Math.round(ctx.h * 2.2);
-  const node = { type: "div", props: { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", width: ctx.w, height: tall }, children: [v2.tree(s, { ...ctx, measure: true })] } };
-  const svg = await satori(node, { width: ctx.w, height: tall, fonts: v2.loadFonts() });
+  const wide = Math.round(ctx.w * 1.4);
+  const node = { type: "div", props: { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", width: wide, height: tall }, children: [v2.tree(s, { ...ctx, measure: true })] } };
+  const svg = await satori(node, { width: wide, height: tall, fonts: v2.loadFonts() });
   const scale = 4;
-  const r = new Resvg(svg, { fitTo: { mode: "width", value: Math.round(ctx.w / scale) } }).render();
+  const r = new Resvg(svg, { fitTo: { mode: "width", value: Math.round(wide / scale) } }).render();
   const px = r.pixels;
+  const unit = wide / r.width;
+  const edge = Math.ceil(ctx.w / unit) + 1;
+  for (let y = 0; y < r.height; y++) {
+    const row = y * r.width * 4;
+    for (let x = edge; x < r.width; x++) if (px[row + x * 4 + 3] > 0) return Infinity;
+  }
   for (let y = r.height - 1; y >= 0; y--) {
     const row = y * r.width * 4;
-    for (let x = 0; x < r.width; x++) if (px[row + x * 4 + 3] > 0) return (y + 1) * (ctx.w / r.width);
+    for (let x = 0; x < edge; x++) if (px[row + x * 4 + 3] > 0) return (y + 1) * unit;
   }
   return 0;
 }
@@ -218,21 +227,31 @@ async function fitLayout(s, ctx) {
 }
 
 // opts.audience: the post's audience (buyer/supplier/both), shown as a pill on the new layouts.
-async function renderSlide(slides, index, { quality = 88, audience } = {}) {
+// opts.width: output width (default 1080; previews for the writer use a smaller one).
+// Returns the JPEG plus what the fit had to do: text_scale (1 = as designed) and whether the
+// optional photo was kept.
+async function renderSlideInfo(slides, index, { quality = 88, audience, width = W } = {}) {
   const s = slides[index];
   if (!s) throw new Error(`No slide ${index + 1}`);
   const isNew = v2.TYPES.includes(s.type);
   let svg;
+  const info = { text_scale: 1, photo: s.photo ? "kept" : "none" };
   if (isNew) {
     const ctx = { index, total: slides.length, audience: AUDIENCE[audience] || null, photo: s.photo ? await photos.dataUri(s.photo) : null };
+    if (s.photo && !ctx.photo) info.photo = "missing";
     const fit = await fitLayout(s, ctx);
+    info.text_scale = Math.round((W / fit.w) * 100) / 100;
+    if (ctx.photo && !fit.photo) info.photo = "dropped: no room on the card";
     svg = await satori(v2.tree(s, fit), { width: fit.w, height: fit.h, fonts: v2.loadFonts() });
   } else {
     svg = await satori(frame(slideContent(s), { index, total: slides.length }), { width: W, height: H, fonts: loadFonts() });
   }
-  const img = new Resvg(svg, { fitTo: { mode: "width", value: W } }).render();
+  const img = new Resvg(svg, { fitTo: { mode: "width", value: width } }).render();
   const { data } = jpeg.encode({ data: Buffer.from(img.pixels), width: img.width, height: img.height }, quality);
-  return data;
+  return { data, ...info };
+}
+async function renderSlide(slides, index, opts = {}) {
+  return (await renderSlideInfo(slides, index, opts)).data;
 }
 
-module.exports = { renderSlide, W, H };
+module.exports = { renderSlide, renderSlideInfo, W, H };
