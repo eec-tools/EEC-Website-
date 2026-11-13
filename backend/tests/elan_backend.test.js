@@ -292,9 +292,24 @@ test("download forbidden for other user", async () => {
 test("create lead", async () => {
   const r = await axios.post(
     `${API}/leads`,
-    { name: "TEST_Lead", email: `lead.${TS}@example.com`, message: "Hello, I want to book a call." },
+    { name: "TEST_Lead", email: `lead.${TS}@example.com`, message: "Hello, I want to book a call.", elapsed_ms: 10000 },
     { validateStatus: () => true }
   );
   assert.equal(r.status, 200);
   assert.ok("lead_id" in r.data);
+});
+
+test("lead honeypot and too-fast submissions are silently dropped", async () => {
+  const base = { name: "TEST_Bot", email: `bot.${TS}@example.com`, message: "Spam spam spam spam." };
+  const filled = await axios.post(`${API}/leads`, { ...base, elapsed_ms: 10000, fax_number: "123" }, { validateStatus: () => true });
+  assert.equal(filled.status, 200);
+  assert.equal(filled.data.lead_id, null);
+  const fast = await axios.post(`${API}/leads`, { ...base, elapsed_ms: 100 }, { validateStatus: () => true });
+  assert.equal(fast.status, 200);
+  assert.equal(fast.data.lead_id, null);
+});
+
+test("lead rejects invalid input", async () => {
+  const r = await axios.post(`${API}/leads`, { name: "x", email: "not-an-email", message: "short", elapsed_ms: 10000 }, { validateStatus: () => true });
+  assert.ok(r.status >= 400 && r.status < 500);
 });

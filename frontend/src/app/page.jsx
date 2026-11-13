@@ -372,7 +372,12 @@ export default function Home() {
               a: <>{a}{link && <> <Link href={link} className="text-[#012D76] hover:underline font-medium">{linkText}.</Link></>}</>,
             }))} />
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border hairline bg-[#FFFFFF] p-6">
-            <p className="text-[#3A4759] text-sm">Still have questions? Tell us what you need.</p>
+            <p className="text-[#3A4759] text-sm">
+              Still have questions? Tell us what you need, or reach us at{" "}
+              <a href={`mailto:${COMPANY.contactEmail}`} className="text-[#012D76] underline underline-offset-2" data-testid="home-contact-email">{COMPANY.contactEmail}</a>
+              {" "}or <a href={COMPANY.phoneHref} className="text-[#012D76] underline underline-offset-2">{COMPANY.phone}</a>
+              {" "}(<Link href="/contact" className="text-[#012D76] underline underline-offset-2">all contact details</Link>).
+            </p>
             <Link href="/buyer-service-request" className="eec-btn-primary" data-testid="faq-cta">
               Request a Buyer Service <ArrowUpRight size={14} />
             </Link>

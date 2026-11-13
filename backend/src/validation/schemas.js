@@ -93,12 +93,12 @@ const supplierApplicationSchema = z.object({
 });
 
 const contactLeadSchema = z.object({
-  name: z.string().min(1),
-  email,
-  phone: z.string().nullable().optional(),
-  company: z.string().nullable().optional(),
-  message: z.string().min(1),
-  source: z.string().default("contact"),
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(254),
+  phone: z.string().trim().max(40).nullable().optional(),
+  company: z.string().trim().max(160).nullable().optional(),
+  message: z.string().trim().min(10).max(5000),
+  source: z.string().max(60).default("contact"),
 });
 
 const newsletterSubscribeSchema = z.object({

@@ -312,7 +312,7 @@ export default function BuyerServiceRequest() {
               <ConsentCheckbox name="consent_accuracy_privacy" checked={form.consent_accuracy_privacy} onChange={set} error={errors.consent_accuracy_privacy}>
                 I confirm that the information provided is accurate to the best of my knowledge and agree to EEC
                 contacting me regarding this enquiry and processing my information under its{" "}
-                <Link href="/privacy" target="_blank" rel="noopener" className="underline text-[#012D76]">
+                <Link href="/privacy-policy" target="_blank" rel="noopener" className="underline text-[#012D76]">
                   Privacy Policy
                 </Link>
                 .
@@ -336,7 +336,7 @@ export default function BuyerServiceRequest() {
               <button type="submit" disabled={submitting} className="eec-btn-primary disabled:opacity-60" data-testid="submit-service-request">
                 {submitting ? "Submitting…" : "Submit Service Request"} <ArrowUpRight size={16} />
               </button>
-              <Link href="/privacy" target="_blank" rel="noopener" className="text-sm text-[#3A4759] underline">
+              <Link href="/privacy-policy" target="_blank" rel="noopener" className="text-sm text-[#3A4759] underline">
                 Privacy Policy
               </Link>
             </div>

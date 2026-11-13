@@ -1,14 +1,10 @@
 import Terms from "@/views/Terms";
 
 export const metadata = {
-  title: "Terms of Service | Elan Exports Consultancy",
-  description: "Terms of Service for Elan Exports Consultancy. Please read these terms carefully before using our platform and services.",
+  title: "Terms & Conditions | Elan Exports Consultancy",
+  description: "Terms & Conditions for Elan Exports Consultancy Pte. Ltd. Acceptable use of the website, user responsibilities, intellectual property, service availability and liability.",
   alternates: {
     canonical: "https://eectrade.com/terms",
-  },
-  robots: {
-    index: false,
-    follow: false,
   },
 };
 

@@ -39,3 +39,7 @@ EEC identifies, qualifies and audits manufacturers, then connects them with proc
 - Categories: https://eectrade.com/categories
 - Services (engagement models): https://eectrade.com/services
 - About / Leadership: https://eectrade.com/about
+- Contact: https://eectrade.com/contact
+- Privacy Policy: https://eectrade.com/privacy-policy
+- Terms & Conditions: https://eectrade.com/terms
+- Data Deletion Instructions: https://eectrade.com/data-deletion

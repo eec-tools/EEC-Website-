@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, LinkedinIcon, InstagramIcon, FacebookIcon, Loader2 } from "lucide-react";
+import { Menu, X, ArrowUpRight, Globe, Handshake, ShieldCheck, MapPin, ArrowRight, LinkedinIcon, InstagramIcon, FacebookIcon, Loader2, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { api, formatApiErrorDetail } from "@/lib/api";
 import NewBadge from "@/components/NewBadge";
+import { COMPANY } from "@/constants/company";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -16,6 +17,18 @@ const NAV = [
   { to: "/categories", label: "Categories" },
   { to: "/services", label: "Services", isNew: true },
   { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+];
+
+// Required on every page: the public legal links shown in the footer.
+const FOOTER_LEGAL_NAV = [
+  { to: "/", label: "Home" },
+  { to: "/about", label: "About Us" },
+  { to: "/services", label: "Services" },
+  { to: "/contact", label: "Contact Us" },
+  { to: "/privacy-policy", label: "Privacy Policy" },
+  { to: "/terms", label: "Terms & Conditions" },
+  { to: "/data-deletion", label: "Data Deletion" },
 ];
 
 function Logo({ size = "header" }) {
@@ -215,7 +228,7 @@ export default function NextLayout({ children }) {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 md:h-28 lg:h-32 flex items-center justify-between">
           <Logo />
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-5 lg:gap-8">
             {NAV.map((n) => {
               const isActive = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
               return (
@@ -378,12 +391,14 @@ export default function NextLayout({ children }) {
                 <FooterLink to="/login">Sign In</FooterLink>
                 <FooterLink to="/register">Register</FooterLink>
                 <li className="list-none">
-                  <a href="mailto:partners@eectrade.com" className="inline-flex items-center gap-1 text-[13px] text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors whitespace-nowrap">
-                    partners@eectrade.com <ArrowUpRight size={12} className="opacity-60 flex-shrink-0" aria-hidden="true" />
+                  <a href={`mailto:${COMPANY.contactEmail}`} className="inline-flex items-center gap-1 text-[13px] text-[#3A4759] hover:text-[#012D76] hover:underline transition-colors whitespace-nowrap">
+                    {COMPANY.contactEmail} <ArrowUpRight size={12} className="opacity-60 flex-shrink-0" aria-hidden="true" />
                   </a>
                 </li>
-                <FooterLink to="/privacy">Privacy Policy</FooterLink>
-                <FooterLink to="/terms">Terms of Service</FooterLink>
+                <FooterLink to="/contact">Contact Us</FooterLink>
+                <FooterLink to="/privacy-policy">Privacy Policy</FooterLink>
+                <FooterLink to="/terms">Terms &amp; Conditions</FooterLink>
+                <FooterLink to="/data-deletion">Data Deletion</FooterLink>
               </ul>
             </div>
 
@@ -436,14 +451,29 @@ export default function NextLayout({ children }) {
                     <p className="text-base font-bold text-[#012D76] leading-snug whitespace-nowrap">Singapore HQ</p>
                   </div>
                   <p className="text-sm text-[#616873] leading-relaxed mt-3 text-left">India &amp; Asia Operations<br/>Sourcing Network</p>
+                  <address className="not-italic text-xs text-[#616873] leading-relaxed mt-3 text-left">
+                    {COMPANY.legalName}<br />
+                    {COMPANY.addressFull}<br />
+                    <a href={COMPANY.phoneHref} className="inline-flex items-center gap-1.5 hover:text-[#012D76] hover:underline mt-1"><Phone size={12} aria-hidden="true" />{COMPANY.phone}</a><br />
+                    <a href={`mailto:${COMPANY.contactEmail}`} className="inline-flex items-center gap-1.5 hover:text-[#012D76] hover:underline"><Mail size={12} aria-hidden="true" />{COMPANY.contactEmail}</a>
+                  </address>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-[#E5EBF2] mt-10 pt-5 flex flex-col md:flex-row justify-between items-center gap-4">
-            <span className="text-xs text-[#616873] whitespace-nowrap">
-              © 2026 Elan Exports Consultancy Pte. Ltd. All rights reserved.
+          <div className="border-t border-[#E5EBF2] mt-10 pt-5">
+            <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-5" data-testid="footer-legal-nav">
+              {FOOTER_LEGAL_NAV.map((l) => (
+                <Link key={l.to} href={l.to} className="text-xs text-[#3A4759] hover:text-[#012D76] hover:underline">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          <div className="pb-1 flex flex-col md:flex-row justify-between items-center gap-4">
+            <span className="text-xs text-[#616873] text-center md:text-left" data-testid="footer-legal-name">
+              © {new Date().getFullYear()} {COMPANY.legalName} ({COMPANY.registrationNumberLabel} {COMPANY.registrationNumber}). All rights reserved.
             </span>
             <div className="flex items-center gap-2.5 flex-nowrap justify-center">
               <span className="text-xs text-[#616873] whitespace-nowrap">Follow Us</span>
