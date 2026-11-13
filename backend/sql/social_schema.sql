@@ -24,7 +24,7 @@ create table if not exists social_members (
 create table if not exists social_batches (
   batch_id     text primary key,
   week_start   date not null,
-  kind         text not null default 'weekly' check (kind in ('weekly', 'fast_lane')),
+  kind         text not null default 'weekly' check (kind in ('weekly', 'fast_lane', 'rolling')),
   status       text not null default 'pending'
                check (status in ('pending', 'partly_approved', 'approved', 'closed', 'deleted')),
   plan         jsonb not null default '{}'::jsonb,   -- storyline, audience split, experiment, notes
