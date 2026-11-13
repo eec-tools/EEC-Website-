@@ -180,15 +180,56 @@ const v2 = require("./slidesV2");
 const photos = require("./photos");
 const AUDIENCE = { buyer: "For buyers", supplier: "For suppliers", both: "Buyers and suppliers" };
 
+// Long words must never spill over the keyword button or off the page. The slide is laid out with
+// its height following the content; if that is taller than the page, it is laid out again on a
+// larger canvas (the same text, smaller once scaled to 1080 wide). On one-image cards the optional
+// photo goes first, before any text gets smaller.
+const SCALES = [1, 0.92, 0.85, 0.78, 0.72, 0.66];
+async function contentHeight(s, ctx) {
+  const tall = Math.round(ctx.h * 2.2);
+  const node = { type: "div", props: { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", width: ctx.w, height: tall }, children: [v2.tree(s, { ...ctx, measure: true })] } };
+  const svg = await satori(node, { width: ctx.w, height: tall, fonts: v2.loadFonts() });
+  const scale = 4;
+  const r = new Resvg(svg, { fitTo: { mode: "width", value: Math.round(ctx.w / scale) } }).render();
+  const px = r.pixels;
+  for (let y = r.height - 1; y >= 0; y--) {
+    const row = y * r.width * 4;
+    for (let x = 0; x < r.width; x++) if (px[row + x * 4 + 3] > 0) return (y + 1) * (ctx.w / r.width);
+  }
+  return 0;
+}
+async function fitLayout(s, ctx) {
+  if (s.type === "photo_cover") return { ...ctx, w: W, h: H };
+  const tries = [];
+  for (const k of SCALES) {
+    if (ctx.photo && v2.SINGLE.includes(s.type)) tries.push({ k, photo: ctx.photo });
+    tries.push({ k, photo: v2.SINGLE.includes(s.type) ? null : ctx.photo });
+  }
+  // keep the photo only at full size; after that the text matters more
+  const order = tries.filter((t, i) => !(t.photo && v2.SINGLE.includes(s.type) && t.k < 1));
+  let last;
+  for (const t of order) {
+    const w = Math.round(W / t.k);
+    const fit = { ...ctx, photo: t.photo, w, h: Math.round((w * H) / W) };
+    last = fit;
+    if ((await contentHeight(s, fit)) + 24 <= fit.h) return fit;
+  }
+  return last;
+}
+
 // opts.audience: the post's audience (buyer/supplier/both), shown as a pill on the new layouts.
 async function renderSlide(slides, index, { quality = 88, audience } = {}) {
   const s = slides[index];
   if (!s) throw new Error(`No slide ${index + 1}`);
   const isNew = v2.TYPES.includes(s.type);
-  const node = isNew
-    ? v2.tree(s, { index, total: slides.length, audience: AUDIENCE[audience] || null, photo: s.photo ? await photos.dataUri(s.photo) : null })
-    : frame(slideContent(s), { index, total: slides.length });
-  const svg = await satori(node, { width: W, height: H, fonts: isNew ? v2.loadFonts() : loadFonts() });
+  let svg;
+  if (isNew) {
+    const ctx = { index, total: slides.length, audience: AUDIENCE[audience] || null, photo: s.photo ? await photos.dataUri(s.photo) : null };
+    const fit = await fitLayout(s, ctx);
+    svg = await satori(v2.tree(s, fit), { width: fit.w, height: fit.h, fonts: v2.loadFonts() });
+  } else {
+    svg = await satori(frame(slideContent(s), { index, total: slides.length }), { width: W, height: H, fonts: loadFonts() });
+  }
   const img = new Resvg(svg, { fitTo: { mode: "width", value: W } }).render();
   const { data } = jpeg.encode({ data: Buffer.from(img.pixels), width: img.width, height: img.height }, quality);
   return data;

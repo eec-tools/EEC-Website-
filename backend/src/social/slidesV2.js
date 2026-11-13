@@ -170,35 +170,45 @@ function dots(index, total) {
     ...Array.from({ length: total }, (_, k) => h("div", { width: k === index ? 34 : 12, height: 12, borderRadius: 6, backgroundColor: k === index ? C.dark : C.line, marginLeft: 5, marginRight: 5 }))
   );
 }
-function photoBand(src, height) {
-  return src ? h("div", { width: "100%", height, borderRadius: 26, overflow: "hidden", marginTop: 34 }, img(src, 912, height, { objectFit: "cover", width: 912, height })) : null;
+function photoBand(src, height, ctx) {
+  const w = (ctx.w || W) - 168;
+  return src ? h("div", { width: "100%", height, borderRadius: 26, overflow: "hidden", marginTop: 34 }, img(src, w, height, { objectFit: "cover", width: w, height })) : null;
 }
+// The same words twice in a row read as a mistake: drop a default label the headline already says.
+const same = (a, b) => {
+  const n = (x) => String(x || "").toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+  return n(a) && n(b) && (n(a) === n(b) || n(b).startsWith(n(a)) || n(a).startsWith(n(b)));
+};
 
 // ---------- slides ----------
-function page(children, { index, total, audience, single }) {
+// ctx.w / ctx.h: the size the slide is laid out at (larger than 1080x1350 when the text is scaled
+// down to fit). ctx.measure: height follows the content, so the renderer can see whether it fits.
+function page(children, { index, total, audience, single, w = W, h: ht = H, measure }) {
   const right = single || total <= 1 ? (audience ? pill(audience) : null) : h("div", { fontSize: 24, fontWeight: 700, color: C.sub, letterSpacing: 2 }, `${index + 1} / ${total}`);
   return h(
     "div",
-    { width: W, height: H, flexDirection: "column", backgroundColor: C.bg, fontFamily: "Outfit", color: C.ink, padding: "72px 84px 70px" },
+    { width: w, ...(measure ? {} : { height: ht }), flexDirection: "column", backgroundColor: C.bg, fontFamily: "Outfit", color: C.ink, padding: "72px 84px 70px" },
     h("div", { alignItems: "center", justifyContent: "space-between" }, lockup(), right),
-    h("div", { flexDirection: "column", flexGrow: 1, flexShrink: 1 }, ...children),
+    h("div", { flexDirection: "column", flexGrow: measure ? 0 : 1, flexShrink: measure ? 0 : 1 }, ...children),
     !single && total > 1 ? dots(index, total) : null
   );
 }
 
 function photoCover(s, ctx) {
   const shade = "linear-gradient(180deg, rgba(18,40,14,0.80) 0%, rgba(18,40,14,0.74) 30%, rgba(18,40,14,0) 62%)";
+  const w = ctx.w || W;
+  const ht = ctx.h || H;
   return h(
     "div",
-    { width: W, height: H, position: "relative", backgroundColor: C.dark, fontFamily: "Outfit" },
-    ctx.photo ? img(ctx.photo, W, H, { position: "absolute", left: 0, top: 0, objectFit: "cover", width: W, height: H }) : null,
-    h("div", { position: "absolute", left: 0, top: 0, width: W, height: H, backgroundImage: shade }),
+    { width: w, height: ht, position: "relative", backgroundColor: C.dark, fontFamily: "Outfit" },
+    ctx.photo ? img(ctx.photo, w, ht, { position: "absolute", left: 0, top: 0, objectFit: "cover", width: w, height: ht }) : null,
+    h("div", { position: "absolute", left: 0, top: 0, width: w, height: ht, backgroundImage: shade }),
     h(
       "div",
-      { position: "absolute", left: 0, top: 0, width: W, height: H, flexDirection: "column", padding: "72px 84px 76px" },
+      { position: "absolute", left: 0, top: 0, width: w, height: ht, flexDirection: "column", padding: "72px 84px 76px" },
       h("div", { alignItems: "center", justifyContent: "space-between" }, lockup({ onPhoto: true }), ctx.audience ? pill(ctx.audience) : null),
       s.kicker ? h("div", { marginTop: 54 }, h("div", { backgroundColor: C.acc, color: C.ink, fontSize: 44, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", padding: "12px 24px" }, s.kicker)) : null,
-      h("div", { marginTop: 28, color: C.white, fontSize: sizeFor(s.title, [[40, 96], [60, 88], [90, 76], [999, 66]]), fontWeight: 800, lineHeight: 1.02, letterSpacing: -2, maxWidth: 912, flexDirection: "column" }, ...lines(s.title)),
+      h("div", { marginTop: 28, color: C.white, fontSize: sizeFor(`${s.title || ""} ${s.accent || ""}`, [[40, 96], [60, 88], [90, 76], [999, 66]]), fontWeight: 800, lineHeight: 1.02, letterSpacing: -2, maxWidth: w - 168, flexDirection: "column" }, ...lines(s.title), s.accent ? h("div", { flexDirection: "column", color: C.acc }, ...lines(s.accent)) : null),
       h("div", { width: 120, height: 6, backgroundColor: C.acc, marginTop: 34, borderRadius: 3 }),
       ctx.total > 1
         ? h(
@@ -233,7 +243,7 @@ function statementCover(s, ctx) {
 function why(s, ctx) {
   return page(
     [
-      kicker(s.kicker || "Why it happens", { marginTop: 90 }),
+      kicker(s.kicker || (same("Why it happens", s.title) ? null : "Why it happens"), { marginTop: 90 }),
       headline(s.title, s.accent, { big: [[40, 80], [70, 72], [999, 64]], style: { marginTop: 22 } }),
       h("div", { marginTop: 50 }, panels(s.good, s.bad)),
       askBox(s.rule_label || "The rule", s.rule, { marginTop: 40 }),
@@ -286,7 +296,14 @@ function visual(s) {
             "div",
             { alignItems: "center", padding: "26px 30px", borderRadius: 22, backgroundColor: ok ? C.soft : C.badSoft, fontSize: 38, fontWeight: 600, marginTop: ok ? 0 : 16 },
             mark(ok, 56),
-            h("div", { marginLeft: 22, flexShrink: 1 }, p.title || p.text || "")
+            p.title && p.text
+              ? h(
+                  "div",
+                  { flexDirection: "column", marginLeft: 22, flexShrink: 1 },
+                  h("div", { fontSize: 24, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", color: ok ? C.dark : C.bad }, p.title),
+                  h("div", { marginTop: 6, lineHeight: 1.25 }, p.text)
+                )
+              : h("div", { marginLeft: 22, flexShrink: 1 }, p.text || p.title || "")
           )
         )
     );
@@ -320,7 +337,7 @@ function check(s, ctx) {
 function saver(s, ctx) {
   return page(
     [
-      kicker(s.kicker || "Save this for your next order", { marginTop: 100 }),
+      kicker(s.kicker || (/^save this/i.test(s.title || "") ? null : "Save this for your next order"), { marginTop: 100 }),
       h(
         "div",
         { flexDirection: "column", marginTop: 36, backgroundColor: C.dark, borderRadius: 32, padding: "52px 50px", color: C.white },
@@ -348,7 +365,7 @@ function mistake(s, ctx) {
     [
       kicker(s.kicker, { marginTop: 54 }),
       headline(s.title, s.accent, { big: [[40, 84], [70, 78], [999, 68]], style: { marginTop: 16 } }),
-      ctx.photo ? photoBand(ctx.photo, 300) : null,
+      ctx.photo ? photoBand(ctx.photo, 340, ctx) : null,
       (s.got || []).length
         ? h(
             "div",
@@ -377,7 +394,7 @@ function ready(s, ctx) {
     [
       kicker(s.kicker, { marginTop: 90 }),
       headline(s.title, s.accent, { big: [[40, 86], [70, 80], [999, 70]], style: { marginTop: 20 } }),
-      ctx.photo ? photoBand(ctx.photo, 260) : null,
+      ctx.photo ? photoBand(ctx.photo, 340, ctx) : null,
       subText(s.intro, { marginTop: 40 }),
       h("div", { marginTop: 14 }, numbered((s.items || []).slice(0, ctx.photo ? 3 : 4))),
       ctaRow(s.keyword),
@@ -403,19 +420,32 @@ function update(s, ctx) {
 function quotes(s, ctx) {
   const cols = (s.columns && s.columns.length === 2 ? s.columns : ["Quote A", "Quote B"]).slice(0, 2);
   const rows = (s.rows || []).slice(0, 4).map((r) => (typeof r === "string" ? r : r.label));
-  const card = (title, i) =>
-    h(
-      "div",
-      { flexDirection: "column", flexGrow: 1, flexShrink: 1, flexBasis: 0, backgroundColor: C.white, border: `2px solid ${C.line}`, borderRadius: 26, padding: "30px 32px", marginLeft: i ? 22 : 0 },
-      h("div", { fontSize: 34, fontWeight: 800, marginBottom: 14 }, title),
-      ...rows.map((r) => h("div", { justifyContent: "space-between", fontSize: 32, padding: "16px 0", borderTop: `2px solid ${C.line}` }, h("div", { flexShrink: 1 }, r), h("div", { fontWeight: 800, color: C.bad }, "?")))
-    );
+  const cell = (child, style = {}) => h("div", { width: 190, flexShrink: 0, justifyContent: "center", alignItems: "center", ...style }, child);
+  const q = h("div", { width: 52, height: 52, borderRadius: 26, backgroundColor: C.badSoft, color: C.bad, fontSize: 32, fontWeight: 800, alignItems: "center", justifyContent: "center" }, "?");
   return page(
     [
-      kicker(s.kicker, { marginTop: 90 }),
+      kicker(s.kicker, { marginTop: 80 }),
       headline(s.title, s.accent, { big: [[40, 88], [70, 80], [999, 70]], style: { marginTop: 20 } }),
-      h("div", { marginTop: 54 }, ...cols.map(card)),
-      s.close ? h("div", { marginTop: 40, fontSize: 40, lineHeight: 1.3, color: C.sub, fontWeight: 500 }, s.close) : null,
+      h(
+        "div",
+        { flexDirection: "column", marginTop: 48, backgroundColor: C.white, border: `2px solid ${C.line}`, borderRadius: 26, padding: "18px 30px" },
+        h(
+          "div",
+          { alignItems: "center", padding: "14px 0" },
+          h("div", { flexGrow: 1, flexShrink: 1, fontSize: 26, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", color: C.sub }, "Ask both for"),
+          ...cols.map((c) => cell(c, { fontSize: 30, fontWeight: 800, textAlign: "center" }))
+        ),
+        ...rows.map((r) =>
+          h(
+            "div",
+            { alignItems: "center", padding: "18px 0", borderTop: `2px solid ${C.line}` },
+            h("div", { flexGrow: 1, flexShrink: 1, fontSize: 34, fontWeight: 600, lineHeight: 1.25, paddingRight: 16 }, r),
+            cell(q),
+            cell(q)
+          )
+        )
+      ),
+      s.close ? h("div", { marginTop: 34, fontSize: 38, lineHeight: 1.3, color: C.sub, fontWeight: 500 }, s.close) : null,
       ctaRow(s.keyword),
     ],
     { ...ctx, single: true }
@@ -427,7 +457,7 @@ function goodbad(s, ctx) {
     [
       kicker(s.kicker, { marginTop: 90 }),
       headline(s.title, s.accent, { big: [[40, 84], [70, 80], [999, 70]], style: { marginTop: 20 } }),
-      ctx.photo ? photoBand(ctx.photo, 280) : null,
+      ctx.photo ? photoBand(ctx.photo, 340, ctx) : null,
       h("div", { marginTop: 44 }, panels(s.good, s.bad)),
       subText(s.intro, { marginTop: 40 }),
       (s.items || []).length ? h("div", { marginTop: 10 }, numbered(s.items.slice(0, ctx.photo ? 2 : 3), { size: 36 })) : null,
