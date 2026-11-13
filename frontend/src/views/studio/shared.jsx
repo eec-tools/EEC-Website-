@@ -262,7 +262,7 @@ export function Preview({ post }) {
   const cut = post.channel.startsWith("linkedin") ? 210 : 125;
   const shown = more || text.length <= cut ? text : `${text.slice(0, cut).trimEnd()}…`;
   const media = images.length ? (
-    <div className="relative bg-[#0D1B40]">
+    <div className="relative bg-white">
       {isVideo(images[i]) ? (
         <video src={images[i]} controls className="mx-auto max-h-[440px] w-full object-contain">
           <track kind="captions" />
@@ -272,10 +272,10 @@ export function Preview({ post }) {
       )}
       {images.length > 1 ? (
         <>
-          <button type="button" aria-label="Previous slide" disabled={i === 0} onClick={() => setI(i - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 shadow disabled:opacity-30">
+          <button type="button" aria-label="Previous slide" disabled={i === 0} onClick={() => setI(i - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-[#E5EBF2] bg-white/90 p-1.5 shadow disabled:opacity-30">
             <ChevronLeft size={18} />
           </button>
-          <button type="button" aria-label="Next slide" disabled={i === images.length - 1} onClick={() => setI(i + 1)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 shadow disabled:opacity-30">
+          <button type="button" aria-label="Next slide" disabled={i === images.length - 1} onClick={() => setI(i + 1)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-[#E5EBF2] bg-white/90 p-1.5 shadow disabled:opacity-30">
             <ChevronRight size={18} />
           </button>
           <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
